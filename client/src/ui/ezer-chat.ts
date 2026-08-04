@@ -62,16 +62,20 @@ export class EzerChat extends LitElement {
       role: "user",
       content: text,
     };
-    this.messages = [...this.messages, userMsg];
+    const ezerMsgId = crypto.randomUUID();
+    const pendingEzerMsg: Message = {
+      id: ezerMsgId,
+      role: "ezer",
+      content: "",
+      loading: true,
+    };
+    this.messages = [...this.messages, userMsg, pendingEzerMsg];
 
     const replyText = await this.callApi(text);
 
-    const ezerMsg: Message = {
-      id: crypto.randomUUID(),
-      role: "ezer",
-      content: replyText,
-    };
-    this.messages = [...this.messages, ezerMsg];
+    this.messages = this.messages.map((m) =>
+      m.id === ezerMsgId ? { ...m, content: replyText, loading: false } : m,
+    );
   }
 
   // TODO: wire to actual backend
@@ -90,7 +94,11 @@ export class EzerChat extends LitElement {
                 this.messages,
                 (m) => m.id,
                 (m) =>
-                  html`<message-bubble .sender=${m.role} .content=${m.content}></message-bubble>`,
+                  html`<message-bubble
+                    .sender=${m.role}
+                    .content=${m.content}
+                    .loading=${m.loading ?? false}
+                  ></message-bubble>`,
               )}
             </div>`
           : html`<div class="empty">How can Ezer help?</div>`
