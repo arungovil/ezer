@@ -16,6 +16,4 @@ app.post("/api/compile", (req, res) => {
   res.json({ workflowName: "untitled", description: "stub AST", steps: [] });
 });
 
-app.listen(Number(process.env.PORT ?? 3000), () =>
-  console.log("ezer server on :3000"),
-);
+app.listen(Number(process.env.PORT ?? 3000), () => console.log("ezer server on :3000"));

@@ -1,11 +1,25 @@
 {
   "name": "ezer",
   "private": true,
+  "description": "Browser automation: record interactions, compile to a workflow AST with an LLM, replay via synthetic DOM events.",
   "scripts": {
     "setup": "npm install && npm --prefix server install && npm --prefix client install",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run watch",
     "build": "npm --prefix server run build && npm --prefix client run build",
-    "typecheck": "npm --prefix server run typecheck && npm --prefix client run typecheck"
+    "typecheck": "npm --prefix server run typecheck && npm --prefix client run typecheck",
+    "format": "biome check --write .",
+    "lint": "biome check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,js,mjs,json,html}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0"
   }
 }
