@@ -16,7 +16,7 @@ Running log (`decisions.md`) of design calls: what we chose, alternatives consid
 
 ## Stack & Layout
 
-- `client/` — Manifest V3, Lit, TS: `manifest.json`, `content.js` (recorder/replayer), `background.js` (broker), `sidepanel.html/.js`, `ui/agent-chat.js`
+- `client/` — Manifest V3, Lit, TS: `manifest.json`, `content.js` (recorder/replayer), `background.js` (broker), `index.html/.js`, `ui/agent-chat.js`
 - `server/` — Express: `server.js` (`POST /api/compile`), `prompts.js` (prompts + AST schema)
 - LLM: DeepSeek (`deepseek-chat`, OpenAI-compatible API) with structured JSON output
 - Dev env: server on `localhost:3000`; extension loaded unpacked in Chrome
@@ -30,6 +30,30 @@ Running log (`decisions.md`) of design calls: what we chose, alternatives consid
 - **Messages:** `START_RECORDING`, `GET_BUFFER`, `EXECUTE_AST` via background broker
 
 ## Conventions
+
+### Code style
+
+| Rule                  | Convention                                        |
+| --------------------- | ------------------------------------------------- |
+| Files                 | `kebab-case.ts`                                   |
+| Classes / components  | `PascalCase` (`AgentChat`)                        |
+| Functions / variables | `camelCase`; handlers → `handle*`                 |
+| Constants             | `UPPER_SNAKE_CASE` (true constants only)          |
+| Exports               | Named only, no default exports                    |
+| Imports               | Ext libs → internal → siblings (`.js` ext for TS) |
+| TS strict             | No `any` except deliberate boundary loose ends    |
+| Functions             | Small, single-purpose; name over block comment    |
+| Comments              | _Why_, not _what_. Code is the _what_.            |
+| Logs                  | No `console` in committed code                    |
+| Errors                | Degrade gracefully — catch, surface to UI         |
+
+Auto-enforced (Biome): formatting, quotes, semicolons, trailing commas, 100-col width.
+
+### Styling
+
+Design tokens via CSS custom properties in `styles.css`. All Lit components reference `var(--token-name)` only. Tokens cascade through Shadow DOM automatically.
+
+### Extension
 
 - Selector priority (recorded per step): `data-testid` > `id` > `name` > `aria-label` > text content
 - Record click/change on capture phase; truncate innerText to 50 chars

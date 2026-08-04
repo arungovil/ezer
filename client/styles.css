@@ -1,0 +1,50 @@
+:root {
+  /* Colors */
+  --ez-color-bg: #ffffff;
+  --ez-color-surface: #f5f5f5;
+  --ez-color-text: #1a1a1a;
+  --ez-color-text-muted: #6b7280;
+  --ez-color-primary: #2563eb;
+  --ez-color-primary-hover: #1d4ed8;
+  --ez-color-primary-text: #ffffff;
+  --ez-color-border: #e0e0e0;
+  --ez-color-error: #991b1b;
+  --ez-color-error-bg: #fef2f2;
+  --ez-color-success: #15803d;
+
+  /* Spacing */
+  --ez-space-xs: 4px;
+  --ez-space-sm: 8px;
+  --ez-space-md: 12px;
+  --ez-space-lg: 16px;
+  --ez-space-xl: 24px;
+
+  /* Typography */
+  --ez-font-sans: system-ui, -apple-system, sans-serif;
+  --ez-font-mono: ui-monospace, monospace;
+
+  --ez-font-weight-normal: 400;
+  --ez-font-weight-medium: 500;
+  --ez-font-weight-semibold: 600;
+  --ez-font-weight-bold: 700;
+
+  --ez-font-size-sm: 12px;
+  --ez-font-size-md: 14px;
+  --ez-font-size-lg: 16px;
+  --ez-line-height: 1.5;
+
+  /* Borders */
+  --ez-radius-sm: 4px;
+  --ez-radius-md: 8px;
+
+  /* Base */
+  font-family: var(--ez-font-sans);
+  font-size: var(--ez-font-size-md);
+  line-height: var(--ez-line-height);
+  color: var(--ez-color-text);
+  background: var(--ez-color-bg);
+}
+
+body {
+  margin: 0;
+}
