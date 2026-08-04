@@ -1,7 +1,7 @@
+import type { Message } from "@src/types.js";
 import { css, html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
-import type { Message } from "../types.js";
 import "./ezer-header.js";
 import "./message-bubble.js";
 import "./ezer-input.js";

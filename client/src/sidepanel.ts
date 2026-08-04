@@ -1,1 +1,1 @@
-import "./ui/ezer-chat.js";
+import "@src/ui/ezer-chat.js";

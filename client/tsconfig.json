@@ -10,7 +10,11 @@
     "skipLibCheck": true,
     "useDefineForClassFields": false,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["src/*"]
+    }
   },
   "include": ["src"]
 }

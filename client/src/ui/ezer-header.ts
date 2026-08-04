@@ -1,5 +1,5 @@
+import { gearIcon } from "@src/icons/gear.js";
 import { css, html, LitElement } from "lit";
-import { gearIcon } from "../icons/gear.js";
 
 export class EzerHeader extends LitElement {
   static styles = css`

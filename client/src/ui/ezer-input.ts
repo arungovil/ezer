@@ -1,6 +1,6 @@
+import { sendIcon } from "@src/icons/send.js";
 import { css, html, LitElement } from "lit";
 import { query } from "lit/decorators.js";
-import { sendIcon } from "../icons/send.js";
 
 export class EzerInput extends LitElement {
   static styles = css`
