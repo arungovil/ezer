@@ -16,7 +16,7 @@ Running log (`decisions.md`) of design calls: what we chose, alternatives consid
 
 ## Stack & Layout
 
-- `client/` — Manifest V3, Lit, TS: `manifest.json`, `content.js` (recorder/replayer), `background.js` (broker), `index.html/.js`, `ui/ezer-chat.js` (parent), `ui/ezer-header.js`, `ui/ezer-messages.js`, `ui/ezer-input.js`, `icons/`
+- `client/` — Manifest V3, Lit, TS: `manifest.json`, `types.js`, `content.js` (recorder/replayer), `background.js` (broker), `index.html/.js`, `ui/ezer-chat.js` (parent), `ui/ezer-header.js`, `ui/ezer-input.js`, `ui/message-bubble.js`, `icons/`
 - `server/` — Express: `server.js` (`POST /api/compile`), `prompts.js` (prompts + AST schema)
 - LLM: DeepSeek (`deepseek-chat`, OpenAI-compatible API) with structured JSON output
 - Dev env: server on `localhost:3000`; extension loaded unpacked in Chrome
@@ -36,7 +36,7 @@ Running log (`decisions.md`) of design calls: what we chose, alternatives consid
 | Rule                  | Convention                                        |
 | --------------------- | ------------------------------------------------- |
 | Files                 | `kebab-case.ts`                                   |
-| Classes / components  | `PascalCase` (`EzerChat`)                        |
+| Classes / components  | `PascalCase` (`EzerChat`)                         |
 | Functions / variables | `camelCase`; handlers → `handle*`                 |
 | Constants             | `UPPER_SNAKE_CASE` (true constants only)          |
 | Exports               | Named only, no default exports                    |

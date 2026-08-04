@@ -57,8 +57,14 @@ export class EzerInput extends LitElement {
 
   private handleSend() {
     const el = this.textareaRef.value;
-    if (!el) return;
-    console.log(el.value);
+    if (!el?.value.trim()) return;
+    this.dispatchEvent(
+      new CustomEvent("ez-send", {
+        detail: { text: el.value },
+        bubbles: true,
+        composed: true,
+      }),
+    );
     el.value = "";
     el.style.height = "";
   }
