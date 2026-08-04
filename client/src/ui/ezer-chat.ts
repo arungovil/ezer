@@ -1,15 +1,18 @@
 import { css, html, LitElement } from "lit";
+import { createRef, type Ref, ref } from "lit/directives/ref.js";
+import { repeat } from "lit/directives/repeat.js";
 import type { Message } from "../types.js";
 import "./ezer-header.js";
 import "./message-bubble.js";
 import "./ezer-input.js";
 
+export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | "paused";
+
 export class EzerChat extends LitElement {
   static properties = {
-    isRecording: { type: Boolean, state: true },
-    isCompiling: { type: Boolean, state: true },
+    messages: { type: Array, state: true },
+    workflowStatus: { type: String, state: true },
     compiledAst: { type: Object, state: true },
-    executionStatus: { type: String, state: true },
   };
 
   static styles = css`
@@ -37,18 +40,25 @@ export class EzerChat extends LitElement {
     }
   `;
 
-  messages: Message[] = [];
-  isRecording = false;
-  isCompiling = false;
-  compiledAst = null;
-  executionStatus = "";
+  declare messages: Message[];
+  declare workflowStatus: WorkflowStatus;
+  declare compiledAst: unknown;
+
+  private messagesRef: Ref<HTMLDivElement> = createRef();
+
+  constructor() {
+    super();
+    this.messages = [];
+    this.workflowStatus = "idle";
+    this.compiledAst = null;
+  }
 
   protected override updated() {
     this.scrollToBottom();
   }
 
   private scrollToBottom() {
-    const container = this.shadowRoot?.querySelector(".messages");
+    const container = this.messagesRef.value;
     if (container) {
       requestAnimationFrame(() => {
         container.scrollTop = container.scrollHeight;
@@ -69,7 +79,6 @@ export class EzerChat extends LitElement {
       content: text,
     };
     this.messages = [...this.messages, userMsg];
-    this.requestUpdate();
 
     const replyText = await this.callApi(text);
 
@@ -79,7 +88,6 @@ export class EzerChat extends LitElement {
       content: replyText,
     };
     this.messages = [...this.messages, ezerMsg];
-    this.requestUpdate();
   }
 
   // TODO: wire to actual backend
@@ -93,10 +101,12 @@ export class EzerChat extends LitElement {
       <ezer-header></ezer-header>
       ${
         this.messages.length
-          ? html`<div class="messages">
-              ${this.messages.map(
+          ? html`<div class="messages" ${ref(this.messagesRef)}>
+              ${repeat(
+                this.messages,
+                (m) => m.id,
                 (m) =>
-                  html`<message-bubble sender=${m.role} content=${m.content}></message-bubble>`,
+                  html`<message-bubble .sender=${m.role} .content=${m.content}></message-bubble>`,
               )}
             </div>`
           : html`<div class="empty">How can Ezer help?</div>`

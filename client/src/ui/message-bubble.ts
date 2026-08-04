@@ -2,7 +2,7 @@ import { css, html, LitElement } from "lit";
 
 export class MessageBubble extends LitElement {
   static properties = {
-    role: { type: String, attribute: "sender" },
+    sender: { type: String, reflect: true },
     content: { type: String },
   };
 
@@ -18,7 +18,7 @@ export class MessageBubble extends LitElement {
     :host([sender="ezer"]) {
       align-self: flex-start;
     }
-    .role {
+    .sender-label {
       font-size: var(--ez-font-size-sm);
       font-weight: var(--ez-font-weight-medium);
       color: var(--ez-color-text-muted);
@@ -41,18 +41,18 @@ export class MessageBubble extends LitElement {
     }
   `;
 
-  role: "user" | "ezer";
-  content: string;
+  declare sender: "user" | "ezer";
+  declare content: string;
 
   constructor() {
     super();
-    this.role = "ezer";
+    this.sender = "ezer";
     this.content = "";
   }
 
   render() {
     return html`
-      <div class="role">${this.role === "user" ? "You" : "Ezer"}</div>
+      <div class="sender-label">${this.sender === "user" ? "You" : "Ezer"}</div>
       <div class="bubble">${this.content}</div>
     `;
   }
