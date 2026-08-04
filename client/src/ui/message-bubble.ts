@@ -1,10 +1,9 @@
 import { css, html, LitElement } from "lit";
+import { property } from "lit/decorators.js";
 
 export class MessageBubble extends LitElement {
-  static properties = {
-    sender: { type: String, reflect: true },
-    content: { type: String },
-  };
+  @property({ type: String, reflect: true }) sender: "user" | "ezer" = "ezer";
+  @property({ type: String }) content = "";
 
   static styles = css`
     :host {
@@ -40,15 +39,6 @@ export class MessageBubble extends LitElement {
       color: var(--ez-color-text);
     }
   `;
-
-  declare sender: "user" | "ezer";
-  declare content: string;
-
-  constructor() {
-    super();
-    this.sender = "ezer";
-    this.content = "";
-  }
 
   render() {
     return html`

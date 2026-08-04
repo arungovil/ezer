@@ -1,5 +1,5 @@
 import { css, html, LitElement } from "lit";
-import { createRef, type Ref, ref } from "lit/directives/ref.js";
+import { query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import type { Message } from "../types.js";
 import "./ezer-header.js";
@@ -9,11 +9,11 @@ import "./ezer-input.js";
 export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | "paused";
 
 export class EzerChat extends LitElement {
-  static properties = {
-    messages: { type: Array, state: true },
-    workflowStatus: { type: String, state: true },
-    compiledAst: { type: Object, state: true },
-  };
+  @state() private messages: Message[] = [];
+  @state() private workflowStatus: WorkflowStatus = "idle";
+  @state() private compiledAst: unknown = null;
+
+  @query(".messages") private messagesContainer?: HTMLDivElement;
 
   static styles = css`
     :host {
@@ -40,29 +40,13 @@ export class EzerChat extends LitElement {
     }
   `;
 
-  declare messages: Message[];
-  declare workflowStatus: WorkflowStatus;
-  declare compiledAst: unknown;
-
-  private messagesRef: Ref<HTMLDivElement> = createRef();
-
-  constructor() {
-    super();
-    this.messages = [];
-    this.workflowStatus = "idle";
-    this.compiledAst = null;
-  }
-
   protected override updated() {
     this.scrollToBottom();
   }
 
   private scrollToBottom() {
-    const container = this.messagesRef.value;
-    if (container) {
-      requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight;
-      });
+    if (this.messagesContainer) {
+      this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
   }
 
@@ -101,7 +85,7 @@ export class EzerChat extends LitElement {
       <ezer-header></ezer-header>
       ${
         this.messages.length
-          ? html`<div class="messages" ${ref(this.messagesRef)}>
+          ? html`<div class="messages">
               ${repeat(
                 this.messages,
                 (m) => m.id,

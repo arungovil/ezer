@@ -1,5 +1,5 @@
 import { css, html, LitElement } from "lit";
-import { createRef, type Ref, ref } from "lit/directives/ref.js";
+import { query } from "lit/decorators.js";
 import { sendIcon } from "../icons/send.js";
 
 export class EzerInput extends LitElement {
@@ -51,12 +51,12 @@ export class EzerInput extends LitElement {
     }
   `;
 
-  private textareaRef: Ref<HTMLTextAreaElement> = createRef();
+  @query("textarea") private textareaEl?: HTMLTextAreaElement;
 
   private singleLineHeight = 0;
 
   private handleSend() {
-    const el = this.textareaRef.value;
+    const el = this.textareaEl;
     if (!el?.value.trim()) return;
     this.dispatchEvent(
       new CustomEvent("ez-send", {
@@ -77,7 +77,7 @@ export class EzerInput extends LitElement {
   }
 
   protected override firstUpdated() {
-    this.textareaRef.value?.focus();
+    this.textareaEl?.focus();
   }
 
   private handleFocus(e: FocusEvent) {
@@ -102,7 +102,6 @@ export class EzerInput extends LitElement {
     return html`
       <textarea
         aria-label="Ask anything to Ezer"
-        ${ref(this.textareaRef)}
         placeholder="Ask anything to Ezer..."
         @focus=${this.handleFocus}
         @input=${this.handleInput}

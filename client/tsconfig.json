@@ -9,6 +9,7 @@
     "noEmit": true,
     "skipLibCheck": true,
     "useDefineForClassFields": false,
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src"]
