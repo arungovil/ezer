@@ -1,7 +1,7 @@
+import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
 import type { Message } from "@src/types.js";
 import { css, html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
-import { repeat } from "lit/directives/repeat.js";
 import "./ezer-header.js";
 import "./message-bubble.js";
 import "./ezer-input.js";
@@ -25,10 +25,14 @@ export class EzerChat extends LitElement {
     .messages {
       display: flex;
       flex-direction: column;
-      gap: var(--ez-space-md);
       flex: 1;
+      min-height: 0;
+      width: 100%;
       overflow-y: auto;
-      padding: var(--ez-space-md);
+      overflow-x: hidden;
+      scrollbar-gutter: stable;
+      padding: var(--ez-space-md) 0;
+      box-sizing: border-box;
     }
     .empty {
       display: flex;
@@ -90,16 +94,17 @@ export class EzerChat extends LitElement {
       ${
         this.messages.length
           ? html`<div class="messages">
-              ${repeat(
-                this.messages,
-                (m) => m.id,
-                (m) =>
+              ${virtualize({
+                scroller: true,
+                items: this.messages,
+                keyFunction: (m: Message) => m.id,
+                renderItem: (m: Message) =>
                   html`<message-bubble
                     .sender=${m.role}
                     .content=${m.content}
                     .loading=${m.loading ?? false}
                   ></message-bubble>`,
-              )}
+              })}
             </div>`
           : html`<div class="empty">How can Ezer help?</div>`
       }
