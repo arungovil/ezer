@@ -4,3 +4,9 @@ export interface Message {
   content: string;
   loading?: boolean;
 }
+
+export interface InfoPill {
+  id: string;
+  label: string;
+  icon: unknown;
+}

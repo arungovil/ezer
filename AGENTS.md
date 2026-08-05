@@ -38,7 +38,7 @@ Running log (`decisions.md`) of design calls: what we chose, alternatives consid
 | Files                 | `kebab-case.ts`                                   |
 | Classes / components  | `PascalCase` (`EzerChat`)                         |
 | Functions / variables | `camelCase`; handlers → `handle*`                 |
-| Constants             | `UPPER_SNAKE_CASE` (true constants only)          |
+| Constants             | `camelCase`                                       |
 | Exports               | Named only, no default exports                    |
 | Imports               | Ext libs → internal → siblings (`.js` ext for TS) |
 | TS strict             | No `any` except deliberate boundary loose ends    |

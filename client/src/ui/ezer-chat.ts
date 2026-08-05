@@ -1,17 +1,18 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
+import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
 import type { Message } from "@src/types.js";
 import { css, html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
+import "./ezer-empty-state.js";
 import "./ezer-header.js";
-import "./message-bubble.js";
 import "./ezer-input.js";
+import "./message-bubble.js";
 
 export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | "paused";
 
 export class EzerChat extends LitElement {
   @state() private messages: Message[] = [];
-  @state() private workflowStatus: WorkflowStatus = "idle";
-  @state() private compiledAst: unknown = null;
+  @state() protected workflowStatus: WorkflowStatus = "idle";
 
   @query(".messages") private messagesContainer?: HTMLDivElement;
 
@@ -34,14 +35,6 @@ export class EzerChat extends LitElement {
       padding: var(--ez-space-md) 0;
       box-sizing: border-box;
     }
-    .empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      color: var(--ez-color-text-muted);
-      font-size: var(--ez-font-size-md);
-    }
   `;
 
   protected override updated() {
@@ -52,6 +45,35 @@ export class EzerChat extends LitElement {
     if (this.messagesContainer) {
       this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
+  }
+
+  private handleStartRecording() {
+    this.workflowStatus = "recording";
+    const ezerMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "ezer",
+      content: recordingStartedMessage,
+    };
+    this.messages = [...this.messages, ezerMsg];
+  }
+
+  private handleSelectInfo(e: CustomEvent<{ id: string; label: string }>) {
+    const { id, label } = e.detail;
+    const userMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: label,
+    };
+
+    const reply = infoReplies[id] ?? defaultInfoReply;
+
+    const ezerMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "ezer",
+      content: reply,
+    };
+
+    this.messages = [...this.messages, userMsg, ezerMsg];
   }
 
   private handleSend(e: CustomEvent<{ text: string }>) {
@@ -106,7 +128,10 @@ export class EzerChat extends LitElement {
                   ></message-bubble>`,
               })}
             </div>`
-          : html`<div class="empty">How can Ezer help?</div>`
+          : html`<ezer-empty-state
+              @ez-start-recording=${this.handleStartRecording}
+              @ez-select-info=${this.handleSelectInfo}
+            ></ezer-empty-state>`
       }
       <ezer-input @ez-send=${this.handleSend}></ezer-input>
     `;
