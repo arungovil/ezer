@@ -12,7 +12,6 @@ export const recordIcon = html`
     stroke-linecap="round"
     stroke-linejoin="round"
   >
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="12" r="4" fill="currentColor" />
+    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 12h.01"/>
   </svg>
 `;
