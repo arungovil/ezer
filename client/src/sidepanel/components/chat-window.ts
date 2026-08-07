@@ -3,14 +3,14 @@ import { css, html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
 import type { Message, RecordedAction } from "../../types.js";
 import { defaultInfoReply, infoReplies, recordingStartedMessage } from "../constants.js";
-import "./ezer-empty-state.js";
-import "./ezer-header.js";
-import "./ezer-input.js";
+import "./chat-splash.js";
+import "./chat-header.js";
+import "./chat-input.js";
 import "./message-bubble.js";
 
 export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | "paused";
 
-export class EzerChat extends LitElement {
+export class ChatWindow extends LitElement {
   @state() private messages: Message[] = [];
   @state() protected workflowStatus: WorkflowStatus = "idle";
 
@@ -179,10 +179,10 @@ export class EzerChat extends LitElement {
 
   render() {
     return html`
-      <ezer-header
+      <chat-header
         .workflowStatus=${this.workflowStatus}
         @ez-stop-recording=${this.handleStopRecording}
-      ></ezer-header>
+      ></chat-header>
       ${
         this.messages.length
           ? html`<div class="messages">
@@ -198,14 +198,14 @@ export class EzerChat extends LitElement {
                   ></message-bubble>`,
               })}
             </div>`
-          : html`<ezer-empty-state
+          : html`<chat-splash
               @ez-start-recording=${this.handleStartRecording}
               @ez-select-info=${this.handleSelectInfo}
-            ></ezer-empty-state>`
+            ></chat-splash>`
       }
-      <ezer-input @ez-send=${this.handleSend}></ezer-input>
+      <chat-input @ez-send=${this.handleSend}></chat-input>
     `;
   }
 }
 
-customElements.define("ezer-chat", EzerChat);
+customElements.define("chat-window", ChatWindow);

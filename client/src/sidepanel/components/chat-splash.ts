@@ -3,7 +3,7 @@ import type { InfoPill } from "../../types.js";
 import { infoPills } from "../constants.js";
 import { recordIcon } from "../icons/index.js";
 
-export class EzerEmptyState extends LitElement {
+export class ChatSplash extends LitElement {
   static styles = css`
     :host {
       display: flex;
@@ -157,4 +157,4 @@ export class EzerEmptyState extends LitElement {
   }
 }
 
-customElements.define("ezer-empty-state", EzerEmptyState);
+customElements.define("chat-splash", ChatSplash);

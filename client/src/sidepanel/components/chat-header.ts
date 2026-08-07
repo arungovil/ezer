@@ -3,7 +3,7 @@ import { property } from "lit/decorators.js";
 import { gearIcon } from "../icons/gear.js";
 import { zapIcon } from "../icons/zap.js";
 
-export class EzerHeader extends LitElement {
+export class ChatHeader extends LitElement {
   @property({ type: String }) workflowStatus = "idle";
 
   static styles = css`
@@ -133,4 +133,4 @@ export class EzerHeader extends LitElement {
   }
 }
 
-customElements.define("ezer-header", EzerHeader);
+customElements.define("chat-header", ChatHeader);

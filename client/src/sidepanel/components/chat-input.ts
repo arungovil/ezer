@@ -2,7 +2,7 @@ import { css, html, LitElement } from "lit";
 import { query } from "lit/decorators.js";
 import { sendIcon } from "../icons/send.js";
 
-export class EzerInput extends LitElement {
+export class ChatInput extends LitElement {
   static styles = css`
     :host {
       display: flex;
@@ -112,4 +112,4 @@ export class EzerInput extends LitElement {
   }
 }
 
-customElements.define("ezer-input", EzerInput);
+customElements.define("chat-input", ChatInput);
