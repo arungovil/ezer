@@ -4,6 +4,7 @@ import type { RecordedAction } from "../types.js";
 import { buildSelectorChain } from "./selector-chain.js";
 
 let isRecording = false;
+const actionBuffer: RecordedAction[] = [];
 
 function handleCaptureEvent(e: Event) {
   if (!isRecording) return;
@@ -31,24 +32,39 @@ function handleCaptureEvent(e: Event) {
       : {}),
   };
 
-  void chrome.runtime.sendMessage({
-    type: "ACTION_RECORDED",
-    action,
-  });
+  actionBuffer.push(action);
 }
 
 window.addEventListener("click", handleCaptureEvent, true);
 window.addEventListener("change", handleCaptureEvent, true);
 
+function handleStartRecording() {
+  isRecording = true;
+  actionBuffer.length = 0;
+}
+
+function handleStopRecording() {
+  isRecording = false;
+  void chrome.runtime.sendMessage({
+    type: "RECORDING_COMPLETE",
+    actions: [...actionBuffer],
+  });
+  actionBuffer.length = 0;
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type === "START_RECORDING") {
-    isRecording = true;
-    sendResponse({ ok: true });
-  } else if (message?.type === "STOP_RECORDING") {
-    isRecording = false;
-    sendResponse({ ok: true });
-  } else if (message?.type === "PING") {
-    sendResponse({ ok: true });
+  switch (message?.type) {
+    case "START_RECORDING":
+      handleStartRecording();
+      sendResponse({ ok: true });
+      break;
+    case "STOP_RECORDING":
+      handleStopRecording();
+      sendResponse({ ok: true });
+      break;
+    case "PING":
+      sendResponse({ ok: true });
+      break;
   }
   return false;
 });

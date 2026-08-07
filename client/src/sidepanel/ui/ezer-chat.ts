@@ -16,9 +16,9 @@ export class EzerChat extends LitElement {
 
   @query(".messages") private messagesContainer?: HTMLDivElement;
 
-  private handleRuntimeMessage = (message: { type: string; action?: RecordedAction }) => {
-    if (message?.type === "ACTION_RECORDED" && message.action) {
-      this.handleActionRecorded(message.action);
+  private handleRuntimeMessage = (message: { type: string; actions?: RecordedAction[] }) => {
+    if (message?.type === "RECORDING_COMPLETE" && message.actions) {
+      this.handleRecordingComplete(message.actions);
     }
   };
 
@@ -94,21 +94,27 @@ export class EzerChat extends LitElement {
         payload: { type: "STOP_RECORDING" },
       });
     }
-
-    const ezerMsg: Message = {
-      id: crypto.randomUUID(),
-      role: "ezer",
-      content: "⏹️ **Recording stopped.** Action capture paused.",
-    };
-    this.messages = [...this.messages, ezerMsg];
   }
 
-  private handleActionRecorded(action: RecordedAction) {
-    const primarySelector = action.selectors[0] || action.tagName;
-    const valueDetail = action.value !== undefined ? ` (value: "${action.value}")` : "";
-    const textDetail = action.innerText && !action.value ? ` ("${action.innerText}")` : "";
+  private handleRecordingComplete(actions: RecordedAction[]) {
+    if (actions.length === 0) {
+      const msg: Message = {
+        id: crypto.randomUUID(),
+        role: "ezer",
+        content: "⏹️ **Recording stopped.** No actions were captured.",
+      };
+      this.messages = [...this.messages, msg];
+      return;
+    }
 
-    const content = `⚡ **Action Captured:** \`${action.type}\` on \`${primarySelector}\`${valueDetail}${textDetail}`;
+    const lines = actions.map((action, i) => {
+      const primarySelector = action.selectors[0] || action.tagName;
+      const valueDetail = action.value !== undefined ? ` (value: "${action.value}")` : "";
+      const textDetail = action.innerText && !action.value ? ` ("${action.innerText}")` : "";
+      return `${i + 1}. \`${action.type}\` on \`${primarySelector}\`${valueDetail}${textDetail}`;
+    });
+
+    const content = `⏹️ **Recording stopped.** ${actions.length} action${actions.length > 1 ? "s" : ""} captured:\n\n${lines.join("\n")}`;
 
     const msg: Message = {
       id: crypto.randomUUID(),
