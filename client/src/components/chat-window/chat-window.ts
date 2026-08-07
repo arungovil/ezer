@@ -1,12 +1,13 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { css, html, LitElement } from "lit";
+import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
+import type { Message, RecordedAction } from "@src/types.js";
+import { html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
-import type { Message, RecordedAction } from "../../types.js";
-import { defaultInfoReply, infoReplies, recordingStartedMessage } from "../constants.js";
-import "./chat-splash.js";
-import "./chat-header.js";
-import "./chat-input.js";
-import "./message-bubble.js";
+import { styles } from "./chat-window.styles.js";
+import "@src/components/chat-splash/chat-splash.js";
+import "@src/components/chat-header/chat-header.js";
+import "@src/components/chat-input/chat-input.js";
+import "@src/components/message-bubble/message-bubble.js";
 
 export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | "paused";
 
@@ -36,26 +37,7 @@ export class ChatWindow extends LitElement {
     }
   }
 
-  static styles = css`
-    :host {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      background: var(--ez-color-bg);
-    }
-    .messages {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-height: 0;
-      width: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-      scrollbar-gutter: stable;
-      padding: var(--ez-space-md) 0;
-      box-sizing: border-box;
-    }
-  `;
+  static styles = styles;
 
   protected override updated() {
     this.scrollToBottom();

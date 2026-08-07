@@ -1,0 +1,44 @@
+import { gearIcon } from "@src/icons/gear.js";
+import { zapIcon } from "@src/icons/zap.js";
+import { html, LitElement } from "lit";
+import { property } from "lit/decorators.js";
+import { styles } from "./chat-header.styles.js";
+
+export class ChatHeader extends LitElement {
+  @property({ type: String }) workflowStatus = "idle";
+
+  static styles = styles;
+
+  private handleStop() {
+    this.dispatchEvent(
+      new CustomEvent("ez-stop-recording", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  render() {
+    return html`
+      <div class="left">
+        <div class="logo">${zapIcon}</div>
+        <h1>Ezer</h1>
+      </div>
+      <div class="right">
+        ${
+          this.workflowStatus === "recording"
+            ? html`
+                <div class="recording-badge">
+                  <span class="recording-dot"></span>
+                  <span>Recording</span>
+                </div>
+                <button class="stop-btn" @click=${this.handleStop}>Stop</button>
+              `
+            : html`<button class="icon-btn" @click=${() => {}}>${gearIcon}</button>`
+        }
+      </div>
+    `;
+  }
+}
+
+customElements.define("chat-header", ChatHeader);

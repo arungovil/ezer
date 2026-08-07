@@ -10,6 +10,9 @@ const options = {
   },
   bundle: true,
   outdir: "dist",
+  alias: {
+    "@src": "./src",
+  },
   format: "iife",
   target: "chrome120",
   sourcemap: true,

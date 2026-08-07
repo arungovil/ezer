@@ -1,6 +1,6 @@
 // Ezer content script engine
 
-import type { RecordedAction } from "../types.js";
+import type { RecordedAction } from "@src/types.js";
 import { buildSelectorChain } from "./selector-chain.js";
 
 let isRecording = false;
