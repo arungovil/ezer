@@ -1,7 +1,7 @@
-import { infoPills } from "@src/constants.js";
-import { recordIcon } from "@src/icons/index.js";
-import type { InfoPill } from "@src/types.js";
 import { css, html, LitElement } from "lit";
+import type { InfoPill } from "../../types.js";
+import { infoPills } from "../constants.js";
+import { recordIcon } from "../icons/index.js";
 
 export class EzerEmptyState extends LitElement {
   static styles = css`

@@ -1,8 +1,8 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
-import type { Message, RecordedAction } from "@src/types.js";
 import { css, html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
+import type { Message, RecordedAction } from "../../types.js";
+import { defaultInfoReply, infoReplies, recordingStartedMessage } from "../constants.js";
 import "./ezer-empty-state.js";
 import "./ezer-header.js";
 import "./ezer-input.js";

@@ -1,4 +1,4 @@
-// ezer background — broker between side panel and content script.
+// Ezer background service worker
 
 chrome.runtime.onInstalled.addListener(() => {
   void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });

@@ -4,9 +4,9 @@ const watch = process.argv.includes("--watch");
 
 const options = {
   entryPoints: {
-    content: "src/content.ts",
-    background: "src/background.ts",
-    sidepanel: "src/sidepanel.ts",
+    content: "src/content/index.ts",
+    background: "src/background/index.ts",
+    sidepanel: "src/sidepanel/index.ts",
   },
   bundle: true,
   outdir: "dist",

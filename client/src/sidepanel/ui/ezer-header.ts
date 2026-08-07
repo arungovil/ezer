@@ -1,7 +1,7 @@
-import { gearIcon } from "@src/icons/gear.js";
-import { zapIcon } from "@src/icons/zap.js";
 import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
+import { gearIcon } from "../icons/gear.js";
+import { zapIcon } from "../icons/zap.js";
 
 export class EzerHeader extends LitElement {
   @property({ type: String }) workflowStatus = "idle";
