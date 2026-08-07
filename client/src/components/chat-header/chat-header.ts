@@ -1,4 +1,5 @@
-import { gearIcon } from "@src/icons/gear.js";
+import { messageCirclePlusIcon } from "@src/icons/message-circle-plus.js";
+import { textAlignStartIcon } from "@src/icons/text-align-start.js";
 import { zapIcon } from "@src/icons/zap.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
@@ -12,6 +13,15 @@ export class ChatHeader extends LitElement {
   private handleStop() {
     this.dispatchEvent(
       new CustomEvent("ez-stop-recording", {
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private handleNewChat() {
+    this.dispatchEvent(
+      new CustomEvent("ez-new-chat", {
         bubbles: true,
         composed: true,
       }),
@@ -34,7 +44,8 @@ export class ChatHeader extends LitElement {
                 </div>
                 <button class="stop-btn" @click=${this.handleStop}>Stop</button>
               `
-            : html`<button class="icon-btn" @click=${() => {}}>${gearIcon}</button>`
+            : html`<button class="icon-btn" @click=${this.handleNewChat}>${messageCirclePlusIcon}</button>
+                <button class="icon-btn" @click=${() => {}}>${textAlignStartIcon}</button>`
         }
       </div>
     `;

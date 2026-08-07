@@ -32,8 +32,8 @@ export const styles = css`
   }
   .icon-btn svg {
     display: block;
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
   }
   .logo {
     display: flex;

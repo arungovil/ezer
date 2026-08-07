@@ -78,6 +78,11 @@ export class ChatWindow extends LitElement {
     }
   }
 
+  private handleNewChat() {
+    this.messages = [];
+    this.workflowStatus = "idle";
+  }
+
   private handleRecordingComplete(actions: RecordedAction[]) {
     if (actions.length === 0) {
       const msg: Message = {
@@ -164,6 +169,7 @@ export class ChatWindow extends LitElement {
       <chat-header
         .workflowStatus=${this.workflowStatus}
         @ez-stop-recording=${this.handleStopRecording}
+        @ez-new-chat=${this.handleNewChat}
       ></chat-header>
       ${
         this.messages.length
