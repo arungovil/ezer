@@ -10,3 +10,11 @@ export interface InfoPill {
   label: string;
   icon: unknown;
 }
+
+export interface RecordedAction {
+  type: "CLICK" | "INPUT";
+  selectors: string[];
+  value?: string;
+  innerText?: string;
+  tagName: string;
+}

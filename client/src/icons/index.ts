@@ -5,3 +5,4 @@ export { lightbulbIcon } from "./lightbulb.js";
 export { recordIcon } from "./record.js";
 export { sendIcon } from "./send.js";
 export { sparklesIcon } from "./sparkles.js";
+export { zapIcon } from "./zap.js";

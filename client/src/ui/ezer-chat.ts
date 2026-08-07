@@ -1,6 +1,6 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
 import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
-import type { Message } from "@src/types.js";
+import type { Message, RecordedAction } from "@src/types.js";
 import { css, html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
 import "./ezer-empty-state.js";
@@ -15,6 +15,26 @@ export class EzerChat extends LitElement {
   @state() protected workflowStatus: WorkflowStatus = "idle";
 
   @query(".messages") private messagesContainer?: HTMLDivElement;
+
+  private handleRuntimeMessage = (message: { type: string; action?: RecordedAction }) => {
+    if (message?.type === "ACTION_RECORDED" && message.action) {
+      this.handleActionRecorded(message.action);
+    }
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
+      chrome.runtime.onMessage.addListener(this.handleRuntimeMessage);
+    }
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
+      chrome.runtime.onMessage.removeListener(this.handleRuntimeMessage);
+    }
+  }
 
   static styles = css`
     :host {
@@ -49,12 +69,53 @@ export class EzerChat extends LitElement {
 
   private handleStartRecording() {
     this.workflowStatus = "recording";
+
+    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+      void chrome.runtime.sendMessage({
+        target: "content",
+        payload: { type: "START_RECORDING" },
+      });
+    }
+
     const ezerMsg: Message = {
       id: crypto.randomUUID(),
       role: "ezer",
       content: recordingStartedMessage,
     };
     this.messages = [...this.messages, ezerMsg];
+  }
+
+  private handleStopRecording() {
+    this.workflowStatus = "idle";
+
+    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+      void chrome.runtime.sendMessage({
+        target: "content",
+        payload: { type: "STOP_RECORDING" },
+      });
+    }
+
+    const ezerMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "ezer",
+      content: "⏹️ **Recording stopped.** Action capture paused.",
+    };
+    this.messages = [...this.messages, ezerMsg];
+  }
+
+  private handleActionRecorded(action: RecordedAction) {
+    const primarySelector = action.selectors[0] || action.tagName;
+    const valueDetail = action.value !== undefined ? ` (value: "${action.value}")` : "";
+    const textDetail = action.innerText && !action.value ? ` ("${action.innerText}")` : "";
+
+    const content = `⚡ **Action Captured:** \`${action.type}\` on \`${primarySelector}\`${valueDetail}${textDetail}`;
+
+    const msg: Message = {
+      id: crypto.randomUUID(),
+      role: "ezer",
+      content,
+    };
+    this.messages = [...this.messages, msg];
   }
 
   private handleSelectInfo(e: CustomEvent<{ id: string; label: string }>) {
@@ -112,7 +173,10 @@ export class EzerChat extends LitElement {
 
   render() {
     return html`
-      <ezer-header></ezer-header>
+      <ezer-header
+        .workflowStatus=${this.workflowStatus}
+        @ez-stop-recording=${this.handleStopRecording}
+      ></ezer-header>
       ${
         this.messages.length
           ? html`<div class="messages">

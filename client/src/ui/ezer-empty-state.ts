@@ -63,23 +63,23 @@ export class EzerEmptyState extends LitElement {
     }
 
     .pill.record-pill {
-      background: #fef2f2;
-      border: 1px solid #fca5a5;
-      color: #991b1b;
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      color: #1d4ed8;
       font-weight: var(--ez-font-weight-semibold);
     }
 
     .pill.record-pill:hover {
-      background: #fee2e2;
-      border-color: #f87171;
+      background: #dbeafe;
+      border-color: #3b82f6;
       transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
     }
 
     .pill.record-pill .pill-icon {
       display: flex;
       align-items: center;
-      color: var(--ez-color-error);
+      color: var(--ez-color-primary);
     }
 
     .pill.info-pill {
@@ -130,7 +130,7 @@ export class EzerEmptyState extends LitElement {
   render() {
     return html`
       <div class="hero">
-        <h2>Say hello to Ezer!</h2>
+        <h2>Say hello to Ezer! 👋</h2>
         <p>Start recording a workflow or select a prompt to get started</p>
       </div>
 
