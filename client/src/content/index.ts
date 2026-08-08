@@ -1,6 +1,7 @@
 // Ezer content script engine
 
 import { eventHandlers } from "./handlers.js";
+import { runReplay } from "./replay.js";
 
 let isRecording = false;
 
@@ -43,6 +44,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       break;
     case "STOP_RECORDING":
       isRecording = false;
+      sendResponse({ ok: true });
+      break;
+    case "REPLAY_ACTIONS":
+      if (message.actions && Array.isArray(message.actions)) {
+        void runReplay(message.actions);
+      }
       sendResponse({ ok: true });
       break;
     case "PING":

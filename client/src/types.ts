@@ -3,6 +3,8 @@ export interface Message {
   role: "user" | "ezer";
   content: string;
   loading?: boolean;
+  actions?: RecordedAction[];
+  replaying?: boolean;
 }
 
 export interface InfoPill {

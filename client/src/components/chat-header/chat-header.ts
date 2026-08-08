@@ -44,8 +44,15 @@ export class ChatHeader extends LitElement {
                 </div>
                 <button class="stop-btn" @click=${this.handleStop}>Stop</button>
               `
-            : html`<button class="icon-btn" @click=${this.handleNewChat}>${messageCirclePlusIcon}</button>
-                <button class="icon-btn" @click=${() => {}}>${textAlignStartIcon}</button>`
+            : this.workflowStatus === "replaying"
+              ? html`
+                  <div class="replaying-badge">
+                    <span class="replaying-dot"></span>
+                    <span>Replaying</span>
+                  </div>
+                `
+              : html`<button class="icon-btn" @click=${this.handleNewChat}>${messageCirclePlusIcon}</button>
+                  <button class="icon-btn" @click=${() => {}}>${textAlignStartIcon}</button>`
         }
       </div>
     `;

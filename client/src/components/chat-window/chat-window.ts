@@ -15,9 +15,17 @@ export class ChatWindow extends LitElement {
 
   @query(".messages") private messagesContainer?: HTMLDivElement;
 
+  private replayingMessageId: string | null = null;
+
   private handleRuntimeMessage = (message: RuntimeMessage) => {
     if (message?.type === "RECORDING_COMPLETE" && message.actions) {
       this.handleRecordingComplete(message.actions);
+    }
+    if (message?.type === "REPLAY_COMPLETE") {
+      this.finishReplay();
+    }
+    if (message?.type === "REPLAY_ERROR") {
+      this.finishReplay();
     }
   };
 
@@ -105,8 +113,40 @@ export class ChatWindow extends LitElement {
       id: crypto.randomUUID(),
       role: "ezer",
       content,
+      actions,
+      replaying: false,
     };
     this.messages = [...this.messages, msg];
+  }
+
+  private handleReplay(e: CustomEvent<{ actions: RecordedAction[] }>) {
+    const { actions } = e.detail;
+
+    // Match by reference — the actions array is the same object stored on the message
+    const message = this.messages.find((m) => m.actions === actions);
+    if (!message) return;
+
+    this.replayingMessageId = message.id;
+    this.workflowStatus = "replaying";
+
+    this.messages = this.messages.map((m) => (m.id === message.id ? { ...m, replaying: true } : m));
+
+    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+      void chrome.runtime.sendMessage({
+        target: "content",
+        payload: { type: "REPLAY_ACTIONS", actions },
+      });
+    }
+  }
+
+  private finishReplay() {
+    if (!this.replayingMessageId) return;
+
+    this.messages = this.messages.map((m) =>
+      m.id === this.replayingMessageId ? { ...m, replaying: false } : m,
+    );
+    this.replayingMessageId = null;
+    this.workflowStatus = "idle";
   }
 
   private handleSelectInfo(e: CustomEvent<{ id: string; label: string }>) {
@@ -171,17 +211,21 @@ export class ChatWindow extends LitElement {
       ></chat-header>
       ${
         this.messages.length
-          ? html`<div class="messages">
+          ? html`<div class="messages" @ez-replay=${this.handleReplay}>
               ${virtualize({
                 scroller: true,
                 items: this.messages,
                 keyFunction: (m: Message) => m.id,
                 renderItem: (m: Message) =>
-                  html`<message-bubble
-                    .sender=${m.role}
-                    .content=${m.content}
-                    .loading=${m.loading ?? false}
-                  ></message-bubble>`,
+                  html`<div data-message-id=${m.id}>
+                    <message-bubble
+                      .sender=${m.role}
+                      .content=${m.content}
+                      .loading=${m.loading ?? false}
+                      .actions=${m.actions ?? []}
+                      .replaying=${m.replaying ?? false}
+                    ></message-bubble>
+                  </div>`,
               })}
             </div>`
           : html`<chat-splash

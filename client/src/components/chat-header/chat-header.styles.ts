@@ -102,4 +102,23 @@ export const styles = css`
   .stop-btn:hover {
     background: #f3f4f6;
   }
+  .replaying-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: var(--ez-radius-sm);
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    color: #1e40af;
+    font-size: var(--ez-font-size-xs);
+    font-weight: var(--ez-font-weight-medium);
+  }
+  .replaying-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--ez-color-primary);
+    animation: pulse 1.5s infinite;
+  }
 `;
