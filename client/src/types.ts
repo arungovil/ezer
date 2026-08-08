@@ -12,9 +12,19 @@ export interface InfoPill {
 }
 
 export interface RecordedAction {
-  type: "CLICK" | "INPUT";
+  type: "CLICK" | "INPUT" | "SUBMIT";
   selectors: string[];
   value?: string;
+  checked?: boolean;
   innerText?: string;
   tagName: string;
+}
+
+export type CaptureHandler = (target: HTMLElement) => RecordedAction | null;
+
+export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | "paused";
+
+export interface RuntimeMessage {
+  type: string;
+  actions?: RecordedAction[];
 }

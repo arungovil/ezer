@@ -28,10 +28,11 @@ export const COMPILE_SYSTEM_PROMPT = `
 You compile raw browser interaction logs into a validated workflow AST.
 
 Rules:
-- Remove noise: duplicate clicks, blur/focus, events with no target.
+- Remove noise: duplicate clicks, blur/focus, redundant submit events paired with button clicks.
 - Identify macro intent; name the workflow accordingly.
-- One meaningful action per step. Selectors in a step target the same element,
-  ordered by priority: data-testid > id > name > aria-label > text content.
-- Carry value on INPUT only when user-intended (typed text), not auto-filled.
+- One meaningful action per step (action must be CLICK or INPUT).
+- Map form SUBMIT events without an explicit button click to a CLICK step on the primary submit button/form control.
+- Selectors in a step target the same element, ordered by priority: data-testid > id > name > aria-label > text content.
+- Carry value on INPUT only when user-intended (typed text, selected dropdown option, or checked state), not auto-filled.
 - Respond with JSON only, matching the schema exactly.
 `.trim();

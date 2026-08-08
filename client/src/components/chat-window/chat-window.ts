@@ -1,6 +1,6 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
 import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
-import type { Message, RecordedAction } from "@src/types.js";
+import type { Message, RecordedAction, RuntimeMessage, WorkflowStatus } from "@src/types.js";
 import { html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
 import { styles } from "./chat-window.styles.js";
@@ -9,15 +9,13 @@ import "@src/components/chat-header/chat-header.js";
 import "@src/components/chat-input/chat-input.js";
 import "@src/components/message-bubble/message-bubble.js";
 
-export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | "paused";
-
 export class ChatWindow extends LitElement {
   @state() private messages: Message[] = [];
   @state() protected workflowStatus: WorkflowStatus = "idle";
 
   @query(".messages") private messagesContainer?: HTMLDivElement;
 
-  private handleRuntimeMessage = (message: { type: string; actions?: RecordedAction[] }) => {
+  private handleRuntimeMessage = (message: RuntimeMessage) => {
     if (message?.type === "RECORDING_COMPLETE" && message.actions) {
       this.handleRecordingComplete(message.actions);
     }
