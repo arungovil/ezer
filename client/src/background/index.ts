@@ -5,9 +5,30 @@ import { injectAndRetry } from "./fallbacks.js";
 
 let isRecording = false;
 const actionBuffer: RecordedAction[] = [];
+let activeTabId: number | null = null;
+
+// Initialize active tab on startup
+void (async function init() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id != null) activeTabId = tab.id;
+})();
 
 chrome.runtime.onInstalled.addListener(() => {
   void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+});
+
+// Detect tab switches — reset all recording state
+chrome.tabs.onActivated.addListener(({ tabId }) => {
+  if (activeTabId === tabId) return;
+  activeTabId = tabId;
+
+  if (isRecording) {
+    isRecording = false;
+    actionBuffer.length = 0;
+  }
+
+  // Notify sidepanel so it can reset and show the tab-switched message
+  chrome.runtime.sendMessage({ type: "TAB_SWITCHED", tabId }).catch(() => {});
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -54,10 +75,19 @@ async function handleStartRecording(payload: unknown, sendResponse: (response: u
   isRecording = true;
   actionBuffer.length = 0;
 
+  // Update activeTabId in case it wasn't initialized (edge case)
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id != null) activeTabId = tab.id;
+
   await deliverToContent(payload, sendResponse);
 }
 
 async function handleStopRecording(payload: unknown, sendResponse: (response: unknown) => void) {
+  if (!isRecording) {
+    sendResponse({ ok: true });
+    return;
+  }
+
   isRecording = false;
 
   // Snapshot the buffer before forwarding STOP; the content script may

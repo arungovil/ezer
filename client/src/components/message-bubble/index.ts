@@ -7,6 +7,7 @@ import "./message-bubble-text.js";
 import "./message-bubble-quick-action.js";
 import "./message-bubble-recording.js";
 import "./message-bubble-workflow.js";
+import "./message-bubble-tab-switched.js";
 import "@src/components/chat-loader/chat-loader.js";
 
 export class MessageBubble extends LitElement {
@@ -36,6 +37,10 @@ export class MessageBubble extends LitElement {
         return html`<message-bubble-workflow
           .content=${this.content as WorkflowContent}
         ></message-bubble-workflow>`;
+      case MESSAGE_TYPE.TAB_SWITCHED:
+        return html`<message-bubble-tab-switched
+          .content=${this.content as string}
+        ></message-bubble-tab-switched>`;
       default:
         return html`<message-bubble-text
           .content=${String(this.content)}

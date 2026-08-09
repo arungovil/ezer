@@ -28,6 +28,10 @@ export class ChatWindow extends LitElement {
   private replayingMessageId: string | null = null;
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
+    if (message?.type === "TAB_SWITCHED") {
+      this.handleTabSwitched();
+      return;
+    }
     if (message?.type === "RECORDING_COMPLETE" && message.actions) {
       this.handleRecordingComplete(message.actions);
     }
@@ -98,6 +102,26 @@ export class ChatWindow extends LitElement {
   private handleNewChat() {
     this.messages = [];
     this.workflowStatus = "idle";
+  }
+
+  private handleTabSwitched() {
+    this.workflowStatus = "idle";
+    this.replayingMessageId = null;
+
+    // Only notify if there's an active conversation; otherwise stay on splash
+    if (this.messages.length === 0) return;
+
+    // Don't stack duplicate tab-switched messages
+    const last = this.messages[this.messages.length - 1];
+    if (last?.type === MESSAGE_TYPE.TAB_SWITCHED) return;
+
+    const msg: Message = {
+      id: crypto.randomUUID(),
+      role: "ezer",
+      type: MESSAGE_TYPE.TAB_SWITCHED,
+      content: "🔄 **Tab switched.** Start a new recording on this tab when you're ready.",
+    };
+    this.messages = [...this.messages, msg];
   }
 
   private handleRecordingComplete(actions: RecordedAction[]) {

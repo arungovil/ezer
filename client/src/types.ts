@@ -3,6 +3,7 @@ export const MESSAGE_TYPE = {
   QUICK_ACTION: "QUICK_ACTION",
   RECORDING: "RECORDING",
   WORKFLOW: "WORKFLOW",
+  TAB_SWITCHED: "TAB_SWITCHED",
 } as const;
 
 export type MessageType = (typeof MESSAGE_TYPE)[keyof typeof MESSAGE_TYPE];
@@ -20,7 +21,8 @@ export type Message =
       type:
         | typeof MESSAGE_TYPE.TEXT
         | typeof MESSAGE_TYPE.QUICK_ACTION
-        | typeof MESSAGE_TYPE.RECORDING;
+        | typeof MESSAGE_TYPE.RECORDING
+        | typeof MESSAGE_TYPE.TAB_SWITCHED;
       content: string;
       loading?: boolean;
     }
@@ -55,4 +57,5 @@ export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | 
 export interface RuntimeMessage {
   type: string;
   actions?: RecordedAction[];
+  tabId?: number;
 }
