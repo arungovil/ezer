@@ -18,7 +18,16 @@
   "side_panel": {
     "default_path": "index.html"
   },
+  "icons": {
+    "16": "public/ezer.png",
+    "48": "public/ezer.png",
+    "128": "public/ezer.png"
+  },
   "action": {
-    "default_title": "Start Ezer"
+    "default_title": "Start Ezer",
+    "default_icon": {
+      "16": "public/ezer.png",
+      "32": "public/ezer.png"
+    }
   }
 }
