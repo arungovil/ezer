@@ -1,21 +1,12 @@
 import "@src/components/common/ez-pill/index.js";
+import "@src/components/record-button/index.js";
 import { infoPills } from "@src/constants.js";
-import { recordIcon } from "@src/icons/index.js";
 import type { InfoPill } from "@src/types.js";
 import { html, LitElement } from "lit";
 import { styles } from "./chat-splash.styles.js";
 
 export class ChatSplash extends LitElement {
   static styles = styles;
-
-  private handleStartRecording() {
-    this.dispatchEvent(
-      new CustomEvent("ez-start-recording", {
-        bubbles: true,
-        composed: true,
-      }),
-    );
-  }
 
   private handleInfoPillClick(pill: InfoPill) {
     this.dispatchEvent(
@@ -35,12 +26,7 @@ export class ChatSplash extends LitElement {
       </div>
 
       <div class="pills-container">
-        <ez-pill
-          variant="primary"
-          .icon=${recordIcon}
-          label="Record New Workflow"
-          @click=${this.handleStartRecording}
-        ></ez-pill>
+        <record-button></record-button>
 
         ${infoPills.map(
           (pill) => html`
