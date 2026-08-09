@@ -19,7 +19,7 @@ export class ChatSplash extends LitElement {
   private handleInfoPillClick(pill: InfoPill) {
     this.dispatchEvent(
       new CustomEvent("ez-select-info", {
-        detail: { id: pill.id, label: pill.label },
+        detail: { id: pill.id, prompt: pill.prompt },
         bubbles: true,
         composed: true,
       }),

@@ -1,13 +1,20 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
 import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
-import type { Message, RecordedAction, RuntimeMessage, WorkflowStatus } from "@src/types.js";
+import type {
+  Message,
+  RecordedAction,
+  RuntimeMessage,
+  WorkflowContent,
+  WorkflowStatus,
+} from "@src/types.js";
+import { MESSAGE_TYPE } from "@src/types.js";
 import { html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
 import { styles } from "./chat-window.styles.js";
 import "@src/components/chat-splash/chat-splash.js";
 import "@src/components/chat-header/chat-header.js";
 import "@src/components/chat-input/chat-input.js";
-import "@src/components/message-bubble/message-bubble.js";
+import "@src/components/message-bubble/index.js";
 
 export class ChatWindow extends LitElement {
   @state() private messages: Message[] = [];
@@ -65,12 +72,13 @@ export class ChatWindow extends LitElement {
       });
     }
 
-    const ezerMsg: Message = {
+    const msg: Message = {
       id: crypto.randomUUID(),
       role: "ezer",
+      type: MESSAGE_TYPE.RECORDING,
       content: recordingStartedMessage,
     };
-    this.messages = [...this.messages, ezerMsg];
+    this.messages = [...this.messages, msg];
   }
 
   private handleStopRecording() {
@@ -94,6 +102,7 @@ export class ChatWindow extends LitElement {
       const msg: Message = {
         id: crypto.randomUUID(),
         role: "ezer",
+        type: MESSAGE_TYPE.RECORDING,
         content: "⏹️ **Recording stopped.** No actions were captured.",
       };
       this.messages = [...this.messages, msg];
@@ -107,14 +116,13 @@ export class ChatWindow extends LitElement {
       return `${i + 1}. \`${action.type}\` on \`${primarySelector}\`${valueDetail}${textDetail}`;
     });
 
-    const content = `⏹️ **Recording stopped.** ${actions.length} action${actions.length > 1 ? "s" : ""} captured:\n\n${lines.join("\n")}`;
+    const textContent = `⏹️ **Recording stopped.** ${actions.length} action${actions.length > 1 ? "s" : ""} captured:\n\n${lines.join("\n")}`;
 
     const msg: Message = {
       id: crypto.randomUUID(),
       role: "ezer",
-      content,
-      actions,
-      replaying: false,
+      type: MESSAGE_TYPE.WORKFLOW,
+      content: { text: textContent, actions, replaying: false } satisfies WorkflowContent,
     };
     this.messages = [...this.messages, msg];
   }
@@ -122,14 +130,19 @@ export class ChatWindow extends LitElement {
   private handleReplay(e: CustomEvent<{ actions: RecordedAction[] }>) {
     const { actions } = e.detail;
 
-    // Match by reference — the actions array is the same object stored on the message
-    const message = this.messages.find((m) => m.actions === actions);
+    const message = this.messages.find(
+      (m): m is Extract<Message, { type: typeof MESSAGE_TYPE.WORKFLOW }> =>
+        m.type === MESSAGE_TYPE.WORKFLOW && m.content.actions === actions,
+    );
     if (!message) return;
 
     this.replayingMessageId = message.id;
     this.workflowStatus = "replaying";
 
-    this.messages = this.messages.map((m) => (m.id === message.id ? { ...m, replaying: true } : m));
+    this.messages = this.messages.map((m) => {
+      if (m.id !== message.id || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+      return { ...m, content: { ...m.content, replaying: true } };
+    });
 
     if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
       void chrome.runtime.sendMessage({
@@ -142,19 +155,21 @@ export class ChatWindow extends LitElement {
   private finishReplay() {
     if (!this.replayingMessageId) return;
 
-    this.messages = this.messages.map((m) =>
-      m.id === this.replayingMessageId ? { ...m, replaying: false } : m,
-    );
+    this.messages = this.messages.map((m) => {
+      if (m.id !== this.replayingMessageId || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+      return { ...m, content: { ...m.content, replaying: false } };
+    });
     this.replayingMessageId = null;
     this.workflowStatus = "idle";
   }
 
-  private handleSelectInfo(e: CustomEvent<{ id: string; label: string }>) {
-    const { id, label } = e.detail;
+  private handleSelectInfo(e: CustomEvent<{ id: string; prompt: string }>) {
+    const { id, prompt } = e.detail;
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: label,
+      type: MESSAGE_TYPE.QUICK_ACTION,
+      content: prompt,
     };
 
     const reply = infoReplies[id] ?? defaultInfoReply;
@@ -162,6 +177,7 @@ export class ChatWindow extends LitElement {
     const ezerMsg: Message = {
       id: crypto.randomUUID(),
       role: "ezer",
+      type: MESSAGE_TYPE.QUICK_ACTION,
       content: reply,
     };
 
@@ -178,12 +194,14 @@ export class ChatWindow extends LitElement {
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
+      type: MESSAGE_TYPE.TEXT,
       content: text,
     };
     const ezerMsgId = crypto.randomUUID();
     const pendingEzerMsg: Message = {
       id: ezerMsgId,
       role: "ezer",
+      type: MESSAGE_TYPE.TEXT,
       content: "",
       loading: true,
     };
@@ -192,7 +210,9 @@ export class ChatWindow extends LitElement {
     const replyText = await this.callApi(text);
 
     this.messages = this.messages.map((m) =>
-      m.id === ezerMsgId ? { ...m, content: replyText, loading: false } : m,
+      m.id === ezerMsgId && m.type === MESSAGE_TYPE.TEXT
+        ? { ...m, content: replyText, loading: false }
+        : m,
     );
   }
 
@@ -211,19 +231,23 @@ export class ChatWindow extends LitElement {
       ></chat-header>
       ${
         this.messages.length
-          ? html`<div class="messages" @ez-replay=${this.handleReplay}>
+          ? html`<div
+              class="messages"
+              @ez-replay=${this.handleReplay}
+              @ez-start-recording=${this.handleStartRecording}
+            >
               ${virtualize({
                 scroller: true,
                 items: this.messages,
                 keyFunction: (m: Message) => m.id,
                 renderItem: (m: Message) =>
-                  html`<div data-message-id=${m.id}>
+                  html`<div class="message-wrapper" data-message-id=${m.id}>
                     <message-bubble
-                      .sender=${m.role}
+                      .type=${m.type}
+                      sender=${m.role}
                       .content=${m.content}
                       .loading=${m.loading ?? false}
-                      .actions=${m.actions ?? []}
-                      .replaying=${m.replaying ?? false}
+                      .recording=${this.workflowStatus === "recording"}
                     ></message-bubble>
                   </div>`,
               })}

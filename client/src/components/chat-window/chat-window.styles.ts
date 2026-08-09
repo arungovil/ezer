@@ -19,4 +19,10 @@ export const styles = css`
     padding: var(--ez-space-md) 0;
     box-sizing: border-box;
   }
+  .message-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
 `;
