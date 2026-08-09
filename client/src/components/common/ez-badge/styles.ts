@@ -7,7 +7,7 @@ export const styles = css`
     gap: 6px;
     padding: 3px 8px;
     border-radius: var(--ez-radius-sm);
-    font-size: var(--ez-font-size-xs);
+    font-size: var(--ez-font-size-sm);
     font-weight: var(--ez-font-weight-medium);
   }
 
