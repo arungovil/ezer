@@ -1,3 +1,4 @@
+import "@src/components/common/ez-pill/index.js";
 import { infoPills } from "@src/constants.js";
 import { recordIcon } from "@src/icons/index.js";
 import type { InfoPill } from "@src/types.js";
@@ -34,20 +35,21 @@ export class ChatSplash extends LitElement {
       </div>
 
       <div class="pills-container">
-        <button class="pill record-pill" @click=${this.handleStartRecording}>
-          <div class="pill-icon">${recordIcon}</div>
-          <span>Record New Workflow</span>
-        </button>
+        <ez-pill
+          variant="primary"
+          .icon=${recordIcon}
+          label="Record New Workflow"
+          @click=${this.handleStartRecording}
+        ></ez-pill>
 
         ${infoPills.map(
           (pill) => html`
-            <button
-              class="pill info-pill"
+            <ez-pill
+              variant="default"
+              .icon=${pill.icon}
+              .label=${pill.label}
               @click=${() => this.handleInfoPillClick(pill)}
-            >
-              <div class="pill-icon">${pill.icon}</div>
-              <span>${pill.label}</span>
-            </button>
+            ></ez-pill>
           `,
         )}
       </div>

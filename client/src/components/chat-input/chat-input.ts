@@ -1,3 +1,4 @@
+import "@src/components/common/ez-button/index.js";
 import { sendIcon } from "@src/icons/send.js";
 import { html, LitElement } from "lit";
 import { query } from "lit/decorators.js";
@@ -62,7 +63,7 @@ export class ChatInput extends LitElement {
         @input=${this.handleInput}
         @keydown=${this.handleKeydown}
       ></textarea>
-      <button @click=${this.handleSend}>${sendIcon}</button>
+      <ez-button variant="primary" size="icon-md" @click=${this.handleSend}>${sendIcon}</ez-button>
     `;
   }
 }

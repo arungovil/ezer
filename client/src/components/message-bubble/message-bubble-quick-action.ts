@@ -1,3 +1,4 @@
+import "@src/components/common/ez-button/index.js";
 import { renderMarkdown } from "@src/utils/markdown.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
@@ -26,13 +27,14 @@ export class MessageBubbleQuickAction extends LitElement {
       ${
         this.sender === "ezer"
           ? html`
-            <button
-              class="record-btn"
+            <ez-button
+              variant="outline"
+              size="sm"
               ?disabled=${this.recording}
               @click=${this.handleStartRecording}
             >
               🔴 Start Recording
-            </button>
+            </ez-button>
           `
           : null
       }

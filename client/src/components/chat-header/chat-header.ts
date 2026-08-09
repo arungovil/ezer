@@ -1,3 +1,5 @@
+import "@src/components/common/ez-button/index.js";
+import "@src/components/common/ez-badge/index.js";
 import { messageCirclePlusIcon } from "@src/icons/message-circle-plus.js";
 import { textAlignStartIcon } from "@src/icons/text-align-start.js";
 import { zapIcon } from "@src/icons/zap.js";
@@ -38,21 +40,13 @@ export class ChatHeader extends LitElement {
         ${
           this.workflowStatus === "recording"
             ? html`
-                <div class="recording-badge">
-                  <span class="recording-dot"></span>
-                  <span>Recording</span>
-                </div>
-                <button class="stop-btn" @click=${this.handleStop}>Stop</button>
+                <ez-badge variant="error">Recording</ez-badge>
+                <ez-button variant="outline" size="sm" @click=${this.handleStop}>Stop</ez-button>
               `
             : this.workflowStatus === "replaying"
-              ? html`
-                  <div class="replaying-badge">
-                    <span class="replaying-dot"></span>
-                    <span>Replaying</span>
-                  </div>
-                `
-              : html`<button class="icon-btn" @click=${this.handleNewChat}>${messageCirclePlusIcon}</button>
-                  <button class="icon-btn" @click=${() => {}}>${textAlignStartIcon}</button>`
+              ? html`<ez-badge variant="info">Replaying</ez-badge>`
+              : html`<ez-button variant="ghost" size="icon-md" @click=${this.handleNewChat}>${messageCirclePlusIcon}</ez-button>
+                  <ez-button variant="ghost" size="icon-md" @click=${() => {}}>${textAlignStartIcon}</ez-button>`
         }
       </div>
     `;

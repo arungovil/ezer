@@ -25,25 +25,5 @@ export const styles = css`
     height: 40px;
     max-height: 128px;
   }
-  button {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--ez-space-sm);
-    border: none;
-    border-radius: var(--ez-radius-sm);
-    background: var(--ez-color-primary);
-    color: var(--ez-color-primary-text);
-    cursor: pointer;
-  }
-  button svg {
-    display: block;
-    width: 18px;
-    height: 18px;
-  }
-  button:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
+
 `;

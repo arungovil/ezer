@@ -1,3 +1,4 @@
+import "@src/components/common/ez-button/index.js";
 import type { WorkflowContent } from "@src/types.js";
 import { renderMarkdown } from "@src/utils/markdown.js";
 import { html, LitElement } from "lit";
@@ -32,13 +33,14 @@ export class MessageBubbleWorkflow extends LitElement {
       ${
         actions && actions.length > 0
           ? html`
-            <button
-              class="replay-btn"
+            <ez-button
+              variant="primary"
+              size="sm"
               ?disabled=${replaying}
               @click=${this.handleReplay}
             >
               ${replaying ? "⏳ Replaying…" : "▶ Replay"}
-            </button>
+            </ez-button>
           `
           : null
       }
