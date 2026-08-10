@@ -3,7 +3,7 @@ import type { WorkflowContent } from "@src/types.js";
 import { renderMarkdown } from "@src/utils/markdown.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import { styles } from "./message-bubble-workflow.styles.js";
+import { styles } from "./styles.js";
 
 export class MessageBubbleWorkflow extends LitElement {
   @property({ type: Object }) content: WorkflowContent = {

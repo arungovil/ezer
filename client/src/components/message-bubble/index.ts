@@ -3,13 +3,13 @@ import { MESSAGE_TYPE } from "@src/types.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import { styles } from "./styles.js";
-import "./message-bubble-text.js";
-import "./message-bubble-quick-action.js";
-import "./message-bubble-recording.js";
-import "./message-bubble-workflow.js";
-import "./message-bubble-workflow-list.js";
-import "./message-bubble-tab-switched.js";
 import "@src/components/chat-loader/index.js";
+import "@src/components/message-bubble/text/index.js";
+import "@src/components/message-bubble/quick-action/index.js";
+import "@src/components/message-bubble/recording/index.js";
+import "@src/components/message-bubble/workflow/index.js";
+import "@src/components/message-bubble/workflow-list/index.js";
+import "@src/components/message-bubble/tab-switched/index.js";
 
 export class MessageBubble extends LitElement {
   @property({ type: String, reflect: true }) sender: "user" | "ezer" = "ezer";

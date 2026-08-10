@@ -2,14 +2,11 @@ import "@src/components/record-button/index.js";
 import { renderMarkdown } from "@src/utils/markdown.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import { styles } from "./message-bubble-quick-action.styles.js";
 
 export class MessageBubbleQuickAction extends LitElement {
   @property({ type: String, reflect: true }) sender: "user" | "ezer" = "ezer";
   @property({ type: String }) content = "";
   @property({ type: Boolean }) recording = false;
-
-  static styles = styles;
 
   render() {
     return html`
