@@ -46,7 +46,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return false;
   }
 
-  if (message?.type === "REPLAY_COMPLETE" || message?.type === "REPLAY_ERROR") {
+  if (message?.type === "REPLAY_COMPLETE" || message?.type === "REPLAY_FAILED") {
     // Broadcast from content back to sidepanel
     chrome.runtime.sendMessage(message).catch(() => {});
     sendResponse({ ok: true });

@@ -39,7 +39,6 @@ export class ChatSplash extends LitElement {
           `,
         )}
       </div>
-
     `;
   }
 }

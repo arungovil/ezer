@@ -1,6 +1,7 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
 import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
-import { saveWorkflow } from "@src/db/store.js";
+import { getWorkflowsByTabId, saveWorkflow } from "@src/db/store.js";
+import { formatReplayFailure } from "@src/replay/index.js";
 import type {
   Message,
   RecordedAction,
@@ -17,18 +18,21 @@ import "@src/components/common/ez-button/index.js";
 import "@src/components/common/ez-badge/index.js";
 import "@src/components/common/ez-pill/index.js";
 import "@src/components/chat-splash/chat-splash.js";
+import "@src/components/chat-splash/chat-splash-returning.js";
 import "@src/components/chat-header/chat-header.js";
 import "@src/components/chat-input/chat-input.js";
 import "@src/components/message-bubble/index.js";
 
 export class ChatWindow extends LitElement {
   @state() private messages: Message[] = [];
+  @state() private savedWorkflows: Workflow[] = [];
   @state() protected workflowStatus: WorkflowStatus = "idle";
 
   @query(".messages") private messagesContainer?: HTMLDivElement;
 
   private replayingMessageId: string | null = null;
   private pendingEmptyMsgId: string | null = null;
+  private pendingReplayError: string | null = null;
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
     if (message?.type === "TAB_SWITCHED") {
@@ -38,10 +42,12 @@ export class ChatWindow extends LitElement {
     if (message?.type === "RECORDING_COMPLETE" && message.actions) {
       this.handleRecordingComplete(message.actions);
     }
-    if (message?.type === "REPLAY_COMPLETE") {
-      this.finishReplay();
+    if (message?.type === "REPLAY_FAILED") {
+      this.pendingReplayError =
+        message.error ??
+        (message.failure ? formatReplayFailure(message.failure) : "Replay failed.");
     }
-    if (message?.type === "REPLAY_ERROR") {
+    if (message?.type === "REPLAY_COMPLETE") {
       this.finishReplay();
     }
   };
@@ -51,6 +57,7 @@ export class ChatWindow extends LitElement {
     if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
       chrome.runtime.onMessage.addListener(this.handleRuntimeMessage);
     }
+    void this.refreshSavedWorkflows();
   }
 
   override disconnectedCallback() {
@@ -154,6 +161,7 @@ export class ChatWindow extends LitElement {
     this.messages = [];
     this.workflowStatus = "idle";
     this.pendingEmptyMsgId = null;
+    void this.refreshSavedWorkflows();
   }
 
   private handleTabSwitched() {
@@ -161,8 +169,10 @@ export class ChatWindow extends LitElement {
     this.replayingMessageId = null;
     this.clearPendingEmptyPlaceholder();
 
-    // Only notify if there's an active conversation; otherwise stay on splash
-    if (this.messages.length === 0) return;
+    if (this.messages.length === 0) {
+      void this.refreshSavedWorkflows();
+      return;
+    }
 
     // Don't stack duplicate tab-switched messages
     const last = this.messages[this.messages.length - 1];
@@ -205,6 +215,10 @@ export class ChatWindow extends LitElement {
       }
     }
 
+    void this.appendWorkflowMessage(actions);
+  }
+
+  private appendWorkflowMessage(actions: RecordedAction[]) {
     const lines = actions.map((action, i) => {
       const primarySelector = action.selectors[0] || action.tagName;
       const valueDetail = action.value !== undefined ? ` (value: "${action.value}")` : "";
@@ -293,20 +307,13 @@ export class ChatWindow extends LitElement {
     }
   }
 
-  private handleReplay(e: CustomEvent<{ actions: RecordedAction[] }>) {
-    const { actions } = e.detail;
-
-    const message = this.messages.find(
-      (m): m is Extract<Message, { type: typeof MESSAGE_TYPE.WORKFLOW }> =>
-        m.type === MESSAGE_TYPE.WORKFLOW && m.content.actions === actions,
-    );
-    if (!message) return;
-
-    this.replayingMessageId = message.id;
+  private beginReplay(messageId: string, actions: RecordedAction[]) {
+    this.replayingMessageId = messageId;
     this.workflowStatus = "replaying";
+    this.pendingReplayError = null;
 
     this.messages = this.messages.map((m) => {
-      if (m.id !== message.id || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+      if (m.id !== messageId || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
       return { ...m, content: { ...m.content, replaying: true } };
     });
 
@@ -318,6 +325,18 @@ export class ChatWindow extends LitElement {
     }
   }
 
+  private handleReplay(e: CustomEvent<{ actions: RecordedAction[] }>) {
+    const { actions } = e.detail;
+
+    const message = this.messages.find(
+      (m): m is Extract<Message, { type: typeof MESSAGE_TYPE.WORKFLOW }> =>
+        m.type === MESSAGE_TYPE.WORKFLOW && m.content.actions === actions,
+    );
+    if (!message) return;
+
+    this.beginReplay(message.id, actions);
+  }
+
   private finishReplay() {
     if (!this.replayingMessageId) return;
 
@@ -325,8 +344,61 @@ export class ChatWindow extends LitElement {
       if (m.id !== this.replayingMessageId || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
       return { ...m, content: { ...m.content, replaying: false } };
     });
+
+    if (this.pendingReplayError) {
+      const errorMsg: Message = {
+        id: crypto.randomUUID(),
+        role: "ezer",
+        type: MESSAGE_TYPE.RECORDING,
+        content: this.pendingReplayError,
+      };
+      this.messages = [...this.messages, errorMsg];
+      this.pendingReplayError = null;
+    }
+
     this.replayingMessageId = null;
     this.workflowStatus = "idle";
+  }
+
+  private async refreshSavedWorkflows() {
+    if (typeof chrome === "undefined" || !chrome.tabs?.query) {
+      this.savedWorkflows = [];
+      return;
+    }
+
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) {
+        this.savedWorkflows = [];
+        return;
+      }
+
+      const workflows = await getWorkflowsByTabId(tab.id);
+      this.savedWorkflows = workflows.sort((a, b) => b.createdAt - a.createdAt);
+    } catch {
+      this.savedWorkflows = [];
+    }
+  }
+
+  private handleSelectWorkflow(e: CustomEvent<{ workflow: Workflow }>) {
+    const { workflow } = e.detail;
+    if (workflow.actions.length === 0) return;
+
+    const textContent = `▶ **${workflow.name}** — ${workflow.actions.length} action${workflow.actions.length === 1 ? "" : "s"}`;
+
+    const msg: Message = {
+      id: crypto.randomUUID(),
+      role: "ezer",
+      type: MESSAGE_TYPE.WORKFLOW,
+      content: {
+        text: textContent,
+        actions: workflow.actions,
+        replaying: false,
+        saved: true,
+      } satisfies WorkflowContent,
+    };
+    this.messages = [...this.messages, msg];
+    this.beginReplay(msg.id, workflow.actions);
   }
 
   private handleSelectInfo(e: CustomEvent<{ id: string; prompt: string }>) {
@@ -419,10 +491,16 @@ export class ChatWindow extends LitElement {
                   </div>`,
               })}
             </div>`
-          : html`<chat-splash
-              @ez-start-recording=${this.handleStartRecording}
-              @ez-select-info=${this.handleSelectInfo}
-            ></chat-splash>`
+          : this.savedWorkflows.length > 0
+            ? html`<chat-splash-returning
+                .workflows=${this.savedWorkflows}
+                @ez-start-recording=${this.handleStartRecording}
+                @ez-select-workflow=${this.handleSelectWorkflow}
+              ></chat-splash-returning>`
+            : html`<chat-splash
+                @ez-start-recording=${this.handleStartRecording}
+                @ez-select-info=${this.handleSelectInfo}
+              ></chat-splash>`
       }
       <chat-input @ez-send=${this.handleSend}></chat-input>
     `;

@@ -1,7 +1,7 @@
 // Ezer content script engine
 
+import { runReplay } from "@src/replay/index.js";
 import { eventHandlers } from "./handlers.js";
-import { runReplay } from "./replay.js";
 
 let isRecording = false;
 

@@ -1,3 +1,5 @@
+import type { ReplayFailure } from "@src/replay/index.js";
+
 export const MESSAGE_TYPE = {
   TEXT: "TEXT",
   QUICK_ACTION: "QUICK_ACTION",
@@ -69,4 +71,6 @@ export interface RuntimeMessage {
   type: string;
   actions?: RecordedAction[];
   tabId?: number;
+  error?: string;
+  failure?: ReplayFailure;
 }

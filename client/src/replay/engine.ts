@@ -2,10 +2,12 @@
 
 import type { RecordedAction } from "@src/types.js";
 import { executeAction } from "./action-executor.js";
+import { formatReplayFailure, type ReplayFailure } from "./failure.js";
 import { hideViewportBorder, showViewportBorder } from "./highlight.js";
 
 const STEP_DELAY_MS = 800;
 const RETRY_DELAY_MS = 500;
+const SELECTOR_RETRIES = 3;
 
 let isReplaying = false;
 
@@ -14,35 +16,42 @@ export function isReplayActive(): boolean {
 }
 
 export async function runReplay(actions: RecordedAction[]): Promise<void> {
-  if (isReplaying) return;
+  if (isReplaying || actions.length === 0) return;
   isReplaying = true;
 
   showViewportBorder();
 
+  const totalSteps = actions.length;
+
   try {
-    for (const action of actions) {
+    for (let i = 0; i < actions.length; i++) {
       if (!isReplaying) break;
 
-      const element = await resolveElement(action.selectors, 3);
+      const action = actions[i];
+      const stepNumber = i + 1;
+
+      const element = await resolveElement(action.selectors, SELECTOR_RETRIES);
       if (!element) {
-        chrome.runtime
-          .sendMessage({
-            type: "REPLAY_ERROR",
-            error: `Could not resolve element: ${action.selectors[0] || action.tagName}`,
-          })
-          .catch(() => {});
-        continue;
+        reportFailure({
+          stepNumber,
+          totalSteps,
+          reason: "selector_not_found",
+          action,
+        });
+        return;
       }
 
       try {
         await executeAction(action, element);
       } catch (err) {
-        chrome.runtime
-          .sendMessage({
-            type: "REPLAY_ERROR",
-            error: safeErrorMessage(err),
-          })
-          .catch(() => {});
+        reportFailure({
+          stepNumber,
+          totalSteps,
+          reason: "execution_error",
+          action,
+          detail: safeErrorMessage(err),
+        });
+        return;
       }
 
       await delay(STEP_DELAY_MS);
@@ -54,18 +63,28 @@ export async function runReplay(actions: RecordedAction[]): Promise<void> {
   }
 }
 
+function reportFailure(failure: ReplayFailure): void {
+  chrome.runtime
+    .sendMessage({
+      type: "REPLAY_FAILED",
+      error: formatReplayFailure(failure),
+      failure,
+    })
+    .catch(() => {});
+}
+
 async function resolveElement(selectors: string[], retries: number): Promise<HTMLElement | null> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     for (const selector of selectors) {
       try {
         const el = document.querySelector(selector);
-        if (el) {
-          const htmlEl =
-            el instanceof HTMLElement
-              ? el
-              : (el.closest("*") as HTMLElement | null) || (el as unknown as HTMLElement);
-          if (htmlEl) return htmlEl;
-        }
+        if (!el) continue;
+
+        const htmlEl =
+          el instanceof HTMLElement
+            ? el
+            : (el.closest("*") as HTMLElement | null) || (el as unknown as HTMLElement);
+        if (htmlEl && document.contains(htmlEl)) return htmlEl;
       } catch {
         // Invalid selector, try next
       }
