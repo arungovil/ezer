@@ -87,3 +87,18 @@ export interface RuntimeMessage {
   error?: string;
   failure?: ReplayFailure;
 }
+
+export interface PendingWorkflowSave {
+  messageId: string;
+  actions: RecordedAction[];
+}
+
+export interface ChatWindowHost {
+  messages: Message[];
+  savedWorkflows: Workflow[];
+  workflowStatus: WorkflowStatus;
+  replayingMessageId: string | null;
+  pendingEmptyMsgId: string | null;
+  pendingReplayError: string | null;
+  pendingWorkflowSave: PendingWorkflowSave | null;
+}

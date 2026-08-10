@@ -1,1 +1,1 @@
-import "@src/components/chat-window/chat-window.js";
+import "@src/components/chat-window/index.js";
