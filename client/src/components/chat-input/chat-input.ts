@@ -1,10 +1,12 @@
 import "@src/components/common/ez-button/index.js";
 import { sendIcon } from "@src/icons/send.js";
 import { html, LitElement } from "lit";
-import { query } from "lit/decorators.js";
+import { property, query } from "lit/decorators.js";
 import { styles } from "./chat-input.styles.js";
 
 export class ChatInput extends LitElement {
+  @property({ type: String }) placeholder = "What are my available workflows?";
+
   static styles = styles;
 
   @query("textarea") private textareaEl?: HTMLTextAreaElement;
@@ -57,8 +59,8 @@ export class ChatInput extends LitElement {
   render() {
     return html`
       <textarea
-        aria-label="What are my available workflows?"
-        placeholder="What are my available workflows?"
+        aria-label=${this.placeholder}
+        placeholder=${this.placeholder}
         @focus=${this.handleFocus}
         @input=${this.handleInput}
         @keydown=${this.handleKeydown}

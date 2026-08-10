@@ -15,6 +15,7 @@ export interface WorkflowContent {
   actions: RecordedAction[];
   replaying: boolean;
   saved: boolean;
+  awaitingName?: boolean;
 }
 
 export type Message =

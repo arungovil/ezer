@@ -38,7 +38,7 @@ export class MessageBubbleWorkflow extends LitElement {
   }
 
   render() {
-    const { text, actions, replaying, saved } = this.content;
+    const { text, actions, replaying, saved, awaitingName } = this.content;
 
     return html`
       <div>${renderMarkdown(text)}</div>
@@ -57,10 +57,10 @@ export class MessageBubbleWorkflow extends LitElement {
               <ez-button
                 variant="outline"
                 size="sm"
-                ?disabled=${saved}
+                ?disabled=${saved || awaitingName}
                 @click=${this.handleSave}
               >
-                ${saved ? "✓ Saved" : "💾 Save"}
+                ${saved ? "✓ Saved" : awaitingName ? "Enter name below…" : "💾 Save"}
               </ez-button>
             </div>
           `

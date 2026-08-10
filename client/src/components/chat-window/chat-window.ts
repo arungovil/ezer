@@ -33,6 +33,7 @@ export class ChatWindow extends LitElement {
   private replayingMessageId: string | null = null;
   private pendingEmptyMsgId: string | null = null;
   private pendingReplayError: string | null = null;
+  private pendingWorkflowSave: { messageId: string; actions: RecordedAction[] } | null = null;
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
     if (message?.type === "TAB_SWITCHED") {
@@ -161,6 +162,7 @@ export class ChatWindow extends LitElement {
     this.messages = [];
     this.workflowStatus = "idle";
     this.pendingEmptyMsgId = null;
+    this.pendingWorkflowSave = null;
     void this.refreshSavedWorkflows();
   }
 
@@ -168,6 +170,7 @@ export class ChatWindow extends LitElement {
     this.workflowStatus = "idle";
     this.replayingMessageId = null;
     this.clearPendingEmptyPlaceholder();
+    this.clearPendingWorkflowSave();
 
     if (this.messages.length === 0) {
       void this.refreshSavedWorkflows();
@@ -242,27 +245,62 @@ export class ChatWindow extends LitElement {
     this.messages = [...this.messages, msg];
   }
 
-  private async handleSave(e: CustomEvent<{ actions: RecordedAction[] }>) {
+  private clearPendingWorkflowSave() {
+    if (!this.pendingWorkflowSave) return;
+
+    const { messageId } = this.pendingWorkflowSave;
+    this.pendingWorkflowSave = null;
+    this.messages = this.messages.map((m) => {
+      if (m.id !== messageId || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+      return { ...m, content: { ...m.content, awaitingName: false } };
+    });
+  }
+
+  private handleSave(e: CustomEvent<{ actions: RecordedAction[] }>) {
     const { actions } = e.detail;
 
     const message = this.messages.find(
       (m): m is Extract<Message, { type: typeof MESSAGE_TYPE.WORKFLOW }> =>
         m.type === MESSAGE_TYPE.WORKFLOW && m.content.actions === actions,
     );
-    if (!message || message.content.saved) return;
+    if (!message || message.content.saved || message.content.awaitingName) return;
+    if (this.pendingWorkflowSave) return;
 
-    // Lock immediately so rapid clicks can't enqueue duplicate saves.
+    this.pendingWorkflowSave = { messageId: message.id, actions };
+
     this.messages = this.messages.map((m) => {
       if (m.id !== message.id || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
-      return { ...m, content: { ...m.content, saved: true } };
+      return { ...m, content: { ...m.content, awaitingName: true } };
     });
+
+    const promptMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "ezer",
+      type: MESSAGE_TYPE.RECORDING,
+      content: "💾 **Name this workflow.** Reply with a title to save it.",
+    };
+    this.messages = [...this.messages, promptMsg];
+  }
+
+  private async completeWorkflowSave(name: string) {
+    const pending = this.pendingWorkflowSave;
+    if (!pending) return;
+
+    const userMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      type: MESSAGE_TYPE.TEXT,
+      content: name,
+    };
+    this.messages = [...this.messages, userMsg];
+    this.pendingWorkflowSave = null;
 
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab?.id) {
         this.messages = this.messages.map((m) => {
-          if (m.id !== message.id || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
-          return { ...m, content: { ...m.content, saved: false } };
+          if (m.id !== pending.messageId || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+          return { ...m, content: { ...m.content, awaitingName: false } };
         });
         const errorMsg: Message = {
           id: crypto.randomUUID(),
@@ -278,24 +316,30 @@ export class ChatWindow extends LitElement {
         id: crypto.randomUUID(),
         tabId: tab.id,
         url: tab.url ?? "",
-        name: `Workflow — ${new Date().toLocaleString()}`,
-        actions,
+        name,
+        actions: pending.actions,
         createdAt: Date.now(),
       };
 
       await saveWorkflow(workflow);
 
+      this.messages = this.messages.map((m) => {
+        if (m.id !== pending.messageId || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+        return { ...m, content: { ...m.content, saved: true, awaitingName: false } };
+      });
+
       const confirmMsg: Message = {
         id: crypto.randomUUID(),
         role: "ezer",
         type: MESSAGE_TYPE.RECORDING,
-        content: "✅ **Workflow saved!**",
+        content: `✅ **Workflow saved as "${name}"!**`,
       };
       this.messages = [...this.messages, confirmMsg];
+      void this.refreshSavedWorkflows();
     } catch (err) {
       this.messages = this.messages.map((m) => {
-        if (m.id !== message.id || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
-        return { ...m, content: { ...m.content, saved: false } };
+        if (m.id !== pending.messageId || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+        return { ...m, content: { ...m.content, awaitingName: false } };
       });
       const errorMsg: Message = {
         id: crypto.randomUUID(),
@@ -425,6 +469,12 @@ export class ChatWindow extends LitElement {
   private handleSend(e: CustomEvent<{ text: string }>) {
     const text = e.detail.text.trim();
     if (!text) return;
+
+    if (this.pendingWorkflowSave) {
+      void this.completeWorkflowSave(text);
+      return;
+    }
+
     void this.processMessage(text);
   }
 
@@ -502,7 +552,12 @@ export class ChatWindow extends LitElement {
                 @ez-select-info=${this.handleSelectInfo}
               ></chat-splash>`
       }
-      <chat-input @ez-send=${this.handleSend}></chat-input>
+      <chat-input
+        .placeholder=${
+          this.pendingWorkflowSave ? "Enter a workflow name…" : "What are my available workflows?"
+        }
+        @ez-send=${this.handleSend}
+      ></chat-input>
     `;
   }
 }
