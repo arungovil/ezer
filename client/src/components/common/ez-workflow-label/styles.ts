@@ -1,6 +1,10 @@
 import { css } from "lit";
 
-export const workflowLabelStyles = css`
+export const styles = css`
+  :host {
+    display: contents;
+  }
+
   .workflow-name {
     display: flex;
     align-items: center;

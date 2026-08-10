@@ -1,10 +1,8 @@
 import { sharedStyles } from "@src/components/chat-empty/shared.styles.js";
-import { workflowLabelStyles } from "@src/components/common/workflow-label.styles.js";
 import { css } from "lit";
 
 export const styles = [
   sharedStyles,
-  workflowLabelStyles,
   css`
     .workflow-list {
       list-style: none;
@@ -39,14 +37,6 @@ export const styles = [
       border-color: var(--ez-color-primary-border);
       background: var(--ez-color-primary-muted);
       box-shadow: var(--ez-shadow-sm-subtle);
-    }
-
-    .workflow-name {
-      flex: 1;
-    }
-
-    .workflow-meta {
-      flex-shrink: 0;
     }
 
     .pills-container {

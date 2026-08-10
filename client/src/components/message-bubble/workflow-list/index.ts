@@ -1,8 +1,8 @@
 import "@src/components/common/ez-button/index.js";
+import "@src/components/common/ez-workflow-label/index.js";
 import "@src/components/record-button/index.js";
-import { playIcon, trashIcon, workflowIcon } from "@src/icons/index.js";
+import { playIcon, trashIcon } from "@src/icons/index.js";
 import type { Workflow, WorkflowListContent } from "@src/types.js";
-import { formatActionCount } from "@src/utils/format.js";
 import { html, LitElement } from "lit";
 import { property, state } from "lit/decorators.js";
 import { styles } from "./styles.js";
@@ -75,11 +75,7 @@ export class MessageBubbleWorkflowList extends LitElement {
           (workflow) => html`
             <li class="workflow-item">
               <div class="workflow-info">
-                <div class="workflow-name">
-                  <span class="workflow-icon" aria-hidden="true">${workflowIcon}</span>
-                  <span class="workflow-title" title=${workflow.name}>${workflow.name}</span>
-                </div>
-                <span class="workflow-meta">${formatActionCount(workflow.actions.length)}</span>
+                <ez-workflow-label .workflow=${workflow}></ez-workflow-label>
               </div>
               <div class="workflow-actions">
                 <ez-button

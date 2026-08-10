@@ -1,8 +1,6 @@
-import { workflowLabelStyles } from "@src/components/common/workflow-label.styles.js";
 import { css } from "lit";
 
 export const styles = [
-  workflowLabelStyles,
   css`
     :host {
       display: block;

@@ -1,8 +1,8 @@
 import "@src/components/common/ez-pill/index.js";
+import "@src/components/common/ez-workflow-label/index.js";
 import "@src/components/record-button/index.js";
-import { textAlignStartIcon, workflowIcon } from "@src/icons/index.js";
+import { textAlignStartIcon } from "@src/icons/index.js";
 import type { Workflow } from "@src/types.js";
-import { formatActionCount } from "@src/utils/format.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import { styles } from "./styles.js";
@@ -61,11 +61,7 @@ export class ChatWorkflows extends LitElement {
                 class="workflow-item"
                 @click=${() => this.handleWorkflowClick(workflow)}
               >
-                <span class="workflow-name">
-                  <span class="workflow-icon" aria-hidden="true">${workflowIcon}</span>
-                  <span class="workflow-title">${workflow.name}</span>
-                </span>
-                <span class="workflow-meta">${formatActionCount(workflow.actions.length)}</span>
+                <ez-workflow-label .workflow=${workflow}></ez-workflow-label>
               </button>
             </li>
           `,
