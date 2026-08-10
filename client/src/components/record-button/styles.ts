@@ -10,22 +10,22 @@ export const styles = css`
     font-family: inherit;
     font-size: var(--ez-font-size-sm);
     font-weight: var(--ez-font-weight-semibold);
-    line-height: 1.4;
+    line-height: var(--ez-line-height-tight);
     box-sizing: border-box;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--ez-transition-fast);
     white-space: nowrap;
     user-select: none;
-    background: #fef2f2;
-    border: 1px solid #fca5a5;
-    color: #b91c1c;
+    background: var(--ez-color-error-bg);
+    border: 1px solid var(--ez-color-error-border);
+    color: var(--ez-color-error-foreground);
   }
 
   :host(:hover:not(:disabled)) {
-    background: #fee2e2;
-    border-color: #f87171;
+    background: var(--ez-color-error-muted-hover);
+    border-color: var(--ez-color-error-border-hover);
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
+    box-shadow: var(--ez-shadow-sm-error);
   }
 
   :host(:disabled) {
@@ -36,11 +36,11 @@ export const styles = css`
   .icon {
     display: flex;
     align-items: center;
-    color: #dc2626;
+    color: var(--ez-color-error-accent);
   }
 
   .icon svg {
-    width: 14px;
-    height: 14px;
+    width: var(--ez-icon-sm);
+    height: var(--ez-icon-sm);
   }
 `;

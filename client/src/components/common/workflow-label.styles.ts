@@ -19,8 +19,8 @@ export const workflowLabelStyles = css`
   }
 
   .workflow-icon svg {
-    width: 14px;
-    height: 14px;
+    width: var(--ez-icon-sm);
+    height: var(--ez-icon-sm);
   }
 
   .workflow-title {

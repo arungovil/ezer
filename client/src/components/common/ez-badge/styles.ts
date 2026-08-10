@@ -12,20 +12,20 @@ export const styles = css`
   }
 
   :host([variant="error"]) {
-    background: #fef2f2;
-    border: 1px solid #fca5a5;
-    color: #991b1b;
+    background: var(--ez-color-error-bg);
+    border: 1px solid var(--ez-color-error-border);
+    color: var(--ez-color-error);
   }
 
   :host([variant="info"]) {
-    background: #eff6ff;
-    border: 1px solid #93c5fd;
-    color: #1e40af;
+    background: var(--ez-color-primary-muted);
+    border: 1px solid var(--ez-color-primary-border);
+    color: var(--ez-color-primary-emphasis);
   }
 
   .dot {
-    width: 8px;
-    height: 8px;
+    width: var(--ez-icon-xs);
+    height: var(--ez-icon-xs);
     border-radius: 50%;
     animation: pulse 1.5s infinite;
   }

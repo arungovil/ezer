@@ -9,26 +9,26 @@ export const styles = css`
     border-radius: var(--ez-radius-sm);
     font-family: inherit;
     font-size: var(--ez-font-size-sm);
-    line-height: 1.4;
+    line-height: var(--ez-line-height-tight);
     box-sizing: border-box;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all var(--ez-transition-fast);
     white-space: nowrap;
     user-select: none;
   }
 
   :host([variant="primary"]) {
-    background: #eff6ff;
-    border: 1px solid #93c5fd;
-    color: #1d4ed8;
+    background: var(--ez-color-primary-muted);
+    border: 1px solid var(--ez-color-primary-border);
+    color: var(--ez-color-primary-hover);
     font-weight: var(--ez-font-weight-semibold);
   }
 
   :host([variant="primary"]:hover) {
-    background: #dbeafe;
-    border-color: #3b82f6;
+    background: var(--ez-color-primary-muted-hover);
+    border-color: var(--ez-color-primary);
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+    box-shadow: var(--ez-shadow-sm);
   }
 
   :host([variant="default"]) {
@@ -39,7 +39,7 @@ export const styles = css`
   }
 
   :host([variant="default"]:hover) {
-    background: #f0f6ff;
+    background: var(--ez-color-primary-muted);
     border-color: var(--ez-color-primary);
     color: var(--ez-color-primary);
     transform: translateY(-1px);
@@ -52,7 +52,7 @@ export const styles = css`
   }
 
   .icon svg {
-    width: 14px;
-    height: 14px;
+    width: var(--ez-icon-sm);
+    height: var(--ez-icon-sm);
   }
 `;

@@ -32,8 +32,8 @@ export const styles = css`
     flex-shrink: 0;
   }
   .logo svg {
-    width: 16px;
-    height: 16px;
+    width: var(--ez-icon-md);
+    height: var(--ez-icon-md);
   }
   h1 {
     font-size: var(--ez-font-size-md);

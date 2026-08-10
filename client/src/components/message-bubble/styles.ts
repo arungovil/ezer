@@ -58,27 +58,27 @@ export const styles = css`
   }
 
   .bubble code {
-    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-    background: rgba(0, 0, 0, 0.08);
+    font-family: var(--ez-font-mono);
+    background: var(--ez-color-overlay);
     padding: 2px 5px;
     border-radius: var(--ez-radius-sm);
     font-size: 0.9em;
   }
 
   :host([sender="user"]) .bubble code {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--ez-color-overlay-on-primary);
   }
 
   .bubble pre {
     margin: var(--ez-space-xs) 0;
     padding: var(--ez-space-xs) var(--ez-space-sm);
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--ez-color-overlay);
     border-radius: var(--ez-radius-sm);
     overflow-x: auto;
   }
 
   :host([sender="user"]) .bubble pre {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--ez-color-overlay-on-primary);
   }
 
   .bubble pre code {

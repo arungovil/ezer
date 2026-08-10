@@ -30,15 +30,15 @@ export const styles = [
       text-align: left;
       cursor: pointer;
       transition:
-        border-color 0.15s ease,
-        background 0.15s ease,
-        box-shadow 0.15s ease;
+        border-color var(--ez-transition-fast),
+        background var(--ez-transition-fast),
+        box-shadow var(--ez-transition-fast);
     }
 
     .workflow-item:hover {
-      border-color: #93c5fd;
-      background: #eff6ff;
-      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08);
+      border-color: var(--ez-color-primary-border);
+      background: var(--ez-color-primary-muted);
+      box-shadow: var(--ez-shadow-sm-subtle);
     }
 
     .workflow-name {

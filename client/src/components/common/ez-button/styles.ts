@@ -5,16 +5,16 @@ export const styles = css`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: var(--ez-space-xs);
     border: none;
     border-radius: var(--ez-radius-sm);
     font-family: inherit;
     box-sizing: border-box;
     cursor: pointer;
     transition:
-      background 0.15s ease,
-      border-color 0.15s ease,
-      color 0.15s ease;
+      background var(--ez-transition-fast),
+      border-color var(--ez-transition-fast),
+      color var(--ez-transition-fast);
     user-select: none;
     white-space: nowrap;
   }
@@ -84,13 +84,13 @@ export const styles = css`
 
   :host([size="icon-sm"]) ::slotted(svg),
   :host([size="sm"]) ::slotted(svg) {
-    width: 14px;
-    height: 14px;
+    width: var(--ez-icon-sm);
+    height: var(--ez-icon-sm);
   }
 
   :host([size="icon-md"]) ::slotted(svg),
   :host([size="md"]) ::slotted(svg) {
-    width: 16px;
-    height: 16px;
+    width: var(--ez-icon-md);
+    height: var(--ez-icon-md);
   }
 `;
