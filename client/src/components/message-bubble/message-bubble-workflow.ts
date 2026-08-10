@@ -10,6 +10,7 @@ export class MessageBubbleWorkflow extends LitElement {
     text: "",
     actions: [],
     replaying: false,
+    saved: false,
   };
 
   static styles = styles;
@@ -25,22 +26,43 @@ export class MessageBubbleWorkflow extends LitElement {
     );
   }
 
+  private handleSave() {
+    if (this.content.saved || this.content.actions.length === 0) return;
+    this.dispatchEvent(
+      new CustomEvent("ez-save", {
+        detail: { actions: this.content.actions },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
   render() {
-    const { text, actions, replaying } = this.content;
+    const { text, actions, replaying, saved } = this.content;
 
     return html`
       <div>${renderMarkdown(text)}</div>
       ${
         actions && actions.length > 0
           ? html`
-            <ez-button
-              variant="primary"
-              size="sm"
-              ?disabled=${replaying}
-              @click=${this.handleReplay}
-            >
-              ${replaying ? "⏳ Replaying…" : "▶ Replay"}
-            </ez-button>
+            <div class="actions">
+              <ez-button
+                variant="primary"
+                size="sm"
+                ?disabled=${replaying}
+                @click=${this.handleReplay}
+              >
+                ${replaying ? "⏳ Replaying…" : "▶ Replay"}
+              </ez-button>
+              <ez-button
+                variant="outline"
+                size="sm"
+                ?disabled=${saved}
+                @click=${this.handleSave}
+              >
+                ${saved ? "✓ Saved" : "💾 Save"}
+              </ez-button>
+            </div>
           `
           : null
       }

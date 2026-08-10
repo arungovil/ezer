@@ -12,6 +12,7 @@ export interface WorkflowContent {
   text: string;
   actions: RecordedAction[];
   replaying: boolean;
+  saved: boolean;
 }
 
 export type Message =
@@ -53,6 +54,16 @@ export interface RecordedAction {
 export type CaptureHandler = (target: HTMLElement) => RecordedAction | null;
 
 export type WorkflowStatus = "idle" | "recording" | "compiling" | "replaying" | "paused";
+
+export interface Workflow {
+  id: string;
+  tabId: number;
+  url: string;
+  name: string;
+  description?: string;
+  actions: RecordedAction[];
+  createdAt: number;
+}
 
 export interface RuntimeMessage {
   type: string;

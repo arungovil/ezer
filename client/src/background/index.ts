@@ -79,7 +79,11 @@ async function handleStartRecording(payload: unknown, sendResponse: (response: u
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab?.id != null) activeTabId = tab.id;
 
-  await deliverToContent(payload, sendResponse);
+  const response = await deliverToContentAsync(payload);
+  if (isErrorResponse(response)) {
+    isRecording = false;
+  }
+  sendResponse(response);
 }
 
 async function handleStopRecording(payload: unknown, sendResponse: (response: unknown) => void) {
@@ -106,6 +110,21 @@ async function handleStopRecording(payload: unknown, sendResponse: (response: un
     .catch(() => {});
 
   sendResponse({ ok: true });
+}
+
+function deliverToContentAsync(payload: unknown): Promise<unknown> {
+  return new Promise((resolve) => {
+    void deliverToContent(payload, resolve);
+  });
+}
+
+function isErrorResponse(response: unknown): response is { error: string } {
+  return (
+    typeof response === "object" &&
+    response !== null &&
+    "error" in response &&
+    typeof (response as { error: unknown }).error === "string"
+  );
 }
 
 async function deliverToContent(payload: unknown, sendResponse: (response: unknown) => void) {

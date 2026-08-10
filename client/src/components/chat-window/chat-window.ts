@@ -1,9 +1,11 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
 import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
+import { saveWorkflow } from "@src/db/store.js";
 import type {
   Message,
   RecordedAction,
   RuntimeMessage,
+  Workflow,
   WorkflowContent,
   WorkflowStatus,
 } from "@src/types.js";
@@ -26,6 +28,7 @@ export class ChatWindow extends LitElement {
   @query(".messages") private messagesContainer?: HTMLDivElement;
 
   private replayingMessageId: string | null = null;
+  private pendingEmptyMsgId: string | null = null;
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
     if (message?.type === "TAB_SWITCHED") {
@@ -72,13 +75,6 @@ export class ChatWindow extends LitElement {
   private handleStartRecording() {
     this.workflowStatus = "recording";
 
-    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
-      void chrome.runtime.sendMessage({
-        target: "content",
-        payload: { type: "START_RECORDING" },
-      });
-    }
-
     const msg: Message = {
       id: crypto.randomUUID(),
       role: "ezer",
@@ -86,9 +82,64 @@ export class ChatWindow extends LitElement {
       content: recordingStartedMessage,
     };
     this.messages = [...this.messages, msg];
+
+    if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) return;
+
+    chrome.runtime
+      .sendMessage({
+        target: "content",
+        payload: { type: "START_RECORDING" },
+      })
+      .then((response: { error?: string }) => {
+        if (response?.error) {
+          this.workflowStatus = "idle";
+          this.messages = this.messages.map((m) =>
+            m.id === msg.id
+              ? ({
+                  ...m,
+                  content:
+                    "⚠️ **Could not start recording.** This page doesn't support automation (e.g., Chrome internal pages).",
+                } as Message)
+              : m,
+          );
+        }
+      })
+      .catch(() => {
+        this.workflowStatus = "idle";
+        this.messages = this.messages.map((m) =>
+          m.id === msg.id
+            ? ({
+                ...m,
+                content:
+                  "⚠️ **Recording interrupted.** An unexpected error occurred. Please try again.",
+              } as Message)
+            : m,
+        );
+      });
+  }
+
+  private clearPendingEmptyPlaceholder() {
+    if (!this.pendingEmptyMsgId) return;
+    this.messages = this.messages.filter((m) => m.id !== this.pendingEmptyMsgId);
+    this.pendingEmptyMsgId = null;
   }
 
   private handleStopRecording() {
+    // Always show a stopping acknowledgment immediately, before the async
+    // round-trip. If zero actions arrive we keep this placeholder; if actions
+    // arrive we remove it and append the workflow card.
+    const stoppingMsgId = crypto.randomUUID();
+    const stoppingMsg: Message = {
+      id: stoppingMsgId,
+      role: "ezer",
+      type: MESSAGE_TYPE.RECORDING,
+      content: "⏹️ **Recording stopped.** No actions were captured.",
+    };
+
+    // Keep a reference so handleRecordingComplete can find and remove this
+    // placeholder if real actions arrive.
+    this.pendingEmptyMsgId = stoppingMsgId;
+    this.messages = [...this.messages, stoppingMsg];
     this.workflowStatus = "idle";
 
     if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
@@ -102,11 +153,13 @@ export class ChatWindow extends LitElement {
   private handleNewChat() {
     this.messages = [];
     this.workflowStatus = "idle";
+    this.pendingEmptyMsgId = null;
   }
 
   private handleTabSwitched() {
     this.workflowStatus = "idle";
     this.replayingMessageId = null;
+    this.clearPendingEmptyPlaceholder();
 
     // Only notify if there's an active conversation; otherwise stay on splash
     if (this.messages.length === 0) return;
@@ -125,15 +178,31 @@ export class ChatWindow extends LitElement {
   }
 
   private handleRecordingComplete(actions: RecordedAction[]) {
-    if (actions.length === 0) {
-      const msg: Message = {
-        id: crypto.randomUUID(),
-        role: "ezer",
-        type: MESSAGE_TYPE.RECORDING,
-        content: "⏹️ **Recording stopped.** No actions were captured.",
-      };
-      this.messages = [...this.messages, msg];
-      return;
+    // If we already showed the empty placeholder (added eagerly in
+    // handleStopRecording), remove it only when real actions arrived.
+    if (this.pendingEmptyMsgId) {
+      if (actions.length === 0) {
+        // The placeholder is correct — nothing to change.
+        this.pendingEmptyMsgId = null;
+        return;
+      }
+      // Real actions came in: remove the placeholder before appending
+      // the workflow card.
+      this.messages = this.messages.filter((m) => m.id !== this.pendingEmptyMsgId);
+      this.pendingEmptyMsgId = null;
+    } else {
+      // No placeholder was shown (edge case: recording stopped via tab
+      // switch or other external trigger). Show the empty state now.
+      if (actions.length === 0) {
+        const msg: Message = {
+          id: crypto.randomUUID(),
+          role: "ezer",
+          type: MESSAGE_TYPE.RECORDING,
+          content: "⏹️ **Recording stopped.** No actions were captured.",
+        };
+        this.messages = [...this.messages, msg];
+        return;
+      }
     }
 
     const lines = actions.map((action, i) => {
@@ -149,9 +218,79 @@ export class ChatWindow extends LitElement {
       id: crypto.randomUUID(),
       role: "ezer",
       type: MESSAGE_TYPE.WORKFLOW,
-      content: { text: textContent, actions, replaying: false } satisfies WorkflowContent,
+      content: {
+        text: textContent,
+        actions,
+        replaying: false,
+        saved: false,
+      } satisfies WorkflowContent,
     };
     this.messages = [...this.messages, msg];
+  }
+
+  private async handleSave(e: CustomEvent<{ actions: RecordedAction[] }>) {
+    const { actions } = e.detail;
+
+    const message = this.messages.find(
+      (m): m is Extract<Message, { type: typeof MESSAGE_TYPE.WORKFLOW }> =>
+        m.type === MESSAGE_TYPE.WORKFLOW && m.content.actions === actions,
+    );
+    if (!message || message.content.saved) return;
+
+    // Lock immediately so rapid clicks can't enqueue duplicate saves.
+    this.messages = this.messages.map((m) => {
+      if (m.id !== message.id || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+      return { ...m, content: { ...m.content, saved: true } };
+    });
+
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) {
+        this.messages = this.messages.map((m) => {
+          if (m.id !== message.id || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+          return { ...m, content: { ...m.content, saved: false } };
+        });
+        const errorMsg: Message = {
+          id: crypto.randomUUID(),
+          role: "ezer",
+          type: MESSAGE_TYPE.RECORDING,
+          content: "⚠️ **Could not save workflow.** No active tab found.",
+        };
+        this.messages = [...this.messages, errorMsg];
+        return;
+      }
+
+      const workflow: Workflow = {
+        id: crypto.randomUUID(),
+        tabId: tab.id,
+        url: tab.url ?? "",
+        name: `Workflow — ${new Date().toLocaleString()}`,
+        actions,
+        createdAt: Date.now(),
+      };
+
+      await saveWorkflow(workflow);
+
+      const confirmMsg: Message = {
+        id: crypto.randomUUID(),
+        role: "ezer",
+        type: MESSAGE_TYPE.RECORDING,
+        content: "✅ **Workflow saved!**",
+      };
+      this.messages = [...this.messages, confirmMsg];
+    } catch (err) {
+      this.messages = this.messages.map((m) => {
+        if (m.id !== message.id || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
+        return { ...m, content: { ...m.content, saved: false } };
+      });
+      const errorMsg: Message = {
+        id: crypto.randomUUID(),
+        role: "ezer",
+        type: MESSAGE_TYPE.RECORDING,
+        content: `⚠️ **Failed to save workflow.** ${err instanceof Error ? err.message : "Unknown error"}`,
+      };
+      this.messages = [...this.messages, errorMsg];
+    }
   }
 
   private handleReplay(e: CustomEvent<{ actions: RecordedAction[] }>) {
@@ -261,6 +400,7 @@ export class ChatWindow extends LitElement {
           ? html`<div
               class="messages"
               @ez-replay=${this.handleReplay}
+              @ez-save=${this.handleSave}
               @ez-start-recording=${this.handleStartRecording}
             >
               ${virtualize({
