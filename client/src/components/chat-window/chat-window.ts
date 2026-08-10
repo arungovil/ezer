@@ -457,7 +457,7 @@ export class ChatWindow extends LitElement {
   // TODO: wire to actual backend
   private async callApi(_text: string): Promise<string> {
     await new Promise((r) => setTimeout(r, 800));
-    return "Got it. I'll help with that — API wiring coming soon.";
+    return "Hang tight. We are working on getting the live interaction ready!";
   }
 
   render() {

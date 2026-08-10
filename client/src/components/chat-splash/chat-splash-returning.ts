@@ -26,8 +26,8 @@ export class ChatSplashReturning extends LitElement {
   render() {
     return html`
       <div class="hero">
-        <h2>Welcome back</h2>
-        <p>Run a saved workflow or record a new one for this tab</p>
+        <h2>Welcome back!👋</h2>
+        <p>Run a saved workflow or record a new one!</p>
       </div>
 
       <ul class="workflow-list">

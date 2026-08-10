@@ -21,7 +21,7 @@ export class ChatSplash extends LitElement {
   render() {
     return html`
       <div class="hero">
-        <h2>Say hello to Ezer! 👋</h2>
+        <h2>Say hello to ezer! 👋</h2>
         <p>Start recording a workflow or select a prompt to get started</p>
       </div>
 

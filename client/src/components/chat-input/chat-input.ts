@@ -57,8 +57,8 @@ export class ChatInput extends LitElement {
   render() {
     return html`
       <textarea
-        aria-label="Ask anything to Ezer"
-        placeholder="Ask anything to Ezer..."
+        aria-label="What are my available workflows?"
+        placeholder="What are my available workflows?"
         @focus=${this.handleFocus}
         @input=${this.handleInput}
         @keydown=${this.handleKeydown}
