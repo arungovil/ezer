@@ -1,6 +1,6 @@
 import { html } from "lit";
 
-export const messageCirclePlusIcon = html`
+export const workflowIcon = html`
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -12,8 +12,8 @@ export const messageCirclePlusIcon = html`
     stroke-linecap="round"
     stroke-linejoin="round"
   >
-    <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" />
-    <path d="M8 12h8" />
-    <path d="M12 8v8" />
+    <rect width="8" height="8" x="3" y="3" rx="2" />
+    <path d="M7 11v4a2 2 0 0 0 2 2h4" />
+    <rect width="8" height="8" x="13" y="13" rx="2" />
   </svg>
 `;

@@ -1,4 +1,4 @@
-import type { MessageType, WorkflowContent } from "@src/types.js";
+import type { MessageType, WorkflowContent, WorkflowListContent } from "@src/types.js";
 import { MESSAGE_TYPE } from "@src/types.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
@@ -7,6 +7,7 @@ import "./message-bubble-text.js";
 import "./message-bubble-quick-action.js";
 import "./message-bubble-recording.js";
 import "./message-bubble-workflow.js";
+import "./message-bubble-workflow-list.js";
 import "./message-bubble-tab-switched.js";
 import "@src/components/chat-loader/chat-loader.js";
 
@@ -37,6 +38,10 @@ export class MessageBubble extends LitElement {
         return html`<message-bubble-workflow
           .content=${this.content as WorkflowContent}
         ></message-bubble-workflow>`;
+      case MESSAGE_TYPE.WORKFLOW_LIST:
+        return html`<message-bubble-workflow-list
+          .content=${this.content as WorkflowListContent}
+        ></message-bubble-workflow-list>`;
       case MESSAGE_TYPE.TAB_SWITCHED:
         return html`<message-bubble-tab-switched
           .content=${this.content as string}

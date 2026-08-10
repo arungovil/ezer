@@ -1,11 +1,16 @@
 import { css } from "lit";
 import { workflowLabelStyles } from "../common/workflow-label.styles.js";
-import { sharedStyles } from "./chat-splash.shared.styles.js";
 
 export const styles = [
-  sharedStyles,
   workflowLabelStyles,
   css`
+    :host {
+      display: block;
+      width: 280px;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
     .workflow-list {
       list-style: none;
       margin: 0;
@@ -19,43 +24,44 @@ export const styles = [
     .workflow-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: var(--ez-space-md);
+      gap: var(--ez-space-sm);
       width: 100%;
-      padding: var(--ez-space-md);
+      box-sizing: border-box;
+      padding: var(--ez-space-sm) var(--ez-space-md);
       border: 1px solid var(--ez-color-border);
       border-radius: var(--ez-radius-md);
       background: var(--ez-color-bg);
-      font-family: inherit;
-      text-align: left;
-      cursor: pointer;
-      transition:
-        border-color 0.15s ease,
-        background 0.15s ease,
-        box-shadow 0.15s ease;
+      overflow: hidden;
     }
 
-    .workflow-item:hover {
-      border-color: #93c5fd;
-      background: #eff6ff;
-      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08);
-    }
-
-    .workflow-name {
+    .workflow-info {
       flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
-    .workflow-meta {
+    .workflow-actions {
+      display: flex;
+      gap: var(--ez-space-xs);
       flex-shrink: 0;
     }
 
-    .pills-container {
+    .footer {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       gap: var(--ez-space-sm);
+      margin-top: var(--ez-space-md);
       width: 100%;
+    }
+
+    .pagination {
+      display: flex;
+      gap: var(--ez-space-xs);
+      flex-shrink: 0;
     }
   `,
 ];

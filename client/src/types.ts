@@ -5,6 +5,7 @@ export const MESSAGE_TYPE = {
   QUICK_ACTION: "QUICK_ACTION",
   RECORDING: "RECORDING",
   WORKFLOW: "WORKFLOW",
+  WORKFLOW_LIST: "WORKFLOW_LIST",
   TAB_SWITCHED: "TAB_SWITCHED",
 } as const;
 
@@ -16,6 +17,10 @@ export interface WorkflowContent {
   replaying: boolean;
   saved: boolean;
   awaitingName?: boolean;
+}
+
+export interface WorkflowListContent {
+  workflows: Workflow[];
 }
 
 export type Message =
@@ -35,6 +40,13 @@ export type Message =
       role: "user" | "ezer";
       type: typeof MESSAGE_TYPE.WORKFLOW;
       content: WorkflowContent;
+      loading?: boolean;
+    }
+  | {
+      id: string;
+      role: "user" | "ezer";
+      type: typeof MESSAGE_TYPE.WORKFLOW_LIST;
+      content: WorkflowListContent;
       loading?: boolean;
     };
 

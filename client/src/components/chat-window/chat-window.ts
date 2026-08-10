@@ -1,6 +1,12 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { defaultInfoReply, infoReplies, recordingStartedMessage } from "@src/constants.js";
-import { getWorkflowsByTabId, saveWorkflow } from "@src/db/store.js";
+import {
+  defaultInfoReply,
+  infoReplies,
+  recordingStartedMessage,
+  workflowListIntro,
+  workflowListUserPrompt,
+} from "@src/constants.js";
+import { deleteWorkflow, getWorkflowsByTabId, saveWorkflow } from "@src/db/store.js";
 import { formatReplayFailure } from "@src/replay/index.js";
 import type {
   Message,
@@ -8,6 +14,7 @@ import type {
   RuntimeMessage,
   Workflow,
   WorkflowContent,
+  WorkflowListContent,
   WorkflowStatus,
 } from "@src/types.js";
 import { MESSAGE_TYPE } from "@src/types.js";
@@ -158,11 +165,17 @@ export class ChatWindow extends LitElement {
     }
   }
 
-  private handleNewChat() {
+  private resetChat() {
     this.messages = [];
     this.workflowStatus = "idle";
     this.pendingEmptyMsgId = null;
     this.pendingWorkflowSave = null;
+    this.replayingMessageId = null;
+    this.pendingReplayError = null;
+  }
+
+  private handleNewChat() {
+    this.resetChat();
     void this.refreshSavedWorkflows();
   }
 
@@ -398,6 +411,14 @@ export class ChatWindow extends LitElement {
       };
       this.messages = [...this.messages, errorMsg];
       this.pendingReplayError = null;
+    } else {
+      const successMsg: Message = {
+        id: crypto.randomUUID(),
+        role: "ezer",
+        type: MESSAGE_TYPE.RECORDING,
+        content: "✅ **Workflow run completed successfully.**",
+      };
+      this.messages = [...this.messages, successMsg];
     }
 
     this.replayingMessageId = null;
@@ -425,7 +446,43 @@ export class ChatWindow extends LitElement {
   }
 
   private handleSelectWorkflow(e: CustomEvent<{ workflow: Workflow }>) {
-    const { workflow } = e.detail;
+    this.startWorkflowReplay(e.detail.workflow);
+  }
+
+  private async appendWorkflowListMessage() {
+    await this.refreshSavedWorkflows();
+
+    const userMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      type: MESSAGE_TYPE.TEXT,
+      content: workflowListUserPrompt,
+    };
+
+    const introMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "ezer",
+      type: MESSAGE_TYPE.RECORDING,
+      content: workflowListIntro(this.savedWorkflows.length),
+    };
+
+    const newMessages: Message[] = [userMsg, introMsg];
+
+    if (this.savedWorkflows.length > 0) {
+      newMessages.push({
+        id: crypto.randomUUID(),
+        role: "ezer",
+        type: MESSAGE_TYPE.WORKFLOW_LIST,
+        content: {
+          workflows: this.savedWorkflows,
+        } satisfies WorkflowListContent,
+      });
+    }
+
+    this.messages = [...this.messages, ...newMessages];
+  }
+
+  private startWorkflowReplay(workflow: Workflow) {
     if (workflow.actions.length === 0) return;
 
     const textContent = `▶ **${workflow.name}** — ${workflow.actions.length} action${workflow.actions.length === 1 ? "" : "s"}`;
@@ -443,6 +500,48 @@ export class ChatWindow extends LitElement {
     };
     this.messages = [...this.messages, msg];
     this.beginReplay(msg.id, workflow.actions);
+  }
+
+  private handlePlayWorkflow(e: CustomEvent<{ workflow: Workflow }>) {
+    const { workflow } = e.detail;
+    if (workflow.actions.length === 0) return;
+
+    this.resetChat();
+    this.startWorkflowReplay(workflow);
+  }
+
+  private async handleDeleteWorkflow(e: CustomEvent<{ workflow: Workflow }>) {
+    const { workflow } = e.detail;
+
+    try {
+      await deleteWorkflow(workflow.id);
+
+      this.messages = this.messages
+        .map((m) => {
+          if (m.type !== MESSAGE_TYPE.WORKFLOW_LIST) return m;
+          const workflows = m.content.workflows.filter((w) => w.id !== workflow.id);
+          if (workflows.length === 0) return null;
+          return { ...m, content: { ...m.content, workflows } };
+        })
+        .filter((m): m is Message => m !== null);
+
+      const confirmMsg: Message = {
+        id: crypto.randomUUID(),
+        role: "ezer",
+        type: MESSAGE_TYPE.RECORDING,
+        content: `✅ **"${workflow.name}" deleted.**`,
+      };
+      this.messages = [...this.messages, confirmMsg];
+      void this.refreshSavedWorkflows();
+    } catch (err) {
+      const errorMsg: Message = {
+        id: crypto.randomUUID(),
+        role: "ezer",
+        type: MESSAGE_TYPE.RECORDING,
+        content: `⚠️ **Failed to delete workflow.** ${err instanceof Error ? err.message : "Unknown error"}`,
+      };
+      this.messages = [...this.messages, errorMsg];
+    }
   }
 
   private handleSelectInfo(e: CustomEvent<{ id: string; prompt: string }>) {
@@ -524,6 +623,8 @@ export class ChatWindow extends LitElement {
               @ez-replay=${this.handleReplay}
               @ez-save=${this.handleSave}
               @ez-start-recording=${this.handleStartRecording}
+              @ez-play-workflow=${this.handlePlayWorkflow}
+              @ez-delete-workflow=${this.handleDeleteWorkflow}
             >
               ${virtualize({
                 scroller: true,
@@ -546,6 +647,7 @@ export class ChatWindow extends LitElement {
                 .workflows=${this.savedWorkflows}
                 @ez-start-recording=${this.handleStartRecording}
                 @ez-select-workflow=${this.handleSelectWorkflow}
+                @ez-show-all-workflows=${() => void this.appendWorkflowListMessage()}
               ></chat-splash-returning>`
             : html`<chat-splash
                 @ez-start-recording=${this.handleStartRecording}

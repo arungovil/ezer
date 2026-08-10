@@ -40,3 +40,15 @@ Common use cases:
 export const defaultInfoReply = `How can I help you automate your browser today?`;
 
 export const recordingStartedMessage = `🔴 **Recording started!** Perform your actions on the active browser tab. I'll capture your interactions and summarize them into a workflow when you stop.`;
+
+export const workflowListUserPrompt = "What workflows have I saved?";
+
+export function workflowListIntro(count: number): string {
+  if (count === 0) {
+    return "You don't have any saved workflows on this tab yet. Record one and it'll show up here.";
+  }
+  if (count === 1) {
+    return "You've got **1 saved workflow** on this tab:";
+  }
+  return `Here are your **${count} saved workflows** on this tab:`;
+}

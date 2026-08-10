@@ -16,16 +16,16 @@ export const styles = css`
     transition: all 0.15s ease;
     white-space: nowrap;
     user-select: none;
-    background: #eff6ff;
-    border: 1px solid #93c5fd;
-    color: #1d4ed8;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #b91c1c;
   }
 
   :host(:hover:not(:disabled)) {
-    background: #dbeafe;
-    border-color: #3b82f6;
+    background: #fee2e2;
+    border-color: #f87171;
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.15);
   }
 
   :host(:disabled) {
@@ -36,7 +36,7 @@ export const styles = css`
   .icon {
     display: flex;
     align-items: center;
-    color: var(--ez-color-primary);
+    color: #dc2626;
   }
 
   .icon svg {
