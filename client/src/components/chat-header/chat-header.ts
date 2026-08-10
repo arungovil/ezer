@@ -1,7 +1,6 @@
 import "@src/components/common/ez-button/index.js";
 import "@src/components/common/ez-badge/index.js";
 import { messageCirclePlusIcon } from "@src/icons/message-circle-plus.js";
-import { textAlignStartIcon } from "@src/icons/text-align-start.js";
 import { zapIcon } from "@src/icons/zap.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
@@ -46,7 +45,7 @@ export class ChatHeader extends LitElement {
             : this.workflowStatus === "replaying"
               ? html`<ez-badge variant="info">Replaying</ez-badge>`
               : html`<ez-button variant="ghost" size="icon-md" @click=${this.handleNewChat}>${messageCirclePlusIcon}</ez-button>
-                  <ez-button variant="ghost" size="icon-md" @click=${() => {}}>${textAlignStartIcon}</ez-button>`
+                  `
         }
       </div>
     `;
