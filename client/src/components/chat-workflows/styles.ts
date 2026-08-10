@@ -1,6 +1,6 @@
+import { sharedStyles } from "@src/components/chat-empty/shared.styles.js";
+import { workflowLabelStyles } from "@src/components/common/workflow-label.styles.js";
 import { css } from "lit";
-import { workflowLabelStyles } from "../common/workflow-label.styles.js";
-import { sharedStyles } from "./chat-splash.shared.styles.js";
 
 export const styles = [
   sharedStyles,

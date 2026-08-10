@@ -2,7 +2,7 @@ import "@src/components/common/ez-button/index.js";
 import { sendIcon } from "@src/icons/send.js";
 import { html, LitElement } from "lit";
 import { property, query } from "lit/decorators.js";
-import { styles } from "./chat-input.styles.js";
+import { styles } from "./styles.js";
 
 export class ChatInput extends LitElement {
   @property({ type: String }) placeholder = "What are my available workflows?";

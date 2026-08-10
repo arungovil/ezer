@@ -9,7 +9,7 @@ import "./message-bubble-recording.js";
 import "./message-bubble-workflow.js";
 import "./message-bubble-workflow-list.js";
 import "./message-bubble-tab-switched.js";
-import "@src/components/chat-loader/chat-loader.js";
+import "@src/components/chat-loader/index.js";
 
 export class MessageBubble extends LitElement {
   @property({ type: String, reflect: true }) sender: "user" | "ezer" = "ezer";

@@ -30,10 +30,10 @@ import {
   handleSelectWorkflow,
   refreshSavedWorkflows,
 } from "./workflow-handlers.js";
-import "@src/components/chat-splash/chat-splash.js";
-import "@src/components/chat-splash/chat-splash-returning.js";
-import "@src/components/chat-header/chat-header.js";
-import "@src/components/chat-input/chat-input.js";
+import "@src/components/chat-empty/index.js";
+import "@src/components/chat-workflows/index.js";
+import "@src/components/chat-header/index.js";
+import "@src/components/chat-input/index.js";
 import "@src/components/message-bubble/index.js";
 
 export class ChatWindow extends LitElement implements ChatWindowHost {
@@ -225,16 +225,16 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
               })}
             </div>`
           : this.savedWorkflows.length > 0
-            ? html`<chat-splash-returning
+            ? html`<chat-workflows
                 .workflows=${this.savedWorkflows}
                 @ez-start-recording=${() => handleStartRecording(this)}
                 @ez-select-workflow=${(e: CustomEvent) => handleSelectWorkflow(this, e)}
                 @ez-show-all-workflows=${() => void appendWorkflowListMessage(this)}
-              ></chat-splash-returning>`
-            : html`<chat-splash
+              ></chat-workflows>`
+            : html`<chat-empty
                 @ez-start-recording=${() => handleStartRecording(this)}
                 @ez-select-info=${this.handleSelectInfo}
-              ></chat-splash>`
+              ></chat-empty>`
       }
       <chat-input
         .placeholder=${

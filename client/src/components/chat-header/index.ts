@@ -4,7 +4,7 @@ import { houseIcon } from "@src/icons/house.js";
 import { zapIcon } from "@src/icons/zap.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import { styles } from "./chat-header.styles.js";
+import { styles } from "./styles.js";
 
 export class ChatHeader extends LitElement {
   @property({ type: String }) workflowStatus = "idle";

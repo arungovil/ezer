@@ -5,11 +5,11 @@ import type { Workflow } from "@src/types.js";
 import { formatActionCount } from "@src/utils/format.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import { styles } from "./chat-splash-returning.styles.js";
+import { styles } from "./styles.js";
 
 const RECENT_LIMIT = 3;
 
-export class ChatSplashReturning extends LitElement {
+export class ChatWorkflows extends LitElement {
   @property({ type: Array }) workflows: Workflow[] = [];
 
   static styles = styles;
@@ -91,4 +91,4 @@ export class ChatSplashReturning extends LitElement {
   }
 }
 
-customElements.define("chat-splash-returning", ChatSplashReturning);
+customElements.define("chat-workflows", ChatWorkflows);

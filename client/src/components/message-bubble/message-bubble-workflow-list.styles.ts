@@ -1,5 +1,5 @@
+import { workflowLabelStyles } from "@src/components/common/workflow-label.styles.js";
 import { css } from "lit";
-import { workflowLabelStyles } from "../common/workflow-label.styles.js";
 
 export const styles = [
   workflowLabelStyles,

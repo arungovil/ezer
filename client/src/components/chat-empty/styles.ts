@@ -1,5 +1,5 @@
 import { css } from "lit";
-import { sharedStyles } from "./chat-splash.shared.styles.js";
+import { sharedStyles } from "./shared.styles.js";
 
 export const styles = [
   sharedStyles,

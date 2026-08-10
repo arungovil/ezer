@@ -3,9 +3,9 @@ import "@src/components/record-button/index.js";
 import { infoPills } from "@src/constants.js";
 import type { InfoPill } from "@src/types.js";
 import { html, LitElement } from "lit";
-import { styles } from "./chat-splash.styles.js";
+import { styles } from "./styles.js";
 
-export class ChatSplash extends LitElement {
+export class ChatEmpty extends LitElement {
   static styles = styles;
 
   private handleInfoPillClick(pill: InfoPill) {
@@ -43,4 +43,4 @@ export class ChatSplash extends LitElement {
   }
 }
 
-customElements.define("chat-splash", ChatSplash);
+customElements.define("chat-empty", ChatEmpty);
