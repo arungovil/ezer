@@ -1,6 +1,6 @@
 # Ezer
 
-Browser automation, done right: record real interactions, compile them into a validated workflow AST with an LLM, and replay them via synthetic DOM events.
+Record real interactions, compile them into a validated workflow AST with an LLM, and replay them via synthetic DOM events.
 
 ## Getting started
 
