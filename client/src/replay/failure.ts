@@ -1,3 +1,4 @@
+import { ACTION_TYPE } from "@src/message-constants.js";
 import type { RecordedAction } from "@src/types.js";
 
 export type ReplayFailureReason = "selector_not_found" | "execution_error";
@@ -30,11 +31,11 @@ export function formatReplayFailure(failure: ReplayFailure): string {
 
 function describeAction(action: RecordedAction): string {
   switch (action.type) {
-    case "CLICK":
+    case ACTION_TYPE.CLICK:
       return action.innerText ? `click "${truncate(action.innerText)}"` : "click";
-    case "INPUT":
+    case ACTION_TYPE.INPUT:
       return "input";
-    case "SUBMIT":
+    case ACTION_TYPE.SUBMIT:
       return "submit";
   }
 }

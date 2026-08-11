@@ -1,5 +1,4 @@
-// Ezer background service worker
-
+import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import type { RecordedAction } from "@src/types.js";
 import { injectAndRetry } from "./fallbacks.js";
 
@@ -28,12 +27,12 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
   }
 
   // Notify sidepanel so it can reset and show the tab-switched message
-  chrome.runtime.sendMessage({ type: "TAB_SWITCHED", tabId }).catch(() => {});
+  chrome.runtime.sendMessage({ type: RUNTIME_MESSAGE_TYPE.TAB_SWITCHED, tabId }).catch(() => {});
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   // Direct messages from content script
-  if (message?.type === "ACTION_CAPTURED") {
+  if (message?.type === RUNTIME_MESSAGE_TYPE.ACTION_CAPTURED) {
     if (isRecording && message.action) {
       actionBuffer.push(message.action);
     }
@@ -41,12 +40,15 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return false;
   }
 
-  if (message?.type === "GET_RECORDING_STATE") {
+  if (message?.type === RUNTIME_MESSAGE_TYPE.GET_RECORDING_STATE) {
     sendResponse({ isRecording });
     return false;
   }
 
-  if (message?.type === "REPLAY_COMPLETE" || message?.type === "REPLAY_FAILED") {
+  if (
+    message?.type === RUNTIME_MESSAGE_TYPE.REPLAY_COMPLETE ||
+    message?.type === RUNTIME_MESSAGE_TYPE.REPLAY_FAILED
+  ) {
     // Broadcast from content back to sidepanel
     chrome.runtime.sendMessage(message).catch(() => {});
     sendResponse({ ok: true });
@@ -56,12 +58,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   // Messages from sidepanel, routed to content script
   if (message?.target !== "content") return;
 
-  if (message.payload?.type === "START_RECORDING") {
+  if (message.payload?.type === RUNTIME_MESSAGE_TYPE.START_RECORDING) {
     handleStartRecording(message.payload, sendResponse);
     return true;
   }
 
-  if (message.payload?.type === "STOP_RECORDING") {
+  if (message.payload?.type === RUNTIME_MESSAGE_TYPE.STOP_RECORDING) {
     handleStopRecording(message.payload, sendResponse);
     return true;
   }
@@ -104,7 +106,7 @@ async function handleStopRecording(payload: unknown, sendResponse: (response: un
   // Broadcast to sidepanel
   chrome.runtime
     .sendMessage({
-      type: "RECORDING_COMPLETE",
+      type: RUNTIME_MESSAGE_TYPE.RECORDING_COMPLETE,
       actions: captured,
     })
     .catch(() => {});

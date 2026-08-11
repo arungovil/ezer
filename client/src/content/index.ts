@@ -1,5 +1,6 @@
 // Ezer content script engine
 
+import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import { runReplay } from "@src/replay/index.js";
 import { eventHandlers } from "./handlers.js";
 
@@ -7,7 +8,9 @@ let isRecording = false;
 
 void (async function init() {
   try {
-    const state = await chrome.runtime.sendMessage({ type: "GET_RECORDING_STATE" });
+    const state = await chrome.runtime.sendMessage({
+      type: RUNTIME_MESSAGE_TYPE.GET_RECORDING_STATE,
+    });
     if (state?.isRecording) {
       isRecording = true;
     }
@@ -33,26 +36,28 @@ function handleCaptureEvent(e: Event) {
   if (!action) return;
 
   // Send captured event to background worker
-  chrome.runtime.sendMessage({ type: "ACTION_CAPTURED", action }).catch(() => {});
+  chrome.runtime
+    .sendMessage({ type: RUNTIME_MESSAGE_TYPE.ACTION_CAPTURED, action })
+    .catch(() => {});
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   switch (message?.type) {
-    case "START_RECORDING":
+    case RUNTIME_MESSAGE_TYPE.START_RECORDING:
       isRecording = true;
       sendResponse({ ok: true });
       break;
-    case "STOP_RECORDING":
+    case RUNTIME_MESSAGE_TYPE.STOP_RECORDING:
       isRecording = false;
       sendResponse({ ok: true });
       break;
-    case "REPLAY_ACTIONS":
+    case RUNTIME_MESSAGE_TYPE.REPLAY_ACTIONS:
       if (message.actions && Array.isArray(message.actions)) {
         void runReplay(message.actions);
       }
       sendResponse({ ok: true });
       break;
-    case "PING":
+    case RUNTIME_MESSAGE_TYPE.PING:
       sendResponse({ ok: true });
       break;
   }

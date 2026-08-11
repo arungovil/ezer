@@ -1,5 +1,6 @@
 // Replay engine — resolve selectors, retry, pace execution, report results.
 
+import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import type { RecordedAction } from "@src/types.js";
 import { executeAction } from "./action-executor.js";
 import { formatReplayFailure, type ReplayFailure } from "./failure.js";
@@ -59,14 +60,14 @@ export async function runReplay(actions: RecordedAction[]): Promise<void> {
   } finally {
     hideViewportBorder();
     isReplaying = false;
-    chrome.runtime.sendMessage({ type: "REPLAY_COMPLETE" }).catch(() => {});
+    chrome.runtime.sendMessage({ type: RUNTIME_MESSAGE_TYPE.REPLAY_COMPLETE }).catch(() => {});
   }
 }
 
 function reportFailure(failure: ReplayFailure): void {
   chrome.runtime
     .sendMessage({
-      type: "REPLAY_FAILED",
+      type: RUNTIME_MESSAGE_TYPE.REPLAY_FAILED,
       error: formatReplayFailure(failure),
       failure,
     })

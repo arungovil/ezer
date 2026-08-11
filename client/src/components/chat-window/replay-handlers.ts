@@ -1,3 +1,4 @@
+import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import type { ChatWindowHost, RecordedAction } from "@src/types.js";
 import { MESSAGE_TYPE } from "@src/types.js";
 import { ezerStatusMessage } from "./messages-handler.js";
@@ -19,7 +20,7 @@ export function beginReplay(
   if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
     void chrome.runtime.sendMessage({
       target: "content",
-      payload: { type: "REPLAY_ACTIONS", actions },
+      payload: { type: RUNTIME_MESSAGE_TYPE.REPLAY_ACTIONS, actions },
     });
   }
 }

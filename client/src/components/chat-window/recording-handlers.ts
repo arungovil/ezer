@@ -1,3 +1,4 @@
+import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import type { ChatWindowHost, Message, RecordedAction } from "@src/types.js";
 import {
   recordingStartedMessage,
@@ -26,7 +27,7 @@ export function handleStartRecording(host: ChatWindowHost): void {
   chrome.runtime
     .sendMessage({
       target: "content",
-      payload: { type: "START_RECORDING" },
+      payload: { type: RUNTIME_MESSAGE_TYPE.START_RECORDING },
     })
     .then((response: { error?: string }) => {
       if (response?.error) {
@@ -65,7 +66,7 @@ export function handleStopRecording(host: ChatWindowHost): void {
   if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
     void chrome.runtime.sendMessage({
       target: "content",
-      payload: { type: "STOP_RECORDING" },
+      payload: { type: RUNTIME_MESSAGE_TYPE.STOP_RECORDING },
     });
   }
 }

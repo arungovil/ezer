@@ -1,5 +1,6 @@
 // Recording handlers — map DOM events to RecordedActions
 
+import { ACTION_TYPE } from "@src/message-constants.js";
 import type { CaptureHandler, RecordedAction } from "@src/types.js";
 import { extractInnerText, findInteractiveAncestor, getLabelText } from "./dom-utils.js";
 import { buildSelectorChain } from "./selector-chain.js";
@@ -11,7 +12,7 @@ function captureClick(target: HTMLElement): RecordedAction {
   const innerText = extractInnerText(interactiveTarget);
 
   return {
-    type: "CLICK",
+    type: ACTION_TYPE.CLICK,
     selectors,
     tagName: interactiveTarget.tagName.toLowerCase(),
     ...(innerText ? { innerText } : {}),
@@ -51,7 +52,7 @@ function captureChange(target: HTMLElement): RecordedAction | null {
   }
 
   return {
-    type: "INPUT",
+    type: ACTION_TYPE.INPUT,
     selectors,
     tagName,
     value,
@@ -68,7 +69,7 @@ function captureSubmit(target: HTMLElement): RecordedAction | null {
   const innerText = extractInnerText(form);
 
   return {
-    type: "SUBMIT",
+    type: ACTION_TYPE.SUBMIT,
     selectors,
     tagName: "form",
     ...(innerText ? { innerText } : {}),

@@ -1,5 +1,6 @@
 // DOM action execution — synthetic events that work with React/Vue controlled inputs.
 
+import { ACTION_TYPE } from "@src/message-constants.js";
 import type { RecordedAction } from "@src/types.js";
 
 export async function executeAction(action: RecordedAction, element: HTMLElement): Promise<void> {
@@ -10,8 +11,8 @@ export async function executeAction(action: RecordedAction, element: HTMLElement
   element.scrollIntoView?.({ block: "center", behavior: "instant" });
 
   switch (action.type) {
-    case "CLICK":
-    case "SUBMIT": {
+    case ACTION_TYPE.CLICK:
+    case ACTION_TYPE.SUBMIT: {
       const clickTarget = resolveClickTarget(element);
       if (!clickTarget) {
         throw new Error(`No clickable target found for ${action.tagName}.`);
@@ -19,7 +20,7 @@ export async function executeAction(action: RecordedAction, element: HTMLElement
       clickTarget.click();
       break;
     }
-    case "INPUT": {
+    case ACTION_TYPE.INPUT: {
       element.focus?.();
       const applied = await applyInputValue(element, action);
       if (!applied) {

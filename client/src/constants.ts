@@ -1,7 +1,6 @@
 import { helpCircleIcon, lightbulbIcon, sparklesIcon } from "@src/icons/index.js";
-import type { InfoPill } from "@src/types.js";
 
-export const infoPills: InfoPill[] = [
+export const infoPills = [
   { id: "what-is-ezer", label: "What is Ezer?", prompt: "What is Ezer?", icon: sparklesIcon },
   {
     id: "how-it-works",

@@ -1,4 +1,8 @@
+import type { ACTION_TYPE, RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import type { ReplayFailure } from "@src/replay/index.js";
+
+export type ActionType = (typeof ACTION_TYPE)[keyof typeof ACTION_TYPE];
+export type RuntimeMessageType = (typeof RUNTIME_MESSAGE_TYPE)[keyof typeof RUNTIME_MESSAGE_TYPE];
 
 export const MESSAGE_TYPE = {
   TEXT: "TEXT",
@@ -58,7 +62,7 @@ export interface InfoPill {
 }
 
 export interface RecordedAction {
-  type: "CLICK" | "INPUT" | "SUBMIT";
+  type: ActionType;
   selectors: string[];
   value?: string;
   checked?: boolean;
@@ -81,7 +85,7 @@ export interface Workflow {
 }
 
 export interface RuntimeMessage {
-  type: string;
+  type: RuntimeMessageType;
   actions?: RecordedAction[];
   tabId?: number;
   error?: string;

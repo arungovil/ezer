@@ -1,5 +1,6 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
 import { defaultInfoReply, infoReplies } from "@src/constants.js";
+import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import { formatReplayFailure } from "@src/replay/index.js";
 import type {
   ChatWindowHost,
@@ -49,20 +50,20 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   pendingWorkflowSave: PendingWorkflowSave | null = null;
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
-    if (message?.type === "TAB_SWITCHED") {
+    if (message?.type === RUNTIME_MESSAGE_TYPE.TAB_SWITCHED) {
       this.handleTabSwitched();
       return;
     }
-    if (message?.type === "RECORDING_COMPLETE" && message.actions) {
+    if (message?.type === RUNTIME_MESSAGE_TYPE.RECORDING_COMPLETE && message.actions) {
       handleRecordingComplete(this, message.actions);
     }
-    if (message?.type === "REPLAY_FAILED") {
+    if (message?.type === RUNTIME_MESSAGE_TYPE.REPLAY_FAILED) {
       handleReplayFailed(
         this,
         message.error ?? (message.failure ? formatReplayFailure(message.failure) : "Run failed."),
       );
     }
-    if (message?.type === "REPLAY_COMPLETE") {
+    if (message?.type === RUNTIME_MESSAGE_TYPE.REPLAY_COMPLETE) {
       finishReplay(this);
     }
   };
