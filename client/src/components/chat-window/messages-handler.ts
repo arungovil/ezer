@@ -29,7 +29,9 @@ export function recordingStartedMessage(): Message {
 }
 
 export function recordingStoppedEmptyMessage(): Message {
-  return ezerStatusMessage("⏹️ **Recording stopped.** No actions were captured.");
+  return ezerStatusMessage(
+    "⏹️ **Recording stopped.** I didn't catch any actions — give it another try?",
+  );
 }
 
 export function tabSwitchedMessage(): Message {
@@ -37,7 +39,7 @@ export function tabSwitchedMessage(): Message {
     id: newId(),
     role: "ezer",
     type: MESSAGE_TYPE.TAB_SWITCHED,
-    content: "🔄 **Tab switched.** Start a new recording on this tab when you're ready.",
+    content: "🔄 **You switched tabs.** Ready to record something on this page?",
   };
 }
 
@@ -49,7 +51,7 @@ function formatCapturedActions(actions: RecordedAction[]): string {
     return `${i + 1}. \`${action.type}\` on \`${primarySelector}\`${valueDetail}${textDetail}`;
   });
 
-  return `⏹️ **Recording stopped.** ${actions.length} action${actions.length > 1 ? "s" : ""} captured:\n\n${lines.join("\n")}`;
+  return `⏹️ **Recording stopped.** ${actions.length} step${actions.length > 1 ? "s" : ""} captured:\n\n${lines.join("\n")}`;
 }
 
 export function workflowCaptureMessage(actions: RecordedAction[]): Message {
@@ -67,7 +69,7 @@ export function workflowCaptureMessage(actions: RecordedAction[]): Message {
 }
 
 export function savedWorkflowReplayMessage(workflow: Workflow): Message {
-  const textContent = `▶ **${workflow.name}** — ${workflow.actions.length} action${workflow.actions.length === 1 ? "" : "s"}`;
+  const textContent = `▶ **${workflow.name}** — ${workflow.actions.length} step${workflow.actions.length === 1 ? "" : "s"}`;
 
   return {
     id: newId(),

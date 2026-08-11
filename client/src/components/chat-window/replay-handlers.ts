@@ -57,7 +57,7 @@ export function finishReplay(host: ChatWindowHost): void {
   } else {
     host.messages = [
       ...host.messages,
-      ezerStatusMessage("✅ **Workflow run completed successfully.**"),
+      ezerStatusMessage("✅ **All done! Your workflow completed successfully.**"),
     ];
   }
 

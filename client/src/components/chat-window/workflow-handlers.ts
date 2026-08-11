@@ -68,7 +68,7 @@ export function handleSave(
 
   host.messages = [
     ...host.messages,
-    ezerStatusMessage("💾 **Name this workflow.** Reply with a title to save it."),
+    ezerStatusMessage("💾 **Give this workflow a name to save it.**"),
   ];
 }
 
@@ -88,7 +88,9 @@ export async function completeWorkflowSave(host: ChatWindowHost, name: string): 
       });
       host.messages = [
         ...host.messages,
-        ezerStatusMessage("⚠️ **Could not save workflow.** No active tab found."),
+        ezerStatusMessage(
+          "⚠️ **Hmm, something went wrong.** Couldn't find the page to save to. Try again?",
+        ),
       ];
       return;
     }
@@ -109,7 +111,7 @@ export async function completeWorkflowSave(host: ChatWindowHost, name: string): 
       return { ...m, content: { ...m.content, saved: true, awaitingName: false } };
     });
 
-    host.messages = [...host.messages, ezerStatusMessage(`✅ **Workflow saved as "${name}"!**`)];
+    host.messages = [...host.messages, ezerStatusMessage(`✅ **Got it! Saved as "${name}".**`)];
     void refreshSavedWorkflows(host);
   } catch (err) {
     host.messages = host.messages.map((m) => {
@@ -119,7 +121,7 @@ export async function completeWorkflowSave(host: ChatWindowHost, name: string): 
     host.messages = [
       ...host.messages,
       ezerStatusMessage(
-        `⚠️ **Failed to save workflow.** ${err instanceof Error ? err.message : "Unknown error"}`,
+        `⚠️ **Couldn't save your workflow.** ${err instanceof Error ? err.message : "Unknown error"}`,
       ),
     ];
   }
@@ -192,13 +194,16 @@ export async function handleDeleteWorkflow(
       })
       .filter((m): m is Message => m !== null);
 
-    host.messages = [...host.messages, ezerStatusMessage(`✅ **"${workflow.name}" deleted.**`)];
+    host.messages = [
+      ...host.messages,
+      ezerStatusMessage(`✅ **"${workflow.name}" has been removed.**`),
+    ];
     void refreshSavedWorkflows(host);
   } catch (err) {
     host.messages = [
       ...host.messages,
       ezerStatusMessage(
-        `⚠️ **Failed to delete workflow.** ${err instanceof Error ? err.message : "Unknown error"}`,
+        `⚠️ **Couldn't remove the workflow.** ${err instanceof Error ? err.message : "Unknown error"}`,
       ),
     ];
   }

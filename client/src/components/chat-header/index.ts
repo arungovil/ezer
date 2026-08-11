@@ -40,7 +40,7 @@ export class ChatHeader extends LitElement {
           this.workflowStatus === "recording"
             ? html`
                 <ez-badge variant="error">Recording</ez-badge>
-                <ez-button variant="outline" size="sm" @click=${this.handleStop}>Stop</ez-button>
+                <ez-button variant="outline" size="sm" @click=${this.handleStop}>Finish</ez-button>
               `
             : this.workflowStatus === "replaying"
               ? html`<ez-badge variant="info">Replaying</ez-badge>`

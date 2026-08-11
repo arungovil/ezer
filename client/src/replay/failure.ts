@@ -21,11 +21,11 @@ export function formatReplayFailure(failure: ReplayFailure): string {
       stepNumber === 1
         ? " Make sure you're on the page where you recorded this workflow."
         : " An earlier step may have changed the page, or the element was removed.";
-    return `⚠️ **Replay stopped at ${stepLabel}** (${actionLabel}). Could not find \`${selector}\`.${pageHint} Fix the issue and try again.`;
+    return `⚠️ **Run stopped at ${stepLabel}** (${actionLabel}). Could not find \`${selector}\`.${pageHint} Fix the issue and try again.`;
   }
 
   const executionDetail = detail ?? "The action could not be completed.";
-  return `⚠️ **Replay stopped at ${stepLabel}** (${actionLabel}). ${executionDetail} Check the page and try again.`;
+  return `⚠️ **Run stopped at ${stepLabel}** (${actionLabel}). ${executionDetail} Check the page and try again.`;
 }
 
 function describeAction(action: RecordedAction): string {

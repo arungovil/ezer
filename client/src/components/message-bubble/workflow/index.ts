@@ -52,7 +52,7 @@ export class MessageBubbleWorkflow extends LitElement {
                 ?disabled=${replaying}
                 @click=${this.handleReplay}
               >
-                ${replaying ? "⏳ Replaying…" : "▶ Replay"}
+                ${replaying ? "⏳ Running…" : "▶ Run"}
               </ez-button>
               <ez-button
                 variant="outline"
@@ -60,7 +60,7 @@ export class MessageBubbleWorkflow extends LitElement {
                 ?disabled=${saved || awaitingName}
                 @click=${this.handleSave}
               >
-                ${saved ? "✓ Saved" : awaitingName ? "Enter name below…" : "💾 Save"}
+                ${saved ? "✓ Saved" : awaitingName ? "Saving" : "💾 Save"}
               </ez-button>
             </div>
           `

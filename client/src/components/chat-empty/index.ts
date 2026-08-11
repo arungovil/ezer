@@ -22,7 +22,7 @@ export class ChatEmpty extends LitElement {
     return html`
       <div class="hero">
         <h2>Say hello to ezer! 👋</h2>
-        <p>Start recording a workflow or select a prompt to get started</p>
+        <p>Record a new workflow or choose a topic below</p>
       </div>
 
       <div class="pills-container">

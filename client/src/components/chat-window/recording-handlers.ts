@@ -36,7 +36,7 @@ export function handleStartRecording(host: ChatWindowHost): void {
             ? ({
                 ...m,
                 content:
-                  "⚠️ **Could not start recording.** This page doesn't support automation (e.g., Chrome internal pages).",
+                  "⚠️ **Can't record on this page.** Ezer works on regular websites, not browser settings or system pages.",
               } as Message)
             : m,
         );
@@ -48,8 +48,7 @@ export function handleStartRecording(host: ChatWindowHost): void {
         m.id === msg.id
           ? ({
               ...m,
-              content:
-                "⚠️ **Recording interrupted.** An unexpected error occurred. Please try again.",
+              content: "⚠️ **Something went wrong and recording stopped.** Give it another try?",
             } as Message)
           : m,
       );

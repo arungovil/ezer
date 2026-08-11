@@ -5,7 +5,7 @@ import { property, query } from "lit/decorators.js";
 import { styles } from "./styles.js";
 
 export class ChatInput extends LitElement {
-  @property({ type: String }) placeholder = "What are my available workflows?";
+  @property({ type: String }) placeholder = "What can I help you with?";
 
   static styles = styles;
 

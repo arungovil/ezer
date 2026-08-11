@@ -59,8 +59,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     if (message?.type === "REPLAY_FAILED") {
       handleReplayFailed(
         this,
-        message.error ??
-          (message.failure ? formatReplayFailure(message.failure) : "Replay failed."),
+        message.error ?? (message.failure ? formatReplayFailure(message.failure) : "Run failed."),
       );
     }
     if (message?.type === "REPLAY_COMPLETE") {
@@ -188,7 +187,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   // TODO: wire to actual backend
   private async callApi(_text: string): Promise<string> {
     await new Promise((r) => setTimeout(r, 800));
-    return "Hang tight. We are working on getting the live interaction ready!";
+    return "I'm still learning how to chat! Check back soon.";
   }
 
   render() {
@@ -238,7 +237,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
       }
       <chat-input
         .placeholder=${
-          this.pendingWorkflowSave ? "Enter a workflow name…" : "What are my available workflows?"
+          this.pendingWorkflowSave ? "Give your workflow a name…" : "What can I help you with?"
         }
         @ez-send=${this.handleSend}
       ></chat-input>
