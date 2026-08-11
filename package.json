@@ -7,6 +7,7 @@
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run watch",
     "build": "npm --prefix server run build && npm --prefix client run build",
+    "package": "npm --prefix client run package",
     "typecheck": "npm --prefix server run typecheck && npm --prefix client run typecheck",
     "format": "biome check --write .",
     "lint": "biome check .",

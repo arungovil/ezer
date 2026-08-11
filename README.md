@@ -38,6 +38,22 @@ Then load the extension in Chrome:
 npm run build
 ```
 
+### Release package
+
+Build the extension and create a zip for Codeberg releases:
+
+```bash
+npm run package
+```
+
+This writes `release/ezer-<version>.zip` (version from `client/manifest.json`). Upload that file when creating a release on Codeberg — not the auto-generated “Source code” archive.
+
+**Install from a release zip**
+
+1. Download `ezer-<version>.zip` from the release page.
+2. Unzip it.
+3. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the unzipped folder.
+
 ## Tech stack
 
 | Layer       | Tech                                            |
