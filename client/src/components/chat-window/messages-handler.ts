@@ -1,5 +1,11 @@
 import { recordingStartedMessage as recordingStartedText } from "@src/constants.js";
-import type { Message, RecordedAction, Workflow, WorkflowContent } from "@src/types.js";
+import type {
+  CaptureContent,
+  Message,
+  RecordedAction,
+  Workflow,
+  WorkflowContent,
+} from "@src/types.js";
 import { MESSAGE_TYPE } from "@src/types.js";
 
 function newId(): string {
@@ -32,6 +38,19 @@ export function recordingStoppedEmptyMessage(): Message {
   return ezerStatusMessage(
     "⏹️ **Recording stopped.** I didn't catch any actions — give it another try?",
   );
+}
+
+export function userCaptureMessage(content: CaptureContent): Message {
+  return {
+    id: newId(),
+    role: "user",
+    type: MESSAGE_TYPE.CAPTURE,
+    content,
+  };
+}
+
+export function captureAckMessage(): Message {
+  return ezerStatusMessage("📌 **Captured.** Task extraction coming soon.");
 }
 
 export function tabSwitchedMessage(): Message {

@@ -6,6 +6,7 @@ export type RuntimeMessageType = (typeof RUNTIME_MESSAGE_TYPE)[keyof typeof RUNT
 
 export const MESSAGE_TYPE = {
   TEXT: "TEXT",
+  CAPTURE: "CAPTURE",
   QUICK_ACTION: "QUICK_ACTION",
   RECORDING: "RECORDING",
   WORKFLOW: "WORKFLOW",
@@ -25,6 +26,12 @@ export interface WorkflowContent {
 
 export interface WorkflowListContent {
   workflows: Workflow[];
+}
+
+export interface CaptureContent {
+  text: string;
+  url?: string;
+  title?: string;
 }
 
 export type Message =
@@ -51,6 +58,13 @@ export type Message =
       role: "user" | "ezer";
       type: typeof MESSAGE_TYPE.WORKFLOW_LIST;
       content: WorkflowListContent;
+      loading?: boolean;
+    }
+  | {
+      id: string;
+      role: "user";
+      type: typeof MESSAGE_TYPE.CAPTURE;
+      content: CaptureContent;
       loading?: boolean;
     };
 
@@ -88,6 +102,9 @@ export interface RuntimeMessage {
   type: RuntimeMessageType;
   actions?: RecordedAction[];
   tabId?: number;
+  text?: string;
+  url?: string;
+  title?: string;
   error?: string;
   failure?: ReplayFailure;
 }

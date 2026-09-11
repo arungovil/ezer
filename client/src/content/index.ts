@@ -3,6 +3,7 @@
 import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import { runReplay } from "@src/replay/index.js";
 import { eventHandlers } from "./handlers.js";
+import { startSelectionCapture } from "./selection-capture.js";
 
 let isRecording = false;
 
@@ -21,6 +22,9 @@ void (async function init() {
 window.addEventListener("click", handleCaptureEvent, true);
 window.addEventListener("change", handleCaptureEvent, true);
 window.addEventListener("submit", handleCaptureEvent, true);
+
+// Text-selection capture (independent of workflow recording)
+startSelectionCapture();
 
 // Main dispatcher
 function handleCaptureEvent(e: Event) {

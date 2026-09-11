@@ -1,9 +1,15 @@
-import type { MessageType, WorkflowContent, WorkflowListContent } from "@src/types.js";
+import type {
+  CaptureContent,
+  MessageType,
+  WorkflowContent,
+  WorkflowListContent,
+} from "@src/types.js";
 import { MESSAGE_TYPE } from "@src/types.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import { styles } from "./styles.js";
 import "@src/components/chat-loader/index.js";
+import "@src/components/message-bubble/capture/index.js";
 import "@src/components/message-bubble/text/index.js";
 import "@src/components/message-bubble/quick-action/index.js";
 import "@src/components/message-bubble/recording/index.js";
@@ -24,6 +30,10 @@ export class MessageBubble extends LitElement {
     switch (this.type) {
       case MESSAGE_TYPE.TEXT:
         return html`<message-bubble-text .content=${this.content as string}></message-bubble-text>`;
+      case MESSAGE_TYPE.CAPTURE:
+        return html`<message-bubble-capture
+          .content=${this.content as CaptureContent}
+        ></message-bubble-capture>`;
       case MESSAGE_TYPE.QUICK_ACTION:
         return html`<message-bubble-quick-action
           .sender=${this.sender}

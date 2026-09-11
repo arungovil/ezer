@@ -3,6 +3,7 @@ import type { RecordedAction } from "@src/types.js";
 import { injectAndRetry } from "./fallbacks.js";
 
 let isRecording = false;
+let sidepanelOpen = false;
 const actionBuffer: RecordedAction[] = [];
 let activeTabId: number | null = null;
 
@@ -11,6 +12,16 @@ void (async function init() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab?.id != null) activeTabId = tab.id;
 })();
+
+// The side panel keeps a long-lived port open while it's visible. MV3 has no
+// "is the panel open?" API, so this port is the source of truth for that.
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== "ezer-sidepanel") return;
+  sidepanelOpen = true;
+  port.onDisconnect.addListener(() => {
+    sidepanelOpen = false;
+  });
+});
 
 chrome.runtime.onInstalled.addListener(() => {
   void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
@@ -42,6 +53,29 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message?.type === RUNTIME_MESSAGE_TYPE.GET_RECORDING_STATE) {
     sendResponse({ isRecording });
+    return false;
+  }
+
+  if (message?.type === RUNTIME_MESSAGE_TYPE.CAPTURE_SELECTION) {
+    if (!sidepanelOpen) {
+      sendResponse({ ok: false, reason: "panel-closed" });
+      return false;
+    }
+
+    if (typeof message.text !== "string" || !message.text.trim()) {
+      sendResponse({ ok: false, reason: "empty-selection" });
+      return false;
+    }
+
+    chrome.runtime
+      .sendMessage({
+        type: RUNTIME_MESSAGE_TYPE.SELECTION_CAPTURED,
+        text: message.text,
+        url: message.url,
+        title: message.title,
+      })
+      .catch(() => {});
+    sendResponse({ ok: true });
     return false;
   }
 

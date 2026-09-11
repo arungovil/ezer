@@ -1,5 +1,5 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { defaultInfoReply, infoReplies } from "@src/constants.js";
+import { defaultInfoReply, infoReplies, serverBaseUrl } from "@src/constants.js";
 import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import { formatReplayFailure } from "@src/replay/index.js";
 import type {
@@ -12,7 +12,7 @@ import type {
 import { MESSAGE_TYPE } from "@src/types.js";
 import { html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
-import { tabSwitchedMessage } from "./messages-handler.js";
+import { captureAckMessage, tabSwitchedMessage, userCaptureMessage } from "./messages-handler.js";
 import {
   clearPendingEmptyPlaceholder,
   handleRecordingComplete,
@@ -53,6 +53,9 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     if (message?.type === RUNTIME_MESSAGE_TYPE.TAB_SWITCHED) {
       this.handleTabSwitched();
       return;
+    }
+    if (message?.type === RUNTIME_MESSAGE_TYPE.SELECTION_CAPTURED && message.text) {
+      this.handleSelectionCaptured(message.text, message.url, message.title);
     }
     if (message?.type === RUNTIME_MESSAGE_TYPE.RECORDING_COMPLETE && message.actions) {
       handleRecordingComplete(this, message.actions);
@@ -107,6 +110,18 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   private handleNewChat() {
     this.resetChat();
     void refreshSavedWorkflows(this);
+  }
+
+  private handleSelectionCaptured(text: string, url?: string, title?: string) {
+    this.messages = [
+      ...this.messages,
+      userCaptureMessage({
+        text,
+        ...(url ? { url } : {}),
+        ...(title ? { title } : {}),
+      }),
+      captureAckMessage(),
+    ];
   }
 
   private handleTabSwitched() {
@@ -185,10 +200,24 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     );
   }
 
-  // TODO: wire to actual backend
-  private async callApi(_text: string): Promise<string> {
-    await new Promise((r) => setTimeout(r, 800));
-    return "I'm still learning how to chat! Check back soon.";
+  private async callApi(text: string): Promise<string> {
+    try {
+      const response = await fetch(`${serverBaseUrl}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+
+      const body = (await response.json()) as { reply?: string; error?: string };
+
+      if (!response.ok) {
+        return body.error ?? "Something went wrong talking to the Ezer server.";
+      }
+
+      return body.reply ?? "No reply from the server.";
+    } catch {
+      return "Can't reach the Ezer server. Run `npm run dev:server` and try again.";
+    }
   }
 
   render() {
