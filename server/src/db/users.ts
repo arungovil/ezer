@@ -1,0 +1,13 @@
+import { getDb } from "./index.js";
+
+export function upsertUser(userId: string): void {
+  getDb()
+    .prepare(
+      `
+      INSERT INTO users (id)
+      VALUES (?)
+      ON CONFLICT(id) DO NOTHING
+    `,
+    )
+    .run(userId);
+}

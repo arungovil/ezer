@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { routePaths } from "../config/constants.js";
+import { requireUser } from "../middleware/require-user.js";
+import { handleCapture, handleConversationMessages } from "./capture.js";
 import { handleChat } from "./chat.js";
-import { handleCompile } from "./compile.js";
 import { handleHealth } from "./health.js";
 
 export function registerRoutes(app: Express): void {
@@ -9,5 +10,8 @@ export function registerRoutes(app: Express): void {
   app.post(routePaths.chat, (req, res) => {
     void handleChat(req, res);
   });
-  app.post(routePaths.compile, handleCompile);
+  app.post(routePaths.captures, requireUser, (req, res) => {
+    void handleCapture(req, res);
+  });
+  app.get(routePaths.conversationMessages, requireUser, handleConversationMessages);
 }
