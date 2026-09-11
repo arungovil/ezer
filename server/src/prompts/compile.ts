@@ -1,6 +1,6 @@
 // AST contract between server and client — keep in sync with client replayer.
 
-export const AST_JSON_SCHEMA = {
+export const astJsonSchema = {
   type: "object",
   properties: {
     workflowName: { type: "string" },
@@ -24,7 +24,7 @@ export const AST_JSON_SCHEMA = {
   required: ["workflowName", "description", "steps"],
 } as const;
 
-export const COMPILE_SYSTEM_PROMPT = `
+export const compileSystemPrompt = `
 You compile raw browser interaction logs into a validated workflow AST.
 
 Rules:
