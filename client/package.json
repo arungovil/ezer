@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Ezer Chrome extension: record, compile, and replay browser workflows",
+  "description": "Ezer Chrome extension: workflow automation plus a personal assistant for captured items",
   "scripts": {
     "build": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",

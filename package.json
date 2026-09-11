@@ -1,7 +1,7 @@
 {
   "name": "ezer",
   "private": true,
-  "description": "Browser automation: record interactions, compile to a workflow AST with an LLM, replay via synthetic DOM events.",
+  "description": "Ezer: a Chrome side-panel companion with workflow automation and a personal assistant.",
   "scripts": {
     "setup": "npm install && npm --prefix server install && npm --prefix client install",
     "dev:server": "npm --prefix server run dev",

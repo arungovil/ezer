@@ -1,6 +1,9 @@
 # Ezer
 
-Browser automation, done properly: record real interactions in a Chrome extension, compile them into a validated workflow AST with an LLM, and replay them via synthetic DOM events.
+Ezer is a Chrome side-panel companion with two features:
+
+- **Workflow automation** — record real DOM interactions, save them as reusable workflows, and replay them via synthetic DOM events.
+- **Personal assistant** — capture text selections from the page, extract tasks/reminders/notes with an LLM, and keep them in a per-tab conversation persisted on the server.
 
 ## Principles
 
@@ -10,23 +13,50 @@ Browser automation, done properly: record real interactions in a Chrome extensio
 - **Trustworthy by default** — observability, clear errors, one-shot setup, tests that catch real failures
 - **The whole journey** — first-run, empty states, error moments, small touches
 
+## Features
+
+### Workflow automation
+
+- Record `click` / `change` / `submit` on the capture phase
+- Map each event to a `RecordedAction` with a priority-ordered selector chain
+- Save named workflows locally in IndexedDB, scoped per tab
+- Replay saved workflows with synthetic DOM events
+
+### Personal assistant
+
+- Capture text selections from any page (independent of workflow recording)
+- Classify each capture as a `task` | `reminder` | `note` and extract title, due date, and summary via LLM
+- Persist captures, items, and per-tab chat in SQLite
+- Roadmap: notify the user when a due task or reminder comes up
+
 ## Stack & Layout
 
 - `client/src/background/` — MV3 service worker: recording buffer, message routing
 - `client/src/content/` — MV3 content script: `workflow/` (record + replay engine), `capture/` (selection)
 - `client/src/sidepanel/` — MV3 side panel: `components/`, `api/`, `workflow/`, `capture/`
 - `client/src/shared/` — cross-layer types, message constants, replay failure shapes
-- `server/` — Express: `/captures`, `/chat`, SQLite persistence
+- `server/` — Express: `/captures`, `/chat`, `/conversations/messages`, SQLite persistence (assistant feature)
 - LLM: DeepSeek (`deepseek-chat`, OpenAI-compatible API) with structured JSON output
 - Dev env: server on `localhost:3000`; extension loaded unpacked in Chrome
 
 ## Contracts
 
-- **AST:** `{ workflowName, description, steps: [{ stepNumber, action: CLICK|INPUT, selectors: string[], value?, description }] }` — `selectors` ordered by priority; `selectors[0]` is primary
-- **Compile:** DeepSeek `json_object` mode, then validate against the AST schema in code with a repair-retry on mismatch
-- **Replay:** locate via `querySelector(step.selectors)`; INPUT → set value via native setter (`Object.getOwnPropertyDescriptor`) + dispatch input/change (React/Vue controlled inputs); CLICK → scrollIntoView + click(); 500ms between steps
-- **Replay errors:** selector unresolved → retry up to 3×, falling back sequentially down the priority chain; if still unresolvable, pause execution, highlight the failed step red in the side panel, and prompt the user for a manual click
-- **Messages:** `START_RECORDING`, `GET_BUFFER`, `EXECUTE_AST` via background broker
+### Workflow automation
+
+- **Recorded action:** `{ type: CLICK|INPUT|SUBMIT, selectors: string[], value?, checked?, innerText?, tagName }` — `selectors` ordered by priority; `selectors[0]` is primary
+- **Selector chain:** `data-testid` → `id` → `name` → `aria-label` → `placeholder` → `[type]` → tag name
+- **Workflow:** `{ id, tabId, url, name, actions: RecordedAction[], createdAt }` — stored in IndexedDB, scoped per tab
+- **Replay:** resolve via `querySelector(selectors[0])`, falling back down the chain; INPUT → set value via native setter (`Object.getOwnPropertyDescriptor`) + dispatch input/change (React/Vue controlled inputs); CLICK/SUBMIT → scrollIntoView + click(); 800ms between steps
+- **Replay errors:** selector unresolved → retry up to 3× over the selector chain; if still unresolvable, stop the run and surface an error message naming the failed step and suggesting a fix
+- **Messages:** `START_RECORDING`, `STOP_RECORDING`, `REPLAY_ACTIONS`, `ACTION_CAPTURED`, `GET_RECORDING_STATE`, `REPLAY_COMPLETE`, `REPLAY_FAILED`, `RECORDING_COMPLETE` via background broker
+
+### Personal assistant
+
+- **Item kinds:** `task` | `reminder` | `note` — one per capture; `reminder` carries `dueAt` (ISO 8601, resolved in the user's timezone)
+- **Capture:** `POST /captures` with `{ text, tabUrl, url?, title?, timezone? }` → `{ captureId, conversationId, item, reply, userMessageId, ezerMessageId }`
+- **Chat:** `POST /chat` with `{ message }` → `{ reply, rejected }` (off-topic guard)
+- **History:** `GET /conversations/messages?tabUrl=` → per-tab messages; `/captures` and `/conversations/messages` require `X-Ezer-User-Id`
+- **Persistence:** SQLite tables for users, conversations, messages, captures, items
 
 ## Conventions
 
@@ -54,5 +84,5 @@ Design tokens via CSS custom properties in `styles.css`. All Lit components refe
 
 ### Extension
 
-- Selector priority (recorded per step): `data-testid` > `id` > `name` > `aria-label` > text content
-- Record click/change on capture phase; truncate innerText to 50 chars
+- Selector priority (recorded per step): `data-testid` > `id` > `name` > `aria-label` > `placeholder` > `[type]` > tag name
+- Record `click` / `change` / `submit` on the capture phase; truncate innerText to 50 chars

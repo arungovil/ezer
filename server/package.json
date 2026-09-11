@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Ezer Server: raw interaction events -> validated workflow AST via LLM",
+  "description": "Ezer Server: LLM-backed capture extraction and chat for the personal assistant",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",

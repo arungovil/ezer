@@ -1,6 +1,6 @@
 # Ezer Server
 
-Express API for LLM-backed capture extraction and chat. Default base URL: `http://localhost:3000`.
+Express API for the personal-assistant feature: LLM-backed capture extraction (`task` | `reminder` | `note`) and chat. Workflow automation is entirely client-side (IndexedDB) and does not use this server. Default base URL: `http://localhost:3000`.
 
 ## Setup
 
