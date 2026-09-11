@@ -1,5 +1,5 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { defaultInfoReply, infoReplies, serverBaseUrl } from "@src/constants.js";
+import { defaultInfoReply, infoReplies } from "@src/constants.js";
 import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
 import { formatReplayFailure } from "@src/replay/index.js";
 import type {
@@ -12,6 +12,7 @@ import type {
 import { MESSAGE_TYPE } from "@src/types.js";
 import { html, LitElement } from "lit";
 import { query, state } from "lit/decorators.js";
+import { createChatTask } from "./chat-task.js";
 import { captureAckMessage, tabSwitchedMessage, userCaptureMessage } from "./messages-handler.js";
 import {
   clearPendingEmptyPlaceholder,
@@ -48,6 +49,8 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   pendingEmptyMsgId: string | null = null;
   pendingReplayError: string | null = null;
   pendingWorkflowSave: PendingWorkflowSave | null = null;
+
+  private readonly chatTask = createChatTask(this);
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
     if (message?.type === RUNTIME_MESSAGE_TYPE.TAB_SWITCHED) {
@@ -99,6 +102,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   }
 
   private resetChat() {
+    this.chatTask.abort();
     this.messages = [];
     this.workflowStatus = "idle";
     this.pendingEmptyMsgId = null;
@@ -174,6 +178,12 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     void this.processMessage(text);
   }
 
+  private applyChatReply(ezerMsgId: string, content: string) {
+    this.messages = this.messages.map((m) =>
+      m.id === ezerMsgId && m.type === MESSAGE_TYPE.TEXT ? { ...m, content, loading: false } : m,
+    );
+  }
+
   private async processMessage(text: string) {
     const userMsg: Message = {
       id: crypto.randomUUID(),
@@ -191,32 +201,17 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     };
     this.messages = [...this.messages, userMsg, pendingEzerMsg];
 
-    const replyText = await this.callApi(text);
-
-    this.messages = this.messages.map((m) =>
-      m.id === ezerMsgId && m.type === MESSAGE_TYPE.TEXT
-        ? { ...m, content: replyText, loading: false }
-        : m,
-    );
-  }
-
-  private async callApi(text: string): Promise<string> {
     try {
-      const response = await fetch(`${serverBaseUrl}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
-      });
-
-      const body = (await response.json()) as { reply?: string; error?: string };
-
-      if (!response.ok) {
-        return body.error ?? "Something went wrong talking to the Ezer server.";
+      void this.chatTask.run([text, ezerMsgId]);
+      const result = await this.chatTask.taskComplete;
+      this.applyChatReply(result.ezerMsgId, result.reply);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
       }
 
-      return body.reply ?? "No reply from the server.";
-    } catch {
-      return "Can't reach the Ezer server. Run `npm run dev:server` and try again.";
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong.";
+      this.applyChatReply(ezerMsgId, errorMessage);
     }
   }
 

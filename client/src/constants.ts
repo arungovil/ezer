@@ -1,7 +1,5 @@
 import { helpCircleIcon, lightbulbIcon, sparklesIcon } from "@src/icons/index.js";
 
-export const serverBaseUrl = "http://localhost:3000";
-
 export const infoPills = [
   { id: "what-is-ezer", label: "What is Ezer?", prompt: "What is Ezer?", icon: sparklesIcon },
   {

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@lit-labs/virtualizer": "^2.1.1",
+    "@lit/task": "^1.0.3",
     "lit": "^3.2.1",
     "snarkdown": "^2.0.0"
   },
