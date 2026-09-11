@@ -1,36 +1,51 @@
 # Ezer
 
-Record real interactions, compile them into a validated workflow AST with an LLM, and replay them via synthetic DOM events.
+Chrome side-panel assistant that captures text you highlight on any page, uses an LLM to extract tasks and reminders, and persists them in a local SQLite-backed API.
+
+## Demo (30 seconds)
+
+1. Start the server (see below) with `LLM_API_KEY` set.
+2. Load the extension and open the side panel on any page.
+3. Highlight text — e.g. `Submit expense report by Friday 5pm` or `Call dentist tomorrow at 10`.
+4. Ezer shows the capture in chat and replies with what it understood (task, reminder, or note).
+5. Switch tabs and come back — the conversation for that page reloads from the server.
 
 ## Getting started
 
 ### Prerequisites
 
 - Node.js ≥ 20
-- Chrome (or any Chromium browser supporting Manifest V3 side panels)
+- Chrome (Manifest V3 side panel)
+- DeepSeek or other OpenAI-compatible API key
 
 ### Setup
 
 ```bash
-# Install all dependencies (root, client, server)
 npm run setup
 
+cp server/.env.example server/.env   # add LLM_API_KEY
+cp client/.env.example client/.env   # server URL, default http://localhost:3000
 ```
 
 ### Development
 
-```bash
+Terminal 1 — API + SQLite:
 
-# Build the extension and watch for changes
+```bash
+npm run dev:server
+```
+
+Terminal 2 — extension watch build:
+
+```bash
 npm run dev:client
 ```
 
-Then load the extension in Chrome:
+Load the extension:
 
-1. Go to `chrome://extensions`
-2. Enable "Developer mode"
-3. Click "Load unpacked" and select the `client/` directory
-4. Pin Ezer to your toolbar and click the icon to open the side panel
+1. `chrome://extensions` → Developer mode → Load unpacked → `client/`
+2. Pin Ezer, open the side panel on a tab
+3. Highlight text while the panel is open
 
 ### Build
 
@@ -38,32 +53,34 @@ Then load the extension in Chrome:
 npm run build
 ```
 
-### Release package
+## Architecture
 
-Build the extension and create a zip for Codeberg releases:
-
-```bash
-npm run package
+```
+Page selection (content script)
+  → side panel chat UI (Lit)
+  → Express API (POST /captures)
+  → LLM structured extraction
+  → SQLite (users, conversations, messages, captures, items)
 ```
 
-This writes `release/ezer-<version>.zip` (version from `client/manifest.json`). Upload that file when creating a release on Codeberg — not the auto-generated “Source code” archive.
+| Layer | Tech |
+| ----- | ---- |
+| Extension | Manifest V3, Lit 3, TypeScript, esbuild |
+| Server | Express 4, better-sqlite3, TypeScript |
+| LLM | DeepSeek (`deepseek-chat`), JSON mode |
+| Tooling | Biome, Husky, strict TypeScript |
 
-**Install from a release zip**
+## API
 
-1. Download `ezer-<version>.zip` from the release page.
-2. Unzip it.
-3. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the unzipped folder.
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| `GET` | `/health` | Liveness |
+| `POST` | `/captures` | Extract and store a text selection |
+| `GET` | `/conversations/messages?tabUrl=` | Load chat for a tab |
+| `POST` | `/chat` | General Ezer assistant chat |
 
-## Tech stack
-
-| Layer       | Tech                                            |
-| ----------- | ----------------------------------------------- |
-| Extension   | Manifest V3, Lit 3 (web components), TypeScript |
-| Server      | Express 4, TypeScript                           |
-| Bundler     | esbuild (client)                                |
-| Lint/format | Biome                                           |
-| CI hooks    | Husky + lint-staged                             |
+See [server/README.md](server/README.md) for request/response shapes.
 
 ## Status
 
-Early-stage prototype. The recording and replay pipeline works end-to-end in the extension. Pending work is tracked on the [issues tab](https://codeberg.org/arungovil/ezer/issues).
+**Shipped:** text selection capture, LLM task/reminder extraction, SQLite persistence, per-tab chat history.

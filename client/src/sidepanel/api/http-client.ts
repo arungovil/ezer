@@ -1,0 +1,54 @@
+import { getOrCreateUserId } from "@src/shared/identity/user-id.js";
+import { apiErrorMessages, serverBaseUrl } from "./config.js";
+
+type HttpMethod = "GET" | "POST";
+
+interface RequestOptions {
+  method?: HttpMethod;
+  body?: unknown;
+  signal?: AbortSignal;
+  query?: Record<string, string>;
+}
+
+async function parseJsonBody(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+function buildUrl(path: string, query?: Record<string, string>): string {
+  const url = new URL(`${serverBaseUrl}${path}`);
+  if (query) {
+    for (const [key, value] of Object.entries(query)) {
+      url.searchParams.set(key, value);
+    }
+  }
+  return url.toString();
+}
+
+export async function requestJson(
+  path: string,
+  options: RequestOptions = {},
+): Promise<{ response: Response; data: unknown }> {
+  const { method = "GET", body, signal, query } = options;
+  const userId = await getOrCreateUserId();
+
+  try {
+    const response = await fetch(buildUrl(path, query), {
+      method,
+      headers: {
+        "X-Ezer-User-Id": userId,
+        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+      },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal,
+    });
+
+    const data = await parseJsonBody(response);
+    return { response, data };
+  } catch {
+    throw new Error(apiErrorMessages.unreachable);
+  }
+}

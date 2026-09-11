@@ -1,0 +1,47 @@
+import type { CaptureContent, Message } from "@src/shared/types.js";
+import { MESSAGE_TYPE } from "@src/shared/types.js";
+import type { StoredMessageBody } from "@src/sidepanel/api/types.js";
+
+function parseCaptureContent(raw: string): CaptureContent {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) {
+      return { text: raw };
+    }
+
+    const record = parsed as CaptureContent;
+    if (typeof record.text !== "string") {
+      return { text: raw };
+    }
+
+    return {
+      text: record.text,
+      ...(typeof record.url === "string" ? { url: record.url } : {}),
+      ...(typeof record.title === "string" ? { title: record.title } : {}),
+    };
+  } catch {
+    return { text: raw };
+  }
+}
+
+export function storedMessageToUiMessage(message: StoredMessageBody): Message | null {
+  if (message.messageType === MESSAGE_TYPE.CAPTURE && message.role === "user") {
+    return {
+      id: message.id,
+      role: "user",
+      type: MESSAGE_TYPE.CAPTURE,
+      content: parseCaptureContent(message.content),
+    };
+  }
+
+  if (message.messageType === MESSAGE_TYPE.TEXT) {
+    return {
+      id: message.id,
+      role: message.role,
+      type: MESSAGE_TYPE.TEXT,
+      content: message.content,
+    };
+  }
+
+  return null;
+}

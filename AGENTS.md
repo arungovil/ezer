@@ -6,18 +6,17 @@ Browser automation, done properly: record real interactions in a Chrome extensio
 
 - **Depth over breadth** — own one genuinely hard problem instead of skimming ten
 - **Real world first** — malformed input, timeouts, concurrency: degrade gracefully, don't fall over
-- **Deliberate calls** — every product, UX, and infra decision is reasoned, with the rationale recorded
+- **Deliberate calls** — every product, UX, and infra decision is reasoned and documented in code or PRs where it matters
 - **Trustworthy by default** — observability, clear errors, one-shot setup, tests that catch real failures
 - **The whole journey** — first-run, empty states, error moments, small touches
 
-## Decisions
-
-Running log (`decisions.md`) of design calls: what we chose, alternatives considered, tradeoffs accepted, what we cut and why. Concrete beats generic.
-
 ## Stack & Layout
 
-- `client/` — Manifest V3, Lit, TS: `manifest.json`, `types.js`, `content.js` (recorder/replayer), `background.js` (broker), `index.html/.js`, `ui/ezer-chat.js` (parent), `ui/ezer-header.js`, `ui/ezer-input.js`, `ui/message-bubble.js`, `icons/`
-- `server/` — Express: `server.js` (`POST /api/compile`), `prompts.js` (prompts + AST schema)
+- `client/src/background/` — MV3 service worker: recording buffer, message routing
+- `client/src/content/` — MV3 content script: `workflow/` (record + replay engine), `capture/` (selection)
+- `client/src/sidepanel/` — MV3 side panel: `components/`, `api/`, `workflow/`, `capture/`
+- `client/src/shared/` — cross-layer types, message constants, replay failure shapes
+- `server/` — Express: `/captures`, `/chat`, SQLite persistence
 - LLM: DeepSeek (`deepseek-chat`, OpenAI-compatible API) with structured JSON output
 - Dev env: server on `localhost:3000`; extension loaded unpacked in Chrome
 
@@ -57,7 +56,3 @@ Design tokens via CSS custom properties in `styles.css`. All Lit components refe
 
 - Selector priority (recorded per step): `data-testid` > `id` > `name` > `aria-label` > text content
 - Record click/change on capture phase; truncate innerText to 50 chars
-
-## Open calls
-
-- None — see `decisions.md` for resolved calls

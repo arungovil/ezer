@@ -1,5 +1,5 @@
-import { RUNTIME_MESSAGE_TYPE } from "@src/message-constants.js";
-import type { RecordedAction } from "@src/types.js";
+import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
+import type { RecordedAction } from "@src/shared/types.js";
 import { injectAndRetry } from "./fallbacks.js";
 
 let isRecording = false;
@@ -99,6 +99,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message.payload?.type === RUNTIME_MESSAGE_TYPE.STOP_RECORDING) {
     handleStopRecording(message.payload, sendResponse);
+    return true;
+  }
+
+  if (message.payload?.type === RUNTIME_MESSAGE_TYPE.START_CAPTURE) {
+    void deliverToContent(message.payload, sendResponse);
+    return true;
+  }
+
+  if (message.payload?.type === RUNTIME_MESSAGE_TYPE.STOP_CAPTURE) {
+    void deliverToContent(message.payload, sendResponse);
     return true;
   }
 
