@@ -112,8 +112,9 @@ The server powers the personal-assistant feature. Workflow automation is entirel
 | `PUT`  | `/user`                           | Register or sync user              |
 | `DELETE` | `/user`                         | Delete user and owned data         |
 | `POST` | `/captures`                       | Extract and store a text selection |
-| `GET`  | `/conversations/messages?tabUrl=` | Load chat for an origin            |
-| `POST` | `/chat`                           | General Ezer assistant chat        |
+| `GET`  | `/chat?tabUrl=`                   | List chat messages for an origin   |
+| `POST` | `/chat`                           | Send a message and persist reply   |
+| `DELETE` | `/chat/:id`                     | Delete a chat message              |
 
 See [server/README.md](server/README.md) for full request/response shapes and error codes.
 

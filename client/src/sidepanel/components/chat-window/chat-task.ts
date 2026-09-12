@@ -1,4 +1,5 @@
 import { Task } from "@lit/task";
+import { getActiveTabUrl } from "@src/shared/tabs/active-tab.js";
 import { postChat } from "@src/sidepanel/api/index.js";
 import type { ReactiveControllerHost } from "lit";
 
@@ -13,7 +14,12 @@ export function createChatTask(host: ReactiveControllerHost) {
   return new Task<ChatTaskArgs, ChatTaskResult>(host, {
     autoRun: false,
     task: async ([text, ezerMsgId], { signal }) => {
-      const result = await postChat(text, { signal });
+      const tabUrl = await getActiveTabUrl();
+      if (!tabUrl) {
+        throw new Error("No active tab URL");
+      }
+
+      const result = await postChat(text, tabUrl, { signal });
 
       if (!result.ok) {
         throw new Error(result.message);

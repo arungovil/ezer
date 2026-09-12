@@ -9,11 +9,15 @@ export const routePaths = {
   user: "/user",
   chat: "/chat",
   captures: "/captures",
-  conversationMessages: "/conversations/messages",
 } as const;
 
 export const errorMessages = {
   messageRequired: "message is required",
+  chatRequired: "message and tabUrl are required",
+  chatIdRequired: "chat id is required",
+  chatNotFound: "Chat message not found",
+  chatHasLinkedTask: "Cannot delete a capture message with a linked task",
+  requestFailed: "Request failed",
   captureRequired: "text and tabUrl are required",
   tabUrlRequired: "tabUrl query parameter is required",
   invalidTabUrl: "tabUrl must be a valid page URL",

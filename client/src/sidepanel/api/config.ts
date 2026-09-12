@@ -3,7 +3,6 @@ export const serverBaseUrl = __EZER_SERVER_URL__;
 export const routePaths = {
   chat: "/chat",
   captures: "/captures",
-  conversationMessages: "/conversations/messages",
 } as const;
 
 export const apiErrorMessages = {

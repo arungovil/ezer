@@ -34,21 +34,6 @@ export interface CaptureResponseBody {
   ezerMessageId: string;
 }
 
-export interface StoredMessageBody {
-  id: string;
-  role: "user" | "ezer";
-  messageType: string;
-  content: string;
-  createdAt: string;
-}
-
-export interface ConversationMessagesResponseBody {
-  originId: string | null;
-  origin: string | null;
-  tabUrl: string;
-  messages: StoredMessageBody[];
-}
-
 export interface CaptureLlmResult {
   kind: TaskKind;
   title: string;
@@ -116,20 +101,4 @@ export function isCaptureLlmResult(value: unknown): value is CaptureLlmResult {
     typeof result.reply === "string" &&
     result.reply.trim().length > 0
   );
-}
-
-export function toStoredMessageBody(message: {
-  id: string;
-  role: "user" | "ezer";
-  messageType: string;
-  content: string;
-  createdAt: string;
-}): StoredMessageBody {
-  return {
-    id: message.id,
-    role: message.role,
-    messageType: message.messageType,
-    content: message.content,
-    createdAt: message.createdAt,
-  };
 }

@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import { routePaths } from "../config/constants.js";
 import { requireUser, requireUserId } from "../middleware/require-user.js";
-import { handleCapture, handleConversationMessages } from "./capture.js";
-import { handleChat } from "./chat.js";
+import { handleCapture } from "./capture.js";
+import { handleDeleteChat, handleListChat, handlePostChat } from "./chat.js";
 import { handleHealth } from "./health.js";
 import { handleDeleteUser, handleGetUser, handlePutUser } from "./user.js";
 
@@ -11,11 +11,12 @@ export function registerRoutes(app: Express): void {
   app.get(routePaths.user, requireUserId, handleGetUser);
   app.put(routePaths.user, requireUserId, handlePutUser);
   app.delete(routePaths.user, requireUserId, handleDeleteUser);
-  app.post(routePaths.chat, (req, res) => {
-    void handleChat(req, res);
+  app.get(routePaths.chat, requireUser, handleListChat);
+  app.post(routePaths.chat, requireUser, (req, res) => {
+    void handlePostChat(req, res);
   });
+  app.delete(`${routePaths.chat}/:id`, requireUser, handleDeleteChat);
   app.post(routePaths.captures, requireUser, (req, res) => {
     void handleCapture(req, res);
   });
-  app.get(routePaths.conversationMessages, requireUser, handleConversationMessages);
 }

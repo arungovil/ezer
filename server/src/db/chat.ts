@@ -39,6 +39,24 @@ export function insertChat(input: InsertChatInput): ChatRow {
   };
 }
 
+export function getChatById(chatId: string): ChatRow | undefined {
+  return getDb()
+    .prepare(
+      `
+      SELECT
+        id,
+        origin_id AS originId,
+        role,
+        message_type AS messageType,
+        content,
+        created_at AS createdAt
+      FROM chat
+      WHERE id = ?
+    `,
+    )
+    .get(chatId) as ChatRow | undefined;
+}
+
 export function listChatsByOriginId(originId: string): ChatRow[] {
   return getDb()
     .prepare(
@@ -56,4 +74,9 @@ export function listChatsByOriginId(originId: string): ChatRow[] {
     `,
     )
     .all(originId) as ChatRow[];
+}
+
+export function deleteChatById(chatId: string): boolean {
+  const result = getDb().prepare(`DELETE FROM chat WHERE id = ?`).run(chatId);
+  return result.changes > 0;
 }

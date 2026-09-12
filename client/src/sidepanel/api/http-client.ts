@@ -1,7 +1,7 @@
 import { getOrCreateUserId } from "@src/shared/identity/user-id.js";
 import { apiErrorMessages, serverBaseUrl } from "./config.js";
 
-type HttpMethod = "GET" | "POST";
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 interface RequestOptions {
   method?: HttpMethod;

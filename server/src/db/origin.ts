@@ -52,3 +52,15 @@ export function getOriginByUserAndOrigin(userId: string, origin: string): Origin
     )
     .get(userId, origin) as OriginRow | undefined;
 }
+
+export function getOriginByIdForUser(originId: string, userId: string): OriginRow | undefined {
+  return getDb()
+    .prepare(
+      `
+      SELECT id, user_id AS userId, origin, created_at AS createdAt
+      FROM origin
+      WHERE id = ? AND user_id = ?
+    `,
+    )
+    .get(originId, userId) as OriginRow | undefined;
+}

@@ -82,3 +82,8 @@ export function insertTask(input: InsertTaskInput): TaskRow {
 
   return task;
 }
+
+export function taskExistsForChatId(chatId: string): boolean {
+  const row = getDb().prepare(`SELECT id FROM task WHERE chat_id = ?`).get(chatId);
+  return row !== undefined;
+}

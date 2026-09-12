@@ -35,8 +35,8 @@ X-Ezer-User-Id: <uuid-v4>
 | Route group | Middleware | Behavior |
 | ----------- | ---------- | -------- |
 | `/user` | `requireUserId` | Validates header only |
-| `/captures`, `/conversations/messages` | `requireUser` | Validates header and auto-registers the user if missing |
-| `/chat`, `/health` | — | No auth |
+| `/chat`, `/captures` | `requireUser` | Validates header and auto-registers the user if missing |
+| `/health` | — | No auth |
 
 Register explicitly with `PUT /user` on first run. Other routes will create the user row on first use.
 
@@ -48,9 +48,10 @@ Register explicitly with `PUT /user` on first run. Other routes will create the 
 | `GET` | `/user` | `X-Ezer-User-Id` | Get current user |
 | `PUT` | `/user` | `X-Ezer-User-Id` | Register or sync current user |
 | `DELETE` | `/user` | `X-Ezer-User-Id` | Delete user and all owned data |
-| `POST` | `/chat` | — | Ezer-scoped assistant chat (stateless) |
+| `GET` | `/chat?tabUrl=` | `X-Ezer-User-Id` | List chat messages for an origin |
+| `POST` | `/chat` | `X-Ezer-User-Id` | Send a message and persist the reply |
+| `DELETE` | `/chat/:id` | `X-Ezer-User-Id` | Delete a chat message |
 | `POST` | `/captures` | `X-Ezer-User-Id` | Extract and store a text selection |
-| `GET` | `/conversations/messages?tabUrl=` | `X-Ezer-User-Id` | Load chat for an origin |
 
 All JSON endpoints use `Content-Type: application/json`. CORS is enabled for local extension development.
 
@@ -67,6 +68,7 @@ Failed requests return:
 | `400` | Invalid or missing request body / query |
 | `401` | Missing or invalid `X-Ezer-User-Id` |
 | `404` | Resource not found |
+| `409` | Conflict (e.g. deleting a capture linked to a task) |
 | `502` | LLM request failed |
 | `503` | `LLM_API_KEY` not configured |
 
@@ -139,24 +141,96 @@ Delete the user and all owned data (origins, chats, tasks, workflows).
 
 ---
 
+## `GET /chat`
+
+List persisted chat messages for the **origin** of the given page URL.
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Query**
+
+| Param | Required | Description |
+| ----- | -------- | ----------- |
+| `tabUrl` | Yes | Any page URL on the target origin |
+
+**Response `200`**
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `originId` | `string` \| `null` | Origin row id, or `null` if none yet |
+| `origin` | `string` \| `null` | URL origin, or `null` if none yet |
+| `tabUrl` | `string` | Echo of the query param |
+| `messages` | `array` | Chat messages ordered by `createdAt` |
+
+Each message:
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `id` | `string` | Message UUID |
+| `role` | `string` | `user` \| `ezer` |
+| `messageType` | `string` | `CAPTURE` \| `TEXT` |
+| `content` | `string` | Plain text or JSON (`CAPTURE`) |
+| `createdAt` | `string` | ISO 8601 timestamp |
+
+**Errors:** `400` missing or invalid `tabUrl` · `401` invalid header
+
+---
+
 ## `POST /chat`
 
-Send a user message to the Ezer assistant. **Not persisted** — stateless help/onboarding chat.
+Send a typed message to the Ezer assistant. Persists the user message and Ezer reply in the `chat` table.
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
 
 **Request body**
 
 | Field | Type | Required | Description |
 | ----- | ---- | -------- | ----------- |
 | `message` | `string` | Yes | Non-empty user message (whitespace trimmed) |
+| `tabUrl` | `string` | Yes | Active page URL (origin is parsed from this) |
 
 **Response `200`**
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `originId` | `string` | Origin row id |
+| `origin` | `string` | URL origin, e.g. `https://github.com` |
 | `reply` | `string` | Assistant reply (markdown allowed) |
 | `rejected` | `boolean` | `true` if the message was off-topic |
+| `userMessageId` | `string` | Saved user `TEXT` chat id |
+| `ezerMessageId` | `string` | Saved Ezer `TEXT` reply id |
 
-**Errors:** `400` missing message · `502` LLM failed · `503` LLM not configured
+**Errors:** `400` invalid body · `401` invalid header · `502` LLM failed · `503` LLM not configured
+
+---
+
+## `DELETE /chat/:id`
+
+Delete a chat message owned by the authenticated user.
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Path**
+
+| Param | Description |
+| ----- | ----------- |
+| `id` | Chat message UUID |
+
+**Response `204`** — no body.
+
+**Errors:** `401` invalid header · `404` message not found · `409` message is a capture linked to a task
 
 ---
 
@@ -193,56 +267,6 @@ Parse a highlighted text selection into a task, reminder, or note. Persists chat
 | `ezerMessageId` | `string` | Saved Ezer `TEXT` reply id |
 
 **Errors:** `400` invalid body · `401` invalid header · `502` LLM failed · `503` LLM not configured
-
----
-
-## `GET /conversations/messages`
-
-Load persisted chat messages for the **origin** of the given page URL. Pages on the same domain share one thread.
-
-**Headers**
-
-| Header | Required | Description |
-| ------ | -------- | ----------- |
-| `X-Ezer-User-Id` | Yes | Client UUID |
-
-**Query**
-
-| Param | Required | Description |
-| ----- | -------- | ----------- |
-| `tabUrl` | Yes | Any page URL on the target origin |
-
-**Response `200`**
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `originId` | `string` \| `null` | Origin row id, or `null` if none yet |
-| `origin` | `string` \| `null` | URL origin, or `null` if none yet |
-| `tabUrl` | `string` | Echo of the query param |
-| `messages` | `array` | Chat messages ordered by `createdAt` |
-
-Each message:
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| `id` | `string` | Message UUID |
-| `role` | `string` | `user` \| `ezer` |
-| `messageType` | `string` | `CAPTURE` \| `TEXT` |
-| `content` | `string` | Plain text or JSON (`CAPTURE`) |
-| `createdAt` | `string` | ISO 8601 timestamp |
-
-**Example**
-
-```json
-{
-  "originId": "uuid-or-null",
-  "origin": "https://github.com",
-  "tabUrl": "https://github.com/acme/repo",
-  "messages": []
-}
-```
-
-**Errors:** `400` missing or invalid `tabUrl` · `401` invalid header
 
 ---
 

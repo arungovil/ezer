@@ -1,6 +1,6 @@
 import type { CaptureContent, Message } from "@src/shared/types.js";
 import { MESSAGE_TYPE } from "@src/shared/types.js";
-import type { StoredMessageBody } from "@src/sidepanel/api/types.js";
+import type { ChatMessageBody } from "@src/sidepanel/api/types.js";
 
 function parseCaptureContent(raw: string): CaptureContent {
   try {
@@ -24,7 +24,7 @@ function parseCaptureContent(raw: string): CaptureContent {
   }
 }
 
-export function storedMessageToUiMessage(message: StoredMessageBody): Message | null {
+export function storedMessageToUiMessage(message: ChatMessageBody): Message | null {
   if (message.messageType === MESSAGE_TYPE.CAPTURE && message.role === "user") {
     return {
       id: message.id,

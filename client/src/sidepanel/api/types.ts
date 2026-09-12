@@ -4,11 +4,31 @@ export interface ApiErrorBody {
 
 export interface ChatRequestBody {
   message: string;
+  tabUrl: string;
+}
+
+export interface ChatMessageBody {
+  id: string;
+  role: "user" | "ezer";
+  messageType: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface ChatListResponseBody {
+  originId: string | null;
+  origin: string | null;
+  tabUrl: string;
+  messages: ChatMessageBody[];
 }
 
 export interface ChatResponseBody {
+  originId: string;
+  origin: string;
   reply: string;
   rejected: boolean;
+  userMessageId: string;
+  ezerMessageId: string;
 }
 
 export type ItemKind = "task" | "reminder" | "note";
@@ -39,21 +59,6 @@ export interface CaptureResponseBody {
   ezerMessageId: string;
 }
 
-export interface StoredMessageBody {
-  id: string;
-  role: "user" | "ezer";
-  messageType: string;
-  content: string;
-  createdAt: string;
-}
-
-export interface ConversationMessagesResponseBody {
-  originId: string | null;
-  origin: string | null;
-  tabUrl: string;
-  messages: StoredMessageBody[];
-}
-
 export type ApiSuccess<T> = {
   ok: true;
   data: T;
@@ -73,11 +78,18 @@ export function isApiErrorBody(value: unknown): value is ApiErrorBody {
 }
 
 export function isChatResponseBody(value: unknown): value is ChatResponseBody {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const body = value as ChatResponseBody;
   return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as ChatResponseBody).reply === "string" &&
-    typeof (value as ChatResponseBody).rejected === "boolean"
+    typeof body.originId === "string" &&
+    typeof body.origin === "string" &&
+    typeof body.reply === "string" &&
+    typeof body.rejected === "boolean" &&
+    typeof body.userMessageId === "string" &&
+    typeof body.ezerMessageId === "string"
   );
 }
 
@@ -119,12 +131,12 @@ export function isCaptureResponseBody(value: unknown): value is CaptureResponseB
   );
 }
 
-function isStoredMessageBody(value: unknown): value is StoredMessageBody {
+function isChatMessageBody(value: unknown): value is ChatMessageBody {
   if (typeof value !== "object" || value === null) {
     return false;
   }
 
-  const message = value as StoredMessageBody;
+  const message = value as ChatMessageBody;
   return (
     typeof message.id === "string" &&
     (message.role === "user" || message.role === "ezer") &&
@@ -134,19 +146,17 @@ function isStoredMessageBody(value: unknown): value is StoredMessageBody {
   );
 }
 
-export function isConversationMessagesResponseBody(
-  value: unknown,
-): value is ConversationMessagesResponseBody {
+export function isChatListResponseBody(value: unknown): value is ChatListResponseBody {
   if (typeof value !== "object" || value === null) {
     return false;
   }
 
-  const body = value as ConversationMessagesResponseBody;
+  const body = value as ChatListResponseBody;
   return (
     (body.originId === null || typeof body.originId === "string") &&
     (body.origin === null || typeof body.origin === "string") &&
     typeof body.tabUrl === "string" &&
     Array.isArray(body.messages) &&
-    body.messages.every(isStoredMessageBody)
+    body.messages.every(isChatMessageBody)
   );
 }
