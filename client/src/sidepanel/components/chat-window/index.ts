@@ -1,5 +1,5 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { defaultInfoReply, infoReplies } from "@src/shared/constants.js";
+import { helpPrompt } from "@src/shared/constants.js";
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
 import { formatReplayFailure } from "@src/shared/replay-failure.js";
 import type {
@@ -152,25 +152,8 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     this.messages = [...this.messages, tabSwitchedMessage()];
   }
 
-  private handleSelectInfo(e: CustomEvent<{ id: string; prompt: string }>) {
-    const { id, prompt } = e.detail;
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      type: MESSAGE_TYPE.QUICK_ACTION,
-      content: prompt,
-    };
-
-    const reply = infoReplies[id] ?? defaultInfoReply;
-
-    const ezerMsg: Message = {
-      id: crypto.randomUUID(),
-      role: "ezer",
-      type: MESSAGE_TYPE.QUICK_ACTION,
-      content: reply,
-    };
-
-    this.messages = [...this.messages, userMsg, ezerMsg];
+  private handleHelp() {
+    void this.processChatMessage(helpPrompt, MESSAGE_TYPE.QUICK_ACTION);
   }
 
   private handleSend(e: CustomEvent<{ text: string }>) {
@@ -185,24 +168,31 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     void this.processMessage(text);
   }
 
-  private applyChatReply(ezerMsgId: string, content: string) {
+  private applyChatReply(
+    ezerMsgId: string,
+    content: string,
+    messageType: typeof MESSAGE_TYPE.TEXT | typeof MESSAGE_TYPE.QUICK_ACTION,
+  ) {
     this.messages = this.messages.map((m) =>
-      m.id === ezerMsgId && m.type === MESSAGE_TYPE.TEXT ? { ...m, content, loading: false } : m,
+      m.id === ezerMsgId && m.type === messageType ? { ...m, content, loading: false } : m,
     );
   }
 
-  private async processMessage(text: string) {
+  private async processChatMessage(
+    text: string,
+    messageType: typeof MESSAGE_TYPE.TEXT | typeof MESSAGE_TYPE.QUICK_ACTION = MESSAGE_TYPE.TEXT,
+  ) {
     const userMsg: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      type: MESSAGE_TYPE.TEXT,
+      type: messageType,
       content: text,
     };
     const ezerMsgId = crypto.randomUUID();
     const pendingEzerMsg: Message = {
       id: ezerMsgId,
       role: "ezer",
-      type: MESSAGE_TYPE.TEXT,
+      type: messageType,
       content: "",
       loading: true,
     };
@@ -211,15 +201,19 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     try {
       void this.chatTask.run([text, ezerMsgId]);
       const result = await this.chatTask.taskComplete;
-      this.applyChatReply(result.ezerMsgId, result.reply);
+      this.applyChatReply(result.ezerMsgId, result.reply, messageType);
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         return;
       }
 
       const errorMessage = error instanceof Error ? error.message : "Something went wrong.";
-      this.applyChatReply(ezerMsgId, errorMessage);
+      this.applyChatReply(ezerMsgId, errorMessage, messageType);
     }
+  }
+
+  private async processMessage(text: string) {
+    await this.processChatMessage(text);
   }
 
   render() {
@@ -250,7 +244,6 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
                       sender=${m.role}
                       .content=${m.content}
                       .loading=${m.loading ?? false}
-                      .recording=${this.workflowStatus === "recording"}
                     ></message-bubble>
                   </div>`,
               })}
@@ -264,7 +257,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
               ></chat-workflows>`
             : html`<chat-empty
                 @ez-start-recording=${() => handleStartRecording(this)}
-                @ez-select-info=${this.handleSelectInfo}
+                @ez-help=${this.handleHelp}
               ></chat-empty>`
       }
       <chat-input

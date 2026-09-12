@@ -1,30 +1,29 @@
 # Ezer
 
-Ezer is a Chrome side-panel companion with two features:
-
-1. **Workflow automation** — record real interactions on a page, save them as a reusable workflow, and replay them with synthetic DOM events.
-2. **Personal assistant** — capture text from any page and Ezer turns it into tasks, reminders, and notes that stick around (per-tab, persisted in a local server).
+Ezer is a Chrome side-panel **personal and professional assistant**. Capture what you find while
+browsing and Ezer turns it into tasks, reminders, and notes; it can also learn workflows and replay
+them for you. New ways to help are on the way.
 
 ## Features
 
-### 1. Workflow automation
-
-Record a task once, replay it whenever you need it.
-
-1. Click **Record** in the side panel.
-2. Do what you'd normally do — Ezer captures clicks, inputs, and form submissions on the capture phase.
-3. Stop recording, name the workflow, and Ezer saves it locally (IndexedDB, per tab).
-4. Replay any saved workflow — Ezer locates each element by its recorded selectors and drives it with synthetic DOM events.
-
-### 2. Personal assistant
+### Personal assistant
 
 Keep track of things you come across while browsing.
 
 1. Highlight text on any page while the panel is open — e.g. `Submit expense report by Friday 5pm`.
-2. Ezer sends the selection to the server, where an LLM classifies it as a **task**, **reminder**, or **note** and extracts a title, due date, and summary.
-3. The capture and the per-tab conversation are persisted in SQLite and reload when you return to that tab.
+2. Ezer turns the selection into a **task**, **reminder**, or **note**, with a title, due date, and summary.
+3. Your captures and Ezer's replies are saved and come back when you return to that tab.
 
-> **Roadmap:** due reminders and tasks will be pushed back to the user as notifications, turning captured items into an active to-do flow.
+> **Roadmap:** due reminders and tasks will be pushed back to you as notifications, turning captured items into an active to-do flow.
+
+### Workflows
+
+Record a repetitive on-page task once, replay it when you need it.
+
+1. Click **Record** in the side panel.
+2. Do what you'd normally do — Ezer captures your clicks, inputs, and form submissions.
+3. Stop recording, name the workflow, and Ezer saves it for that tab.
+4. Replay any saved workflow — Ezer finds each element and runs the steps for you.
 
 ## Demo (30 seconds)
 
@@ -32,7 +31,7 @@ Keep track of things you come across while browsing.
 2. Load the extension and open the side panel on any page.
 3. **Assistant:** highlight text — e.g. `Submit expense report by Friday 5pm`. Ezer shows the capture in chat and replies with what it understood (task, reminder, or note).
 4. **Workflow:** click Record, do a few actions on the page, stop, name it, then replay it from the saved-workflows list.
-5. Switch tabs and come back — the conversation for that page reloads from the server, and saved workflows stay with their tab.
+5. Switch tabs and come back — your captures for that page reload from the server, and saved workflows stay with their tab.
 
 ## Getting started
 
@@ -69,7 +68,7 @@ Load the extension:
 
 1. `chrome://extensions` → Developer mode → Load unpacked → `client/`
 2. Pin Ezer, open the side panel on a tab
-3. Record a workflow, or highlight text while the panel is open
+3. Highlight text while the panel is open, or record a workflow
 
 ### Build
 
@@ -80,18 +79,18 @@ npm run build
 ## Architecture
 
 ```
-Workflow automation (all client-side)
-  capture-phase listeners (content script)
-    → recorded actions with priority-ordered selectors
-    → IndexedDB (per tab)
-    → replay via synthetic DOM events
-
 Personal assistant (client → server)
   page selection (content script)
     → side panel chat UI (Lit)
     → Express API (POST /captures, POST /chat)
     → LLM structured extraction
     → SQLite (users, conversations, messages, captures, items)
+
+Workflows (all client-side, optional)
+  capture-phase listeners (content script)
+    → recorded actions with priority-ordered selectors
+    → IndexedDB (per tab)
+    → replay via synthetic DOM events
 ```
 
 | Layer            | Tech                                    |
@@ -117,6 +116,6 @@ See [server/README.md](server/README.md) for request/response shapes.
 
 ## Status
 
-**Shipped:** workflow recording + replay (client-side), text selection capture, LLM task/reminder extraction, SQLite persistence, per-tab chat history.
+**Shipped:** text selection capture, LLM task/reminder/note extraction, SQLite persistence, per-tab capture history; workflow recording + replay.
 
 **Roadmap:** notifications for due tasks and reminders.

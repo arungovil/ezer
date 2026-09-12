@@ -68,13 +68,6 @@ export type Message =
       loading?: boolean;
     };
 
-export interface InfoPill {
-  id: string;
-  label: string;
-  prompt: string;
-  icon: unknown;
-}
-
 export interface RecordedAction {
   type: ActionType;
   selectors: string[];

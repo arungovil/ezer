@@ -1,17 +1,15 @@
 import "@src/sidepanel/components/common/ez-pill/index.js";
 import "@src/sidepanel/components/record-button/index.js";
-import { infoPills } from "@src/shared/constants.js";
-import type { InfoPill } from "@src/shared/types.js";
+import { helpCircleIcon } from "@src/sidepanel/icons/index.js";
 import { html, LitElement } from "lit";
 import { styles } from "./styles.js";
 
 export class ChatEmpty extends LitElement {
   static styles = styles;
 
-  private handleInfoPillClick(pill: InfoPill) {
+  private handleHelpClick() {
     this.dispatchEvent(
-      new CustomEvent("ez-select-info", {
-        detail: { id: pill.id, prompt: pill.prompt },
+      new CustomEvent("ez-help", {
         bubbles: true,
         composed: true,
       }),
@@ -22,22 +20,18 @@ export class ChatEmpty extends LitElement {
     return html`
       <div class="hero">
         <h2>Say hello to ezer! 👋</h2>
-        <p>Record a new workflow or choose a topic below</p>
+        <p>Highlight text on the page or tap Help to get started</p>
       </div>
 
       <div class="pills-container">
         <record-button></record-button>
 
-        ${infoPills.map(
-          (pill) => html`
-            <ez-pill
-              variant="default"
-              .icon=${pill.icon}
-              .label=${pill.label}
-              @click=${() => this.handleInfoPillClick(pill)}
-            ></ez-pill>
-          `,
-        )}
+        <ez-pill
+          variant="default"
+          .icon=${helpCircleIcon}
+          label="Help"
+          @click=${this.handleHelpClick}
+        ></ez-pill>
       </div>
     `;
   }

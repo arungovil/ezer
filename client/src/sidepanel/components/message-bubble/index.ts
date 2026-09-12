@@ -22,7 +22,6 @@ export class MessageBubble extends LitElement {
   @property({ type: String }) type: MessageType = MESSAGE_TYPE.TEXT;
   @property() content: unknown = "";
   @property({ type: Boolean }) loading = false;
-  @property({ type: Boolean }) recording = false;
 
   static styles = styles;
 
@@ -36,9 +35,7 @@ export class MessageBubble extends LitElement {
         ></message-bubble-capture>`;
       case MESSAGE_TYPE.QUICK_ACTION:
         return html`<message-bubble-quick-action
-          .sender=${this.sender}
           .content=${this.content as string}
-          .recording=${this.recording}
         ></message-bubble-quick-action>`;
       case MESSAGE_TYPE.RECORDING:
         return html`<message-bubble-recording
