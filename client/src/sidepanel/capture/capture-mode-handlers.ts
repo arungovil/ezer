@@ -2,6 +2,37 @@ import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
 import type { ChatWindowHost, Message } from "@src/shared/types.js";
 import { captureStartedMessage } from "./messages.js";
 
+function sendCaptureMode(enabled: boolean): void {
+  if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) return;
+
+  void chrome.runtime.sendMessage({
+    target: "content",
+    payload: {
+      type: enabled ? RUNTIME_MESSAGE_TYPE.START_CAPTURE : RUNTIME_MESSAGE_TYPE.STOP_CAPTURE,
+    },
+  });
+}
+
+export function armCaptureMode(): void {
+  sendCaptureMode(true);
+}
+
+export function disarmCaptureMode(): void {
+  sendCaptureMode(false);
+}
+
+export function handleStopCaptureMode(): void {
+  disarmCaptureMode();
+}
+
+export function syncCaptureMode(host: ChatWindowHost): void {
+  if (host.workflowStatus === "idle") {
+    armCaptureMode();
+  } else {
+    disarmCaptureMode();
+  }
+}
+
 export function handleStartCapture(host: ChatWindowHost): void {
   const msg = captureStartedMessage();
   host.messages = [...host.messages, msg];
@@ -36,13 +67,4 @@ export function handleStartCapture(host: ChatWindowHost): void {
           : m,
       );
     });
-}
-
-export function handleStopCaptureMode(): void {
-  if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) return;
-
-  void chrome.runtime.sendMessage({
-    target: "content",
-    payload: { type: RUNTIME_MESSAGE_TYPE.STOP_CAPTURE },
-  });
 }

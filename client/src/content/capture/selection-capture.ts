@@ -27,8 +27,6 @@ function handleMouseUp(): void {
   const text = selection.toString().trim();
   if (!text) return;
 
-  captureMode = false;
-
   chrome.runtime
     .sendMessage({
       type: RUNTIME_MESSAGE_TYPE.CAPTURE_SELECTION,

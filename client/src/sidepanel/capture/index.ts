@@ -1,4 +1,10 @@
-export { handleStartCapture, handleStopCaptureMode } from "./capture-mode-handlers.js";
+export {
+  armCaptureMode,
+  disarmCaptureMode,
+  handleStartCapture,
+  handleStopCaptureMode,
+  syncCaptureMode,
+} from "./capture-mode-handlers.js";
 export { type CaptureTaskArgs, createCaptureTask } from "./capture-task.js";
 export { loadCaptureConversationForActiveTab } from "./conversation-loader.js";
 export { handleSelectionCaptured } from "./handlers.js";

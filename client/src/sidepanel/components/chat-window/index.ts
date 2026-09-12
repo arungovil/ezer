@@ -12,8 +12,9 @@ import type {
 import { MESSAGE_TYPE } from "@src/shared/types.js";
 import {
   createCaptureTask,
+  disarmCaptureMode,
   handleSelectionCaptured,
-  handleStopCaptureMode,
+  syncCaptureMode,
 } from "@src/sidepanel/capture/index.js";
 import { tabSwitchedMessage } from "@src/sidepanel/workflow/messages-handler.js";
 import {
@@ -37,7 +38,7 @@ import {
   handleSelectWorkflow,
   refreshSavedWorkflows,
 } from "@src/sidepanel/workflow/workflow-handlers.js";
-import { html, LitElement } from "lit";
+import { html, LitElement, type PropertyValues } from "lit";
 import { query, state } from "lit/decorators.js";
 import { createChatTask } from "./chat-task.js";
 import { styles } from "./styles.js";
@@ -96,6 +97,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
       chrome.runtime.onMessage.addListener(this.handleRuntimeMessage);
     }
     void refreshSavedWorkflows(this);
+    syncCaptureMode(this);
   }
 
   override disconnectedCallback() {
@@ -103,12 +105,16 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
       chrome.runtime.onMessage.removeListener(this.handleRuntimeMessage);
     }
+    disarmCaptureMode();
   }
 
   static styles = styles;
 
-  protected override updated() {
+  protected override updated(changedProperties: PropertyValues<this>) {
     this.scrollToBottom();
+    if (changedProperties.has("workflowStatus")) {
+      syncCaptureMode(this);
+    }
   }
 
   private scrollToBottom() {
@@ -120,13 +126,13 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   private resetChat() {
     this.chatTask.abort();
     this.captureTask.abort();
-    handleStopCaptureMode();
     this.messages = [];
     this.workflowStatus = "idle";
     this.pendingEmptyMsgId = null;
     this.pendingWorkflowSave = null;
     this.replayingMessageId = null;
     this.pendingReplayError = null;
+    syncCaptureMode(this);
   }
 
   private handleNewChat() {
@@ -139,7 +145,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     this.replayingMessageId = null;
     clearPendingEmptyPlaceholder(this);
     clearPendingWorkflowSave(this);
-    handleStopCaptureMode();
+    syncCaptureMode(this);
 
     if (this.messages.length === 0) {
       void refreshSavedWorkflows(this);
