@@ -18,13 +18,32 @@ export function getRequestUserId(req: Request): string {
   return userId;
 }
 
-export function requireUser(req: Request, res: Response<ApiErrorBody>, next: NextFunction): void {
+export function requireUserId(req: Request, res: Response<ApiErrorBody>, next: NextFunction): void {
   try {
     const userId = getRequestUserId(req);
-    upsertUser(userId);
     res.locals.userId = userId;
     next();
   } catch {
     res.status(401).json({ error: errorMessages.userIdRequired });
   }
+}
+
+export function requireUser(req: Request, res: Response<ApiErrorBody>, next: NextFunction): void {
+  requireUserId(req, res, () => {
+    try {
+      upsertUser(readUserId(res));
+      next();
+    } catch {
+      res.status(500).json({ error: errorMessages.userPersistFailed });
+    }
+  });
+}
+
+function readUserId(res: Response): string {
+  const userId = res.locals.userId;
+  if (typeof userId !== "string") {
+    throw new Error(errorMessages.userIdRequired);
+  }
+
+  return userId;
 }

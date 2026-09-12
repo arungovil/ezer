@@ -108,11 +108,14 @@ The server powers the personal-assistant feature. Workflow automation is entirel
 | Method | Path                              | Description                        |
 | ------ | --------------------------------- | ---------------------------------- |
 | `GET`  | `/health`                         | Liveness                           |
+| `GET`  | `/user`                           | Get current user                   |
+| `PUT`  | `/user`                           | Register or sync user              |
+| `DELETE` | `/user`                         | Delete user and owned data         |
 | `POST` | `/captures`                       | Extract and store a text selection |
-| `GET`  | `/conversations/messages?tabUrl=` | Load chat for a tab                |
+| `GET`  | `/conversations/messages?tabUrl=` | Load chat for an origin            |
 | `POST` | `/chat`                           | General Ezer assistant chat        |
 
-See [server/README.md](server/README.md) for request/response shapes.
+See [server/README.md](server/README.md) for full request/response shapes and error codes.
 
 ## Status
 

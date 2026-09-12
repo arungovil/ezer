@@ -2,6 +2,8 @@
 
 SQLite persistence for the personal-assistant backend. Schema is defined in `schema.ts` and applied on startup via `getDb()`.
 
+HTTP API reference: [../../README.md](../../README.md)
+
 **Engine:** SQLite (better-sqlite3)  
 **Default path:** `./data/ezer.sqlite` (`DB_PATH` env)  
 **Journal mode:** WAL  
@@ -236,7 +238,7 @@ Typical flow for `POST /captures`:
 
 | File          | Table      | Responsibility                          |
 | ------------- | ---------- | --------------------------------------- |
-| `user.ts`     | `user`     | Upsert client identity                  |
+| `user.ts`     | `user`     | Get, upsert, and delete client identity |
 | `origin.ts`   | `origin`   | Get or create origin by user + domain   |
 | `chat.ts`     | `chat`     | Insert and list messages                |
 | `task.ts`     | `task`     | Insert extracted items                  |
