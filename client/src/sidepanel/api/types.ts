@@ -30,8 +30,9 @@ export interface CaptureItemBody {
 }
 
 export interface CaptureResponseBody {
-  captureId: string;
-  conversationId: string;
+  taskId: string;
+  originId: string;
+  origin: string;
   item: CaptureItemBody;
   reply: string;
   userMessageId: string;
@@ -47,7 +48,8 @@ export interface StoredMessageBody {
 }
 
 export interface ConversationMessagesResponseBody {
-  conversationId: string | null;
+  originId: string | null;
+  origin: string | null;
   tabUrl: string;
   messages: StoredMessageBody[];
 }
@@ -107,8 +109,9 @@ export function isCaptureResponseBody(value: unknown): value is CaptureResponseB
 
   const body = value as CaptureResponseBody;
   return (
-    typeof body.captureId === "string" &&
-    typeof body.conversationId === "string" &&
+    typeof body.taskId === "string" &&
+    typeof body.originId === "string" &&
+    typeof body.origin === "string" &&
     isCaptureItemBody(body.item) &&
     typeof body.reply === "string" &&
     typeof body.userMessageId === "string" &&
@@ -140,7 +143,8 @@ export function isConversationMessagesResponseBody(
 
   const body = value as ConversationMessagesResponseBody;
   return (
-    (body.conversationId === null || typeof body.conversationId === "string") &&
+    (body.originId === null || typeof body.originId === "string") &&
+    (body.origin === null || typeof body.origin === "string") &&
     typeof body.tabUrl === "string" &&
     Array.isArray(body.messages) &&
     body.messages.every(isStoredMessageBody)

@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import { errorMessages } from "../config/constants.js";
 import { isLlmConfigured } from "../config/env.js";
-import { getOrCreateConversation } from "../db/conversations.js";
-import { listMessagesByTabUrl } from "../db/messages.js";
+import { listChatsByOriginId } from "../db/chat.js";
+import { getOriginByUserAndOrigin } from "../db/origin.js";
+import { parsePageOrigin } from "../lib/parse-origin.js";
 import { readUserId } from "../middleware/read-user-id.js";
 import { processCapture } from "../services/capture-service.js";
 import type { ApiErrorBody } from "../types/api.js";
@@ -49,12 +50,19 @@ export function handleConversationMessages(
     return;
   }
 
+  const pageOrigin = parsePageOrigin(tabUrl);
+  if (!pageOrigin) {
+    res.status(400).json({ error: errorMessages.invalidTabUrl });
+    return;
+  }
+
   const userId = readUserId(res);
-  const messages = listMessagesByTabUrl(userId, tabUrl);
-  const conversation = messages.length > 0 ? getOrCreateConversation(userId, tabUrl) : null;
+  const origin = getOriginByUserAndOrigin(userId, pageOrigin);
+  const messages = origin ? listChatsByOriginId(origin.id) : [];
 
   res.json({
-    conversationId: conversation?.id ?? null,
+    originId: origin?.id ?? null,
+    origin: origin?.origin ?? null,
     tabUrl,
     messages: messages.map(toStoredMessageBody),
   });

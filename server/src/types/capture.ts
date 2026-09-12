@@ -1,6 +1,12 @@
-export const itemKinds = ["task", "reminder", "note"] as const;
+export const taskKinds = ["task", "reminder", "note"] as const;
 
-export type ItemKind = (typeof itemKinds)[number];
+export type TaskKind = (typeof taskKinds)[number];
+
+/** @deprecated Use TaskKind */
+export type ItemKind = TaskKind;
+
+/** @deprecated Use taskKinds */
+export const itemKinds = taskKinds;
 
 export interface CaptureRequestBody {
   text: string;
@@ -12,15 +18,16 @@ export interface CaptureRequestBody {
 
 export interface CaptureItemBody {
   id: string;
-  kind: ItemKind;
+  kind: TaskKind;
   title: string;
   dueAt: string | null;
   summary: string | null;
 }
 
 export interface CaptureResponseBody {
-  captureId: string;
-  conversationId: string;
+  taskId: string;
+  originId: string;
+  origin: string;
   item: CaptureItemBody;
   reply: string;
   userMessageId: string;
@@ -36,13 +43,14 @@ export interface StoredMessageBody {
 }
 
 export interface ConversationMessagesResponseBody {
-  conversationId: string | null;
+  originId: string | null;
+  origin: string | null;
   tabUrl: string;
   messages: StoredMessageBody[];
 }
 
 export interface CaptureLlmResult {
-  kind: ItemKind;
+  kind: TaskKind;
   title: string;
   dueAt: string | null;
   summary: string;
@@ -87,8 +95,8 @@ export function parseTabUrlQuery(value: unknown): string | null {
   return tabUrl.length > 0 ? tabUrl : null;
 }
 
-function isItemKind(value: unknown): value is ItemKind {
-  return typeof value === "string" && (itemKinds as readonly string[]).includes(value);
+function isTaskKind(value: unknown): value is TaskKind {
+  return typeof value === "string" && (taskKinds as readonly string[]).includes(value);
 }
 
 export function isCaptureLlmResult(value: unknown): value is CaptureLlmResult {
@@ -100,7 +108,7 @@ export function isCaptureLlmResult(value: unknown): value is CaptureLlmResult {
   const dueAt = result.dueAt;
 
   return (
-    isItemKind(result.kind) &&
+    isTaskKind(result.kind) &&
     typeof result.title === "string" &&
     result.title.trim().length > 0 &&
     (dueAt === null || typeof dueAt === "string") &&

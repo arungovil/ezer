@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { getEnv } from "../config/env.js";
-import { insertCapture } from "../db/captures.js";
-import { getOrCreateConversation } from "../db/conversations.js";
-import { insertItem } from "../db/items.js";
-import { insertMessage } from "../db/messages.js";
+import { insertChat } from "../db/chat.js";
+import { getOrCreateOrigin } from "../db/origin.js";
+import { insertTask } from "../db/task.js";
+import { parsePageOrigin } from "../lib/parse-origin.js";
 import { captureSystemPrompt } from "../prompts/capture.js";
 import {
   type CaptureLlmResult,
@@ -73,37 +73,18 @@ export async function processCapture(
   userId: string,
   input: CaptureRequestBody,
 ): Promise<CaptureResponseBody> {
-  const conversation = getOrCreateConversation(userId, input.tabUrl);
-  const capture = insertCapture({
-    conversationId: conversation.id,
-    userId,
-    rawText: input.text,
-    sourceUrl: input.url ?? input.tabUrl,
-    sourceTitle: input.title,
-  });
-
-  let extracted: CaptureLlmResult;
-  try {
-    extracted = await extractCapture(input);
-  } catch {
-    extracted = fallbackCaptureResult(input.text);
+  const pageOrigin = parsePageOrigin(input.tabUrl);
+  if (!pageOrigin) {
+    throw new Error("Invalid tab URL");
   }
 
-  const item = insertItem({
-    captureId: capture.id,
-    userId,
-    kind: extracted.kind,
-    title: extracted.title.trim(),
-    dueAt: extracted.dueAt,
-    summary: extracted.summary.trim(),
-  });
-
+  const origin = getOrCreateOrigin(userId, pageOrigin);
   const userMessageId = randomUUID();
   const ezerMessageId = randomUUID();
 
-  insertMessage({
+  insertChat({
     id: userMessageId,
-    conversationId: conversation.id,
+    originId: origin.id,
     role: "user",
     messageType: "CAPTURE",
     content: JSON.stringify({
@@ -113,23 +94,43 @@ export async function processCapture(
     }),
   });
 
-  insertMessage({
+  let extracted: CaptureLlmResult;
+  try {
+    extracted = await extractCapture(input);
+  } catch {
+    extracted = fallbackCaptureResult(input.text);
+  }
+
+  const task = insertTask({
+    originId: origin.id,
+    userId,
+    chatId: userMessageId,
+    kind: extracted.kind,
+    title: extracted.title.trim(),
+    dueAt: extracted.dueAt,
+    summary: extracted.summary.trim(),
+    sourceUrl: input.url ?? input.tabUrl,
+    sourceTitle: input.title,
+  });
+
+  insertChat({
     id: ezerMessageId,
-    conversationId: conversation.id,
+    originId: origin.id,
     role: "ezer",
     messageType: "TEXT",
     content: extracted.reply.trim(),
   });
 
   return {
-    captureId: capture.id,
-    conversationId: conversation.id,
+    taskId: task.id,
+    originId: origin.id,
+    origin: origin.origin,
     item: {
-      id: item.id,
-      kind: item.kind,
-      title: item.title,
-      dueAt: item.dueAt,
-      summary: item.summary,
+      id: task.id,
+      kind: task.kind,
+      title: task.title,
+      dueAt: task.dueAt,
+      summary: task.summary,
     },
     reply: extracted.reply.trim(),
     userMessageId,

@@ -4,7 +4,7 @@ export function upsertUser(userId: string): void {
   getDb()
     .prepare(
       `
-      INSERT INTO users (id)
+      INSERT INTO user (id)
       VALUES (?)
       ON CONFLICT(id) DO NOTHING
     `,

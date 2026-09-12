@@ -1,0 +1,251 @@
+# Ezer database
+
+SQLite persistence for the personal-assistant backend. Schema is defined in `schema.ts` and applied on startup via `getDb()`.
+
+**Engine:** SQLite (better-sqlite3)  
+**Default path:** `./data/ezer.sqlite` (`DB_PATH` env)  
+**Journal mode:** WAL  
+**Foreign keys:** ON
+
+## Conceptual model
+
+Data is scoped in three layers:
+
+1. **User** — identity from the client (`X-Ezer-User-Id` UUID)
+2. **Origin** — browsing context per user, keyed by URL origin (e.g. `https://github.com`)
+3. **Domain data** — chat messages, tasks, and workflows for that origin
+
+All pages on the same origin share one chat thread and one set of tasks/workflows for that user.
+
+```
+user
+  └── origin (user_id + origin)
+        ├── chat
+        ├── task
+        └── workflow
+```
+
+## Entity-relationship diagram
+
+```mermaid
+erDiagram
+  user ||--o{ origin : "has"
+  origin ||--o{ chat : "has"
+  origin ||--o{ task : "has"
+  origin ||--o{ workflow : "has"
+  chat ||--o| task : "optional source"
+  user ||--o{ task : "owns"
+  user ||--o{ workflow : "owns"
+
+  user {
+    text id PK
+    text created_at
+  }
+
+  origin {
+    text id PK
+    text user_id FK
+    text origin UK
+    text created_at
+  }
+
+  chat {
+    text id PK
+    text origin_id FK
+    text role
+    text message_type
+    text content
+    text created_at
+  }
+
+  task {
+    text id PK
+    text origin_id FK
+    text user_id FK
+    text chat_id FK
+    text kind
+    text title
+    text summary
+    text due_at
+    text status
+    text source_url
+    text source_title
+    text created_at
+  }
+
+  workflow {
+    text id PK
+    text origin_id FK
+    text user_id FK
+    text name
+    text actions
+    text created_at
+  }
+```
+
+## Tables
+
+### `user`
+
+Client identity. Created on first authenticated request.
+
+| Column       | Type | Constraints | Description                          |
+| ------------ | ---- | ----------- | ------------------------------------ |
+| `id`         | TEXT | PRIMARY KEY | UUID from `X-Ezer-User-Id` header    |
+| `created_at` | TEXT | NOT NULL    | ISO 8601 timestamp (SQLite `datetime`) |
+
+---
+
+### `origin`
+
+Per-user browsing context. One row per `(user_id, origin)` pair.
+
+| Column       | Type | Constraints                  | Description                                      |
+| ------------ | ---- | ---------------------------- | ------------------------------------------------ |
+| `id`         | TEXT | PRIMARY KEY                  | UUID                                             |
+| `user_id`    | TEXT | NOT NULL, FK → `user(id)`    | Owner                                            |
+| `origin`     | TEXT | NOT NULL                     | URL origin, e.g. `https://github.com`            |
+| `created_at` | TEXT | NOT NULL                     | First time this user visited this origin         |
+
+**Unique:** `(user_id, origin)`
+
+**Derivation:** `origin` is parsed from the client’s page URL via `new URL(tabUrl).origin` (see `lib/parse-origin.ts`). Full page paths on the same site map to one origin row.
+
+---
+
+### `chat`
+
+Chat messages for an origin. Ordered by `created_at`.
+
+| Column         | Type | Constraints                  | Description                                           |
+| -------------- | ---- | ---------------------------- | ----------------------------------------------------- |
+| `id`           | TEXT | PRIMARY KEY                  | UUID                                                  |
+| `origin_id`    | TEXT | NOT NULL, FK → `origin(id)`  | Parent origin                                         |
+| `role`         | TEXT | NOT NULL, CHECK              | `user` \| `ezer`                                      |
+| `message_type` | TEXT | NOT NULL                     | See [Message types](#message-types)                   |
+| `content`      | TEXT | NOT NULL                     | Plain text or JSON (for `CAPTURE`)                    |
+| `created_at`   | TEXT | NOT NULL                     | Message timestamp                                     |
+
+**Index:** `idx_chat_origin_created (origin_id, created_at)`
+
+---
+
+### `task`
+
+Structured items extracted from text captures (or future sources).
+
+| Column         | Type | Constraints                  | Description                                |
+| -------------- | ---- | ---------------------------- | ------------------------------------------ |
+| `id`           | TEXT | PRIMARY KEY                  | UUID                                       |
+| `origin_id`    | TEXT | NOT NULL, FK → `origin(id)`  | Domain scope                               |
+| `user_id`      | TEXT | NOT NULL, FK → `user(id)`    | Owner (denormalized for user-wide queries) |
+| `chat_id`      | TEXT | FK → `chat(id)`, nullable    | User `CAPTURE` message that created this   |
+| `kind`         | TEXT | NOT NULL, CHECK              | `task` \| `reminder` \| `note`             |
+| `title`        | TEXT | NOT NULL                     | Short label                                |
+| `summary`      | TEXT |                          | One-line description                       |
+| `due_at`       | TEXT |                          | ISO 8601 datetime; used for reminders      |
+| `status`       | TEXT | NOT NULL, DEFAULT `active`   | `active` \| `done` \| `dismissed`          |
+| `source_url`   | TEXT |                          | Page URL where text was selected           |
+| `source_title` | TEXT |                          | Page title at capture time                 |
+| `created_at`   | TEXT | NOT NULL                     | Creation timestamp                         |
+
+**Indexes:**
+- `idx_task_user_status_due (user_id, status, due_at)` — user to-do / reminder queries
+- `idx_task_origin_created (origin_id, created_at)` — per-origin task history
+
+---
+
+### `workflow`
+
+Recorded browser interaction sequences, scoped to an origin.
+
+| Column       | Type | Constraints                  | Description                          |
+| ------------ | ---- | ---------------------------- | ------------------------------------ |
+| `id`         | TEXT | PRIMARY KEY                  | UUID                                 |
+| `origin_id`  | TEXT | NOT NULL, FK → `origin(id)`  | Domain scope                         |
+| `user_id`    | TEXT | NOT NULL, FK → `user(id)`    | Owner                                |
+| `name`       | TEXT | NOT NULL                     | User-given workflow name             |
+| `actions`    | TEXT | NOT NULL                     | JSON array of recorded DOM actions   |
+| `created_at` | TEXT | NOT NULL                     | Creation timestamp                   |
+
+**Index:** `idx_workflow_origin_created (origin_id, created_at)`
+
+> **Note:** Workflow sync from the extension is not wired yet. The table exists for server-side storage; the client still uses IndexedDB today.
+
+## Relationships
+
+| Parent   | Child      | Cardinality | FK column   | On delete |
+| -------- | ---------- | ----------- | ----------- | --------- |
+| `user`   | `origin`   | 1:N         | `user_id`   | —         |
+| `user`   | `task`     | 1:N         | `user_id`   | —         |
+| `user`   | `workflow` | 1:N         | `user_id`   | —         |
+| `origin` | `chat`     | 1:N         | `origin_id` | —         |
+| `origin` | `task`     | 1:N         | `origin_id` | —         |
+| `origin` | `workflow` | 1:N         | `origin_id` | —         |
+| `chat`   | `task`     | 1:0..1      | `chat_id`   | —         |
+
+**Lookup keys in application code:**
+
+| Operation              | Key                                              |
+| ---------------------- | ------------------------------------------------ |
+| Resolve origin         | `(user_id, origin)`                              |
+| Load chat for a page   | `origin.id` where `origin = parsePageOrigin(tabUrl)` |
+| List tasks for origin  | `task.origin_id`                                 |
+| List workflows         | `workflow.origin_id`                             |
+
+## Enums and conventions
+
+### Message types
+
+Used in `chat.message_type`:
+
+| Value     | Role  | `content` format                                      |
+| --------- | ----- | ----------------------------------------------------- |
+| `CAPTURE` | user  | JSON: `{ text, url?, title? }` — raw page selection   |
+| `TEXT`    | either| Markdown plain text (Ezer replies, future typed chat) |
+
+### Task kinds
+
+| Value      | Meaning                                      |
+| ---------- | -------------------------------------------- |
+| `task`     | Action item, often without a specific time   |
+| `reminder` | Action tied to a date/time (`due_at` set)    |
+| `note`     | Reference info; no action required           |
+
+### Task status
+
+| Value       | Meaning                |
+| ----------- | ---------------------- |
+| `active`    | Open / in progress     |
+| `done`      | Completed              |
+| `dismissed` | Removed from active list |
+
+## Capture write path
+
+Typical flow for `POST /captures`:
+
+```
+1. getOrCreateOrigin(userId, parsePageOrigin(tabUrl))
+2. INSERT chat  — user CAPTURE (raw selection JSON)
+3. LLM extract  — kind, title, summary, due_at, reply
+4. INSERT task  — structured item (chat_id → user message)
+5. INSERT chat  — ezer TEXT (reply markdown)
+```
+
+## Module map
+
+| File          | Table      | Responsibility                          |
+| ------------- | ---------- | --------------------------------------- |
+| `user.ts`     | `user`     | Upsert client identity                  |
+| `origin.ts`   | `origin`   | Get or create origin by user + domain   |
+| `chat.ts`     | `chat`     | Insert and list messages                |
+| `task.ts`     | `task`     | Insert extracted items                  |
+| `workflow.ts` | `workflow` | Insert workflows (API not wired)        |
+| `schema.ts`   | —          | DDL migrations                          |
+| `index.ts`    | —          | Connection, migration runner, lifecycle |
+
+## Migrations
+
+Migrations run sequentially on every `getDb()` call. Legacy plural table names and pre-refactor tables are dropped before the current schema is created.
+
+For a clean slate during development, delete the SQLite file and restart the server.

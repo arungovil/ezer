@@ -1,23 +1,50 @@
 export const migrations = [
   `
-    CREATE TABLE IF NOT EXISTS users (
+    DROP TABLE IF EXISTS workflows;
+  `,
+  `
+    DROP TABLE IF EXISTS tasks;
+  `,
+  `
+    DROP TABLE IF EXISTS chats;
+  `,
+  `
+    DROP TABLE IF EXISTS origins;
+  `,
+  `
+    DROP TABLE IF EXISTS users;
+  `,
+  `
+    DROP TABLE IF EXISTS items;
+  `,
+  `
+    DROP TABLE IF EXISTS captures;
+  `,
+  `
+    DROP TABLE IF EXISTS messages;
+  `,
+  `
+    DROP TABLE IF EXISTS conversations;
+  `,
+  `
+    CREATE TABLE IF NOT EXISTS user (
       id TEXT PRIMARY KEY,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `,
   `
-    CREATE TABLE IF NOT EXISTS conversations (
+    CREATE TABLE IF NOT EXISTS origin (
       id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL REFERENCES users(id),
-      tab_url TEXT NOT NULL,
+      user_id TEXT NOT NULL REFERENCES user(id),
+      origin TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      UNIQUE(user_id, tab_url)
+      UNIQUE(user_id, origin)
     );
   `,
   `
-    CREATE TABLE IF NOT EXISTS messages (
+    CREATE TABLE IF NOT EXISTS chat (
       id TEXT PRIMARY KEY,
-      conversation_id TEXT NOT NULL REFERENCES conversations(id),
+      origin_id TEXT NOT NULL REFERENCES origin(id),
       role TEXT NOT NULL CHECK(role IN ('user', 'ezer')),
       message_type TEXT NOT NULL,
       content TEXT NOT NULL,
@@ -25,35 +52,45 @@ export const migrations = [
     );
   `,
   `
-    CREATE INDEX IF NOT EXISTS idx_messages_conversation_id
-    ON messages(conversation_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_chat_origin_created
+    ON chat(origin_id, created_at);
   `,
   `
-    CREATE TABLE IF NOT EXISTS captures (
+    CREATE TABLE IF NOT EXISTS task (
       id TEXT PRIMARY KEY,
-      conversation_id TEXT NOT NULL REFERENCES conversations(id),
-      user_id TEXT NOT NULL REFERENCES users(id),
-      raw_text TEXT NOT NULL,
+      origin_id TEXT NOT NULL REFERENCES origin(id),
+      user_id TEXT NOT NULL REFERENCES user(id),
+      chat_id TEXT REFERENCES chat(id),
+      kind TEXT NOT NULL CHECK(kind IN ('task', 'reminder', 'note')),
+      title TEXT NOT NULL,
+      summary TEXT,
+      due_at TEXT,
+      status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'done', 'dismissed')),
       source_url TEXT,
       source_title TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `,
   `
-    CREATE TABLE IF NOT EXISTS items (
+    CREATE INDEX IF NOT EXISTS idx_task_user_status_due
+    ON task(user_id, status, due_at);
+  `,
+  `
+    CREATE INDEX IF NOT EXISTS idx_task_origin_created
+    ON task(origin_id, created_at);
+  `,
+  `
+    CREATE TABLE IF NOT EXISTS workflow (
       id TEXT PRIMARY KEY,
-      capture_id TEXT NOT NULL REFERENCES captures(id),
-      user_id TEXT NOT NULL REFERENCES users(id),
-      kind TEXT NOT NULL CHECK(kind IN ('task', 'reminder', 'note')),
-      title TEXT NOT NULL,
-      due_at TEXT,
-      status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'done', 'dismissed')),
-      summary TEXT,
+      origin_id TEXT NOT NULL REFERENCES origin(id),
+      user_id TEXT NOT NULL REFERENCES user(id),
+      name TEXT NOT NULL,
+      actions TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `,
   `
-    CREATE INDEX IF NOT EXISTS idx_items_user_status_due
-    ON items(user_id, status, due_at);
+    CREATE INDEX IF NOT EXISTS idx_workflow_origin_created
+    ON workflow(origin_id, created_at);
   `,
 ] as const;
