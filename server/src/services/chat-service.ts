@@ -74,6 +74,8 @@ export async function processChat(
   const userMessageId = randomUUID();
   const ezerMessageId = randomUUID();
 
+  const llmResult = await chatWithLlm(input.message);
+
   insertChat({
     id: userMessageId,
     originId: origin.id,
@@ -81,8 +83,6 @@ export async function processChat(
     messageType: "TEXT",
     content: input.message,
   });
-
-  const llmResult = await chatWithLlm(input.message);
 
   insertChat({
     id: ezerMessageId,

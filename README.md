@@ -25,14 +25,6 @@ Record a repetitive on-page task once, replay it when you need it.
 3. Stop recording, name the workflow, and Ezer saves it for that tab.
 4. Replay any saved workflow — Ezer finds each element and runs the steps for you.
 
-## Demo (30 seconds)
-
-1. Start the server (see below) with `LLM_API_KEY` set.
-2. Load the extension and open the side panel on any page.
-3. **Assistant:** highlight text — e.g. `Submit expense report by Friday 5pm`. Ezer shows the capture in chat and replies with what it understood (reminder or note).
-4. **Workflow:** click Record, do a few actions on the page, stop, name it, then replay it from the saved-workflows list.
-5. Switch tabs and come back — your captures for that page reload from the server, and saved workflows stay with their tab.
-
 ## Getting started
 
 ### Prerequisites
@@ -82,46 +74,46 @@ npm run build
 Personal assistant (client → server)
   page selection (content script)
     → side panel chat UI (Lit)
-    → Express API (POST /captures, POST /chat)
+    → Express API (POST /captures, GET/POST /chat, GET/PATCH /task)
     → LLM structured extraction
-    → SQLite (users, conversations, messages, captures, items)
+    → SQLite (user, origin, chat, task)
 
-Workflows (all client-side, optional)
+Workflows (client today; server APIs ready)
   capture-phase listeners (content script)
     → recorded actions with priority-ordered selectors
-    → IndexedDB (per tab)
+    → IndexedDB (per tab) — extension not yet wired to GET/POST /workflow
     → replay via synthetic DOM events
 ```
 
-| Layer            | Tech                                    |
-| ---------------- | --------------------------------------- |
-| Extension        | Manifest V3, Lit 3, TypeScript, esbuild |
-| Workflow storage | IndexedDB (client-side, per tab)        |
-| Server           | Express 4, better-sqlite3, TypeScript   |
-| LLM              | DeepSeek (`deepseek-chat`), JSON mode   |
-| Tooling          | Biome, Husky, strict TypeScript         |
+| Layer            | Tech                                                |
+| ---------------- | --------------------------------------------------- |
+| Extension        | Manifest V3, Lit 3, TypeScript, esbuild             |
+| Workflow storage | IndexedDB (client); SQLite via `/workflow` (server) |
+| Server           | Express 4, better-sqlite3, TypeScript               |
+| LLM              | DeepSeek (`deepseek-chat`), JSON mode               |
+| Tooling          | Biome, Husky, strict TypeScript                     |
 
 ## API
 
-The server powers the personal-assistant feature. Workflow automation is entirely client-side (IndexedDB) and needs no server.
+The server powers the personal-assistant feature and exposes workflow/task persistence. The extension still reads workflows from IndexedDB until client integration is complete.
 
-| Method | Path                              | Description                        |
-| ------ | --------------------------------- | ---------------------------------- |
-| `GET`  | `/health`                         | Liveness                           |
-| `GET`  | `/user`                           | Get current user                   |
-| `PUT`  | `/user`                           | Register or sync user              |
-| `DELETE` | `/user`                         | Delete user and owned data         |
-| `POST` | `/captures`                       | Extract and store a text selection |
-| `GET`  | `/chat?tabUrl=`                   | List chat messages for an origin   |
-| `POST` | `/chat`                           | Send a message and persist reply   |
-| `DELETE` | `/chat/:id`                     | Delete a chat message              |
-| `GET`  | `/workflow?tabUrl=`             | List workflows for an origin       |
-| `GET`  | `/workflow/:id`                 | Get one workflow                   |
-| `POST` | `/workflow`                     | Save a workflow                    |
-| `GET`  | `/task?tabUrl=`                 | List tasks for an origin           |
-| `GET`  | `/task/:id`                     | Get one task                       |
-| `POST` | `/task`                         | Create a task                      |
-| `PATCH` | `/task/:id`                    | Update a task                      |
+| Method   | Path                | Description                        |
+| -------- | ------------------- | ---------------------------------- |
+| `GET`    | `/health`           | Liveness                           |
+| `GET`    | `/user`             | Get current user                   |
+| `PUT`    | `/user`             | Register or sync user              |
+| `DELETE` | `/user`             | Soft-delete user and owned data    |
+| `POST`   | `/captures`         | Extract and store a text selection |
+| `GET`    | `/chat?tabUrl=`     | List chat messages for an origin   |
+| `POST`   | `/chat`             | Send a message and persist reply   |
+| `DELETE` | `/chat/:id`         | Soft-delete a chat message         |
+| `GET`    | `/workflow?tabUrl=` | List workflows for an origin       |
+| `GET`    | `/workflow/:id`     | Get one workflow                   |
+| `POST`   | `/workflow`         | Save a workflow                    |
+| `GET`    | `/task?tabUrl=`     | List tasks for an origin           |
+| `GET`    | `/task/:id`         | Get one task                       |
+| `POST`   | `/task`             | Create a task                      |
+| `PATCH`  | `/task/:id`         | Update a task                      |
 
 See [server/README.md](server/README.md) for full request/response shapes and error codes.
 

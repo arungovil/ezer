@@ -25,7 +25,12 @@ export async function handleCapture(
   try {
     const result = await processCapture(readUserId(res), input);
     res.json(result);
-  } catch {
-    res.status(502).json({ error: errorMessages.llmFailed });
+  } catch (error) {
+    if (error instanceof Error && error.message === "Invalid tab URL") {
+      res.status(400).json({ error: errorMessages.invalidTabUrl });
+      return;
+    }
+
+    res.status(500).json({ error: errorMessages.capturePersistFailed });
   }
 }

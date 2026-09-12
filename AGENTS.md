@@ -19,7 +19,7 @@ way.
 
 - Capture text selections from any page (independent of workflow recording)
 - Classify each capture as a `reminder` | `note` and extract title, due date, and summary via LLM
-- Persist captures, items, and per-tab chat in SQLite
+- Persist captures, tasks, and per-origin chat in SQLite
 - Roadmap: notify the user when a due reminder comes up
 
 ### Workflow automation
@@ -35,7 +35,7 @@ way.
 - `client/src/content/` — MV3 content script: `workflow/` (record + replay engine), `capture/` (selection)
 - `client/src/sidepanel/` — MV3 side panel: `components/`, `api/`, `workflow/`, `capture/`
 - `client/src/shared/` — cross-layer types, message constants, replay failure shapes
-- `server/` — Express: `/captures`, `/chat`, `/conversations/messages`, SQLite persistence (assistant feature)
+- `server/` — Express: `/captures`, `/chat`, `/task`, `/workflow`, `/user`, SQLite persistence (assistant feature)
 - LLM: DeepSeek (`deepseek-chat`, OpenAI-compatible API) with structured JSON output
 - Dev env: server on `localhost:3000`; extension loaded unpacked in Chrome
 
@@ -44,16 +44,17 @@ way.
 ### Personal assistant
 
 - **Item kinds:** `reminder` | `note` — one per capture; `reminder` may carry `dueAt` (ISO 8601, resolved in the user's timezone)
-- **Capture:** `POST /captures` with `{ text, tabUrl, url?, title?, timezone? }` → `{ captureId, conversationId, item, reply, userMessageId, ezerMessageId }`
-- **Chat:** `POST /chat` with `{ message }` → `{ reply, rejected }` (off-topic guard)
-- **History:** `GET /conversations/messages?tabUrl=` → per-tab messages; `/captures` and `/conversations/messages` require `X-Ezer-User-Id`
-- **Persistence:** SQLite tables for users, conversations, messages, captures, items
+- **Capture:** `POST /captures` with `{ text, tabUrl, url?, title?, timezone? }` → `{ taskId, originId, origin, item, reply, userMessageId, ezerMessageId }`. LLM failures degrade to a generic note (always `200` on success path).
+- **Chat:** `POST /chat` with `{ message, tabUrl }` → `{ originId, origin, reply, rejected, userMessageId, ezerMessageId }` (off-topic guard)
+- **History:** `GET /chat?tabUrl=` → per-origin messages; authenticated routes require `X-Ezer-User-Id`
+- **Tasks:** `GET /task?tabUrl=`, `PATCH /task/:id` — reminders and notes for the page origin
+- **Persistence:** SQLite tables `user`, `origin`, `chat`, `task`, `workflow` (soft delete via `deleted_at`)
 
 ### Workflow automation
 
 - **Recorded action:** `{ type: CLICK|INPUT|SUBMIT, selectors: string[], value?, checked?, innerText?, tagName }` — `selectors` ordered by priority; `selectors[0]` is primary
 - **Selector chain:** `data-testid` → `id` → `name` → `aria-label` → `placeholder` → `[type]` → tag name
-- **Workflow:** `{ id, tabId, url, name, actions: RecordedAction[], createdAt }` — stored in IndexedDB, scoped per tab
+- **Workflow:** `{ id, tabId, url, name, actions: RecordedAction[], createdAt }` — client stores in IndexedDB today; server `GET/POST /workflow` available for migration
 - **Replay:** resolve via `querySelector(selectors[0])`, falling back down the chain; INPUT → set value via native setter (`Object.getOwnPropertyDescriptor`) + dispatch input/change (React/Vue controlled inputs); CLICK/SUBMIT → scrollIntoView + click(); 800ms between steps
 - **Replay errors:** selector unresolved → retry up to 3× over the selector chain; if still unresolvable, stop the run and surface an error message naming the failed step and suggesting a fix
 - **Messages:** `START_RECORDING`, `STOP_RECORDING`, `REPLAY_ACTIONS`, `ACTION_CAPTURED`, `GET_RECORDING_STATE`, `REPLAY_COMPLETE`, `REPLAY_FAILED`, `RECORDING_COMPLETE` via background broker

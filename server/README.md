@@ -1,6 +1,6 @@
 # Ezer Server
 
-Express API for the personal-assistant feature: LLM-backed capture extraction (`reminder` | `note`), per-origin chat persistence, and user identity. Workflow replay remains client-side (IndexedDB) until the `workflow` table is wired up.
+Express API for the personal-assistant feature: LLM-backed capture extraction (`reminder` | `note`), per-origin chat and task persistence, workflow storage, and user identity. Workflow replay is client-side; the extension still uses IndexedDB until wired to `GET/POST /workflow`.
 
 Default base URL: `http://localhost:3000`
 
@@ -64,7 +64,7 @@ All JSON endpoints use `Content-Type: application/json`. CORS is enabled for loc
 
 ### Soft delete
 
-`DELETE` routes never remove rows from SQLite. They set `deleted_at` (ISO 8601) on the affected row(s). All reads filter `deleted_at IS NULL`. `DELETE /user` soft-deletes the user and cascades to owned origins, chats, tasks, and workflows. Re-registering with `PUT /user` or any authenticated route clears `deleted_at` on the user row; visiting a site again restores that origin via `getOrCreateOrigin`.
+`DELETE` routes never remove rows from SQLite. They set `deleted_at` (ISO 8601) on the affected row(s). All reads filter `deleted_at IS NULL`. `DELETE /user` soft-deletes the user and cascades to owned origins, chats, tasks, and workflows. **Account deletion is irreversible from the product's perspective** — re-registering clears `deleted_at` on the user row and revisiting a site restores the origin shell, but cascaded chat/task/workflow rows stay hidden.
 
 ### Error responses
 
@@ -80,7 +80,8 @@ Failed requests return:
 | `401` | Missing or invalid `X-Ezer-User-Id` |
 | `404` | Resource not found |
 | `409` | Conflict (e.g. deleting a capture linked to a task) |
-| `502` | LLM request failed |
+| `500` | Persist or internal failure |
+| `502` | LLM request failed (`POST /chat` only) |
 | `503` | `LLM_API_KEY` not configured |
 
 ---
@@ -247,7 +248,7 @@ Soft-delete a chat message owned by the authenticated user.
 
 ## `POST /captures`
 
-Parse a highlighted text selection into a reminder or note. Persists chat messages and a task row, scoped to the **origin** derived from `tabUrl`.
+Parse a highlighted text selection into a reminder or note. Persists chat messages and a task row, scoped to the **origin** derived from `tabUrl`. If the LLM call fails or returns invalid JSON, the server saves a generic **note** fallback and still returns `200`.
 
 **Headers**
 
@@ -277,7 +278,7 @@ Parse a highlighted text selection into a reminder or note. Persists chat messag
 | `userMessageId` | `string` | Saved user `CAPTURE` chat id |
 | `ezerMessageId` | `string` | Saved Ezer `TEXT` reply id |
 
-**Errors:** `400` invalid body · `401` invalid header · `502` LLM failed · `503` LLM not configured
+**Errors:** `400` invalid body or `tabUrl` · `401` invalid header · `500` persist failed · `503` LLM not configured
 
 ---
 

@@ -30,6 +30,7 @@ export const errorMessages = {
   taskPersistFailed: "Failed to save task",
   taskUpdateRequired: "At least one updatable field is required",
   captureRequired: "text and tabUrl are required",
+  capturePersistFailed: "Failed to save capture",
   tabUrlRequired: "tabUrl query parameter is required",
   invalidTabUrl: "tabUrl must be a valid page URL",
   userIdRequired: "X-Ezer-User-Id header must be a valid UUID",

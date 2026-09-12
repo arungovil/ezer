@@ -48,7 +48,11 @@ export async function requestJson(
 
     const data = await parseJsonBody(response);
     return { response, data };
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
+
     throw new Error(apiErrorMessages.unreachable);
   }
 }

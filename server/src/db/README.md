@@ -177,7 +177,7 @@ Recorded browser interaction sequences, scoped to an origin.
 
 **Index:** `idx_workflow_origin_created (origin_id, created_at)`
 
-Workflows are exposed via `GET/POST /workflow` (see [../../README.md](../../README.md)). The extension client still reads from IndexedDB until wired to the API.
+Workflows are exposed via `GET/POST /workflow` (see [../../README.md](../../README.md)). `DELETE /workflow/:id` is not implemented yet; `softDeleteWorkflowForUser` is ready for when it is. The extension client still reads from IndexedDB until wired to the API.
 
 ## Relationships
 
@@ -248,8 +248,8 @@ Typical flow for `POST /captures`:
 | `user.ts`     | `user`     | Get, upsert, and soft-delete client identity |
 | `origin.ts`   | `origin`   | Get or create origin by user + domain   |
 | `chat.ts`     | `chat`     | Insert, list, and soft-delete messages  |
-| `task.ts`     | `task`     | Insert, list, get, update, soft-delete  |
-| `workflow.ts` | `workflow` | Insert, query, and soft-delete workflows |
+| `task.ts`     | `task`     | Insert, list, get, update (`softDeleteTaskForUser` for future routes) |
+| `workflow.ts` | `workflow` | Insert and query (`softDeleteWorkflowForUser` for future routes) |
 | `schema.ts`   | —          | DDL migrations                          |
 | `index.ts`    | —          | Connection, migration runner, lifecycle |
 
