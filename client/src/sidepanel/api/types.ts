@@ -160,3 +160,91 @@ export function isChatListResponseBody(value: unknown): value is ChatListRespons
     body.messages.every(isChatMessageBody)
   );
 }
+
+export type WorkflowActionType = "CLICK" | "INPUT" | "SUBMIT";
+
+export interface RecordedActionBody {
+  type: WorkflowActionType;
+  selectors: string[];
+  value?: string;
+  checked?: boolean;
+  innerText?: string;
+  tagName: string;
+}
+
+export interface CreateWorkflowRequestBody {
+  name: string;
+  tabUrl: string;
+  actions: RecordedActionBody[];
+}
+
+export interface WorkflowResponseBody {
+  id: string;
+  originId: string;
+  origin: string;
+  name: string;
+  actions: RecordedActionBody[];
+  createdAt: string;
+}
+
+export interface WorkflowListResponseBody {
+  originId: string | null;
+  origin: string | null;
+  tabUrl: string;
+  workflows: WorkflowResponseBody[];
+}
+
+const workflowActionTypes = ["CLICK", "INPUT", "SUBMIT"] as const;
+
+function isWorkflowActionType(value: unknown): value is WorkflowActionType {
+  return typeof value === "string" && (workflowActionTypes as readonly string[]).includes(value);
+}
+
+function isRecordedActionBody(value: unknown): value is RecordedActionBody {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const action = value as RecordedActionBody;
+  return (
+    isWorkflowActionType(action.type) &&
+    Array.isArray(action.selectors) &&
+    action.selectors.every((selector) => typeof selector === "string") &&
+    typeof action.tagName === "string" &&
+    (action.value === undefined || typeof action.value === "string") &&
+    (action.checked === undefined || typeof action.checked === "boolean") &&
+    (action.innerText === undefined || typeof action.innerText === "string")
+  );
+}
+
+export function isWorkflowResponseBody(value: unknown): value is WorkflowResponseBody {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const body = value as WorkflowResponseBody;
+  return (
+    typeof body.id === "string" &&
+    typeof body.originId === "string" &&
+    typeof body.origin === "string" &&
+    typeof body.name === "string" &&
+    Array.isArray(body.actions) &&
+    body.actions.every(isRecordedActionBody) &&
+    typeof body.createdAt === "string"
+  );
+}
+
+export function isWorkflowListResponseBody(value: unknown): value is WorkflowListResponseBody {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const body = value as WorkflowListResponseBody;
+  return (
+    (body.originId === null || typeof body.originId === "string") &&
+    (body.origin === null || typeof body.origin === "string") &&
+    typeof body.tabUrl === "string" &&
+    Array.isArray(body.workflows) &&
+    body.workflows.every(isWorkflowResponseBody)
+  );
+}

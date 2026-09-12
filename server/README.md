@@ -35,7 +35,7 @@ X-Ezer-User-Id: <uuid-v4>
 | Route group | Middleware | Behavior |
 | ----------- | ---------- | -------- |
 | `/user` | `requireUserId` | Validates header only |
-| `/chat`, `/captures` | `requireUser` | Validates header and auto-registers the user if missing |
+| `/chat`, `/captures`, `/workflow` | `requireUser` | Validates header and auto-registers the user if missing |
 | `/health` | — | No auth |
 
 Register explicitly with `PUT /user` on first run. Other routes will create the user row on first use.
@@ -52,6 +52,9 @@ Register explicitly with `PUT /user` on first run. Other routes will create the 
 | `POST` | `/chat` | `X-Ezer-User-Id` | Send a message and persist the reply |
 | `DELETE` | `/chat/:id` | `X-Ezer-User-Id` | Delete a chat message |
 | `POST` | `/captures` | `X-Ezer-User-Id` | Extract and store a text selection |
+| `GET` | `/workflow?tabUrl=` | `X-Ezer-User-Id` | List workflows for an origin |
+| `GET` | `/workflow/:id` | `X-Ezer-User-Id` | Get one workflow |
+| `POST` | `/workflow` | `X-Ezer-User-Id` | Save a workflow |
 
 All JSON endpoints use `Content-Type: application/json`. CORS is enabled for local extension development.
 
@@ -267,6 +270,103 @@ Parse a highlighted text selection into a task, reminder, or note. Persists chat
 | `ezerMessageId` | `string` | Saved Ezer `TEXT` reply id |
 
 **Errors:** `400` invalid body · `401` invalid header · `502` LLM failed · `503` LLM not configured
+
+---
+
+## `GET /workflow`
+
+List saved workflows for the **origin** of the given page URL.
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Query**
+
+| Param | Required | Description |
+| ----- | -------- | ----------- |
+| `tabUrl` | Yes | Any page URL on the target origin |
+
+**Response `200`**
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `originId` | `string` \| `null` | Origin row id, or `null` if none yet |
+| `origin` | `string` \| `null` | URL origin, or `null` if none yet |
+| `tabUrl` | `string` | Echo of the query param |
+| `workflows` | `array` | Workflows ordered by `createdAt` descending |
+
+Each workflow:
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `id` | `string` | Workflow UUID |
+| `originId` | `string` | Origin row id |
+| `origin` | `string` | URL origin |
+| `name` | `string` | User-given name |
+| `actions` | `array` | Recorded DOM actions (`CLICK`, `INPUT`, `SUBMIT`) |
+| `createdAt` | `string` | ISO 8601 timestamp |
+
+Each action:
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `type` | `string` | Yes | `CLICK` \| `INPUT` \| `SUBMIT` |
+| `selectors` | `string[]` | Yes | Priority-ordered selector chain |
+| `tagName` | `string` | Yes | Element tag name |
+| `value` | `string` | No | Input value (`INPUT`) |
+| `checked` | `boolean` | No | Checkbox state (`INPUT`) |
+| `innerText` | `string` | No | Truncated label text (`CLICK`) |
+
+**Errors:** `400` missing or invalid `tabUrl` · `401` invalid header
+
+---
+
+## `GET /workflow/:id`
+
+Get a single workflow by id.
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Path**
+
+| Param | Description |
+| ----- | ----------- |
+| `id` | Workflow UUID |
+
+**Response `200`** — single workflow object (same shape as items in `GET /workflow`).
+
+**Errors:** `401` invalid header · `404` workflow not found
+
+---
+
+## `POST /workflow`
+
+Save a recorded workflow, scoped to the **origin** derived from `tabUrl`.
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Request body**
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `name` | `string` | Yes | Workflow name |
+| `tabUrl` | `string` | Yes | Active page URL (origin is parsed from this) |
+| `actions` | `array` | Yes | Recorded actions (see `GET /workflow`) |
+
+**Response `201`** — saved workflow object.
+
+**Errors:** `400` invalid body · `401` invalid header · `500` persist failed
 
 ---
 

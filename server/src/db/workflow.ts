@@ -38,3 +38,43 @@ export function insertWorkflow(input: InsertWorkflowInput): WorkflowRow {
 
   return workflow;
 }
+
+export function getWorkflowByIdForUser(
+  workflowId: string,
+  userId: string,
+): WorkflowRow | undefined {
+  return getDb()
+    .prepare(
+      `
+      SELECT
+        id,
+        origin_id AS originId,
+        user_id AS userId,
+        name,
+        actions,
+        created_at AS createdAt
+      FROM workflow
+      WHERE id = ? AND user_id = ?
+    `,
+    )
+    .get(workflowId, userId) as WorkflowRow | undefined;
+}
+
+export function listWorkflowsByOriginId(originId: string, userId: string): WorkflowRow[] {
+  return getDb()
+    .prepare(
+      `
+      SELECT
+        id,
+        origin_id AS originId,
+        user_id AS userId,
+        name,
+        actions,
+        created_at AS createdAt
+      FROM workflow
+      WHERE origin_id = ? AND user_id = ?
+      ORDER BY created_at DESC
+    `,
+    )
+    .all(originId, userId) as WorkflowRow[];
+}

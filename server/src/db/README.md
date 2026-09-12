@@ -172,7 +172,7 @@ Recorded browser interaction sequences, scoped to an origin.
 
 **Index:** `idx_workflow_origin_created (origin_id, created_at)`
 
-> **Note:** Workflow sync from the extension is not wired yet. The table exists for server-side storage; the client still uses IndexedDB today.
+Workflows are exposed via `GET/POST /workflow` (see [../../README.md](../../README.md)). The extension client still reads from IndexedDB until wired to the API.
 
 ## Relationships
 
@@ -242,7 +242,7 @@ Typical flow for `POST /captures`:
 | `origin.ts`   | `origin`   | Get or create origin by user + domain   |
 | `chat.ts`     | `chat`     | Insert and list messages                |
 | `task.ts`     | `task`     | Insert extracted items                  |
-| `workflow.ts` | `workflow` | Insert workflows (API not wired)        |
+| `workflow.ts` | `workflow` | Insert and query workflows              |
 | `schema.ts`   | —          | DDL migrations                          |
 | `index.ts`    | —          | Connection, migration runner, lifecycle |
 

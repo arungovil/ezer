@@ -115,6 +115,9 @@ The server powers the personal-assistant feature. Workflow automation is entirel
 | `GET`  | `/chat?tabUrl=`                   | List chat messages for an origin   |
 | `POST` | `/chat`                           | Send a message and persist reply   |
 | `DELETE` | `/chat/:id`                     | Delete a chat message              |
+| `GET`  | `/workflow?tabUrl=`             | List workflows for an origin       |
+| `GET`  | `/workflow/:id`                 | Get one workflow                   |
+| `POST` | `/workflow`                     | Save a workflow                    |
 
 See [server/README.md](server/README.md) for full request/response shapes and error codes.
 
