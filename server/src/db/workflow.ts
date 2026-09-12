@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "./index.js";
+import { notDeleted, softDeleteTimestamp } from "./soft-delete.js";
 
 export interface WorkflowRow {
   id: string;
@@ -54,7 +55,7 @@ export function getWorkflowByIdForUser(
         actions,
         created_at AS createdAt
       FROM workflow
-      WHERE id = ? AND user_id = ?
+      WHERE id = ? AND user_id = ? AND ${notDeleted}
     `,
     )
     .get(workflowId, userId) as WorkflowRow | undefined;
@@ -72,9 +73,23 @@ export function listWorkflowsByOriginId(originId: string, userId: string): Workf
         actions,
         created_at AS createdAt
       FROM workflow
-      WHERE origin_id = ? AND user_id = ?
+      WHERE origin_id = ? AND user_id = ? AND ${notDeleted}
       ORDER BY created_at DESC
     `,
     )
     .all(originId, userId) as WorkflowRow[];
+}
+
+export function softDeleteWorkflowForUser(workflowId: string, userId: string): boolean {
+  const result = getDb()
+    .prepare(
+      `
+      UPDATE workflow
+      SET deleted_at = ?
+      WHERE id = ? AND user_id = ? AND ${notDeleted}
+    `,
+    )
+    .run(softDeleteTimestamp(), workflowId, userId);
+
+  return result.changes > 0;
 }

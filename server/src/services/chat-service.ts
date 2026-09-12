@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { getEnv } from "../config/env.js";
-import { deleteChatById, getChatById, insertChat, listChatsByOriginId } from "../db/chat.js";
+import { getChatById, insertChat, listChatsByOriginId, softDeleteChatById } from "../db/chat.js";
 import { getOrCreateOrigin, getOriginByIdForUser, getOriginByUserAndOrigin } from "../db/origin.js";
 import { taskExistsForChatId } from "../db/task.js";
 import { parsePageOrigin } from "../lib/parse-origin.js";
@@ -117,5 +117,5 @@ export function removeChatMessage(userId: string, chatId: string): boolean {
     throw new Error("Chat message has a linked task");
   }
 
-  return deleteChatById(chatId);
+  return softDeleteChatById(chatId);
 }

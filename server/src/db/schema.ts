@@ -29,7 +29,8 @@ export const migrations = [
   `
     CREATE TABLE IF NOT EXISTS user (
       id TEXT PRIMARY KEY,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      deleted_at TEXT
     );
   `,
   `
@@ -38,6 +39,7 @@ export const migrations = [
       user_id TEXT NOT NULL REFERENCES user(id),
       origin TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      deleted_at TEXT,
       UNIQUE(user_id, origin)
     );
   `,
@@ -48,7 +50,8 @@ export const migrations = [
       role TEXT NOT NULL CHECK(role IN ('user', 'ezer')),
       message_type TEXT NOT NULL,
       content TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      deleted_at TEXT
     );
   `,
   `
@@ -68,7 +71,8 @@ export const migrations = [
       status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'done', 'dismissed')),
       source_url TEXT,
       source_title TEXT,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      deleted_at TEXT
     );
   `,
   `
@@ -86,7 +90,8 @@ export const migrations = [
       user_id TEXT NOT NULL REFERENCES user(id),
       name TEXT NOT NULL,
       actions TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      deleted_at TEXT
     );
   `,
   `

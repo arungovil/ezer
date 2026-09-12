@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { TaskKind } from "../types/capture.js";
 import type { TaskStatus } from "../types/task.js";
 import { getDb } from "./index.js";
+import { notDeleted, softDeleteTimestamp } from "./soft-delete.js";
 
 export interface TaskRow {
   id: string;
@@ -110,7 +111,7 @@ export function getTaskByIdForUser(taskId: string, userId: string): TaskRow | un
         source_title AS sourceTitle,
         created_at AS createdAt
       FROM task
-      WHERE id = ? AND user_id = ?
+      WHERE id = ? AND user_id = ? AND ${notDeleted}
     `,
     )
     .get(taskId, userId) as TaskRow | undefined;
@@ -137,7 +138,7 @@ export function listTasksByOriginId(
         source_title AS sourceTitle,
         created_at AS createdAt
       FROM task
-      WHERE origin_id = ? AND user_id = ? AND status = ?
+      WHERE origin_id = ? AND user_id = ? AND status = ? AND ${notDeleted}
       ORDER BY created_at DESC
     `
     : `
@@ -155,7 +156,7 @@ export function listTasksByOriginId(
         source_title AS sourceTitle,
         created_at AS createdAt
       FROM task
-      WHERE origin_id = ? AND user_id = ?
+      WHERE origin_id = ? AND user_id = ? AND ${notDeleted}
       ORDER BY created_at DESC
     `;
 
@@ -194,7 +195,7 @@ export function updateTaskForUser(
         summary = @summary,
         due_at = @dueAt,
         status = @status
-      WHERE id = @id AND user_id = @userId
+      WHERE id = @id AND user_id = @userId AND ${notDeleted}
     `,
     )
     .run(updated);
@@ -202,7 +203,24 @@ export function updateTaskForUser(
   return updated;
 }
 
+export function softDeleteTaskForUser(taskId: string, userId: string): boolean {
+  const result = getDb()
+    .prepare(
+      `
+      UPDATE task
+      SET deleted_at = ?
+      WHERE id = ? AND user_id = ? AND ${notDeleted}
+    `,
+    )
+    .run(softDeleteTimestamp(), taskId, userId);
+
+  return result.changes > 0;
+}
+
 export function taskExistsForChatId(chatId: string): boolean {
-  const row = getDb().prepare(`SELECT id FROM task WHERE chat_id = ?`).get(chatId);
+  const row = getDb()
+    .prepare(`SELECT id FROM task WHERE chat_id = ? AND ${notDeleted}`)
+    .get(chatId);
+
   return row !== undefined;
 }

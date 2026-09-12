@@ -47,10 +47,10 @@ Register explicitly with `PUT /user` on first run. Other routes will create the 
 | `GET` | `/health` | — | Liveness check |
 | `GET` | `/user` | `X-Ezer-User-Id` | Get current user |
 | `PUT` | `/user` | `X-Ezer-User-Id` | Register or sync current user |
-| `DELETE` | `/user` | `X-Ezer-User-Id` | Delete user and all owned data |
+| `DELETE` | `/user` | `X-Ezer-User-Id` | Soft-delete user and all owned data |
 | `GET` | `/chat?tabUrl=` | `X-Ezer-User-Id` | List chat messages for an origin |
 | `POST` | `/chat` | `X-Ezer-User-Id` | Send a message and persist the reply |
-| `DELETE` | `/chat/:id` | `X-Ezer-User-Id` | Delete a chat message |
+| `DELETE` | `/chat/:id` | `X-Ezer-User-Id` | Soft-delete a chat message |
 | `POST` | `/captures` | `X-Ezer-User-Id` | Extract and store a text selection |
 | `GET` | `/workflow?tabUrl=` | `X-Ezer-User-Id` | List workflows for an origin |
 | `GET` | `/workflow/:id` | `X-Ezer-User-Id` | Get one workflow |
@@ -61,6 +61,10 @@ Register explicitly with `PUT /user` on first run. Other routes will create the 
 | `PATCH` | `/task/:id` | `X-Ezer-User-Id` | Update a task |
 
 All JSON endpoints use `Content-Type: application/json`. CORS is enabled for local extension development.
+
+### Soft delete
+
+`DELETE` routes never remove rows from SQLite. They set `deleted_at` (ISO 8601) on the affected row(s). All reads filter `deleted_at IS NULL`. `DELETE /user` soft-deletes the user and cascades to owned origins, chats, tasks, and workflows. Re-registering with `PUT /user` or any authenticated route clears `deleted_at` on the user row; visiting a site again restores that origin via `getOrCreateOrigin`.
 
 ### Error responses
 
@@ -134,7 +138,7 @@ Same shape as `GET /user`.
 
 ## `DELETE /user`
 
-Delete the user and all owned data (origins, chats, tasks, workflows).
+Soft-delete the user and all owned data (origins, chats, tasks, workflows). Rows remain in SQLite with `deleted_at` set.
 
 **Headers**
 
@@ -221,7 +225,7 @@ Send a typed message to the Ezer assistant. Persists the user message and Ezer r
 
 ## `DELETE /chat/:id`
 
-Delete a chat message owned by the authenticated user.
+Soft-delete a chat message owned by the authenticated user.
 
 **Headers**
 

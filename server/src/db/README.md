@@ -95,6 +95,7 @@ Client identity. Created on first authenticated request.
 | ------------ | ---- | ----------- | ------------------------------------ |
 | `id`         | TEXT | PRIMARY KEY | UUID from `X-Ezer-User-Id` header    |
 | `created_at` | TEXT | NOT NULL    | ISO 8601 timestamp (SQLite `datetime`) |
+| `deleted_at` | TEXT |             | Set by soft delete; `NULL` = active   |
 
 ---
 
@@ -108,6 +109,7 @@ Per-user browsing context. One row per `(user_id, origin)` pair.
 | `user_id`    | TEXT | NOT NULL, FK → `user(id)`    | Owner                                            |
 | `origin`     | TEXT | NOT NULL                     | URL origin, e.g. `https://github.com`            |
 | `created_at` | TEXT | NOT NULL                     | First time this user visited this origin         |
+| `deleted_at` | TEXT |                              | Set by soft delete; `NULL` = active              |
 
 **Unique:** `(user_id, origin)`
 
@@ -127,6 +129,7 @@ Chat messages for an origin. Ordered by `created_at`.
 | `message_type` | TEXT | NOT NULL                     | See [Message types](#message-types)                   |
 | `content`      | TEXT | NOT NULL                     | Plain text or JSON (for `CAPTURE`)                    |
 | `created_at`   | TEXT | NOT NULL                     | Message timestamp                                     |
+| `deleted_at`   | TEXT |                              | Set by soft delete; `NULL` = active                   |
 
 **Index:** `idx_chat_origin_created (origin_id, created_at)`
 
@@ -150,6 +153,7 @@ Structured items extracted from text captures (or future sources).
 | `source_url`   | TEXT |                          | Page URL where text was selected           |
 | `source_title` | TEXT |                          | Page title at capture time                 |
 | `created_at`   | TEXT | NOT NULL                     | Creation timestamp                         |
+| `deleted_at`   | TEXT |                              | Set by soft delete; `NULL` = active        |
 
 **Indexes:**
 - `idx_task_user_status_due (user_id, status, due_at)` — user to-do / reminder queries
@@ -169,6 +173,7 @@ Recorded browser interaction sequences, scoped to an origin.
 | `name`       | TEXT | NOT NULL                     | User-given workflow name             |
 | `actions`    | TEXT | NOT NULL                     | JSON array of recorded DOM actions   |
 | `created_at` | TEXT | NOT NULL                     | Creation timestamp                   |
+| `deleted_at` | TEXT |                              | Set by soft delete; `NULL` = active  |
 
 **Index:** `idx_workflow_origin_created (origin_id, created_at)`
 
@@ -176,15 +181,17 @@ Workflows are exposed via `GET/POST /workflow` (see [../../README.md](../../READ
 
 ## Relationships
 
-| Parent   | Child      | Cardinality | FK column   | On delete |
-| -------- | ---------- | ----------- | ----------- | --------- |
-| `user`   | `origin`   | 1:N         | `user_id`   | —         |
-| `user`   | `task`     | 1:N         | `user_id`   | —         |
-| `user`   | `workflow` | 1:N         | `user_id`   | —         |
-| `origin` | `chat`     | 1:N         | `origin_id` | —         |
-| `origin` | `task`     | 1:N         | `origin_id` | —         |
-| `origin` | `workflow` | 1:N         | `origin_id` | —         |
-| `chat`   | `task`     | 1:0..1      | `chat_id`   | —         |
+| Parent   | Child      | Cardinality | FK column   | On delete   |
+| -------- | ---------- | ----------- | ----------- | ----------- |
+| `user`   | `origin`   | 1:N         | `user_id`   | soft delete |
+| `user`   | `task`     | 1:N         | `user_id`   | soft delete |
+| `user`   | `workflow` | 1:N         | `user_id`   | soft delete |
+| `origin` | `chat`     | 1:N         | `origin_id` | soft delete |
+| `origin` | `task`     | 1:N         | `origin_id` | —           |
+| `origin` | `workflow` | 1:N         | `origin_id` | —           |
+| `chat`   | `task`     | 1:0..1      | `chat_id`   | —           |
+
+All `DELETE` API routes set `deleted_at` instead of removing rows. Reads exclude rows where `deleted_at` is set.
 
 **Lookup keys in application code:**
 
@@ -237,11 +244,12 @@ Typical flow for `POST /captures`:
 
 | File          | Table      | Responsibility                          |
 | ------------- | ---------- | --------------------------------------- |
-| `user.ts`     | `user`     | Get, upsert, and delete client identity |
+| `soft-delete.ts` | —      | `deleted_at` helpers and query fragment |
+| `user.ts`     | `user`     | Get, upsert, and soft-delete client identity |
 | `origin.ts`   | `origin`   | Get or create origin by user + domain   |
-| `chat.ts`     | `chat`     | Insert and list messages                |
-| `task.ts`     | `task`     | Insert, list, get, and update tasks     |
-| `workflow.ts` | `workflow` | Insert and query workflows              |
+| `chat.ts`     | `chat`     | Insert, list, and soft-delete messages  |
+| `task.ts`     | `task`     | Insert, list, get, update, soft-delete  |
+| `workflow.ts` | `workflow` | Insert, query, and soft-delete workflows |
 | `schema.ts`   | —          | DDL migrations                          |
 | `index.ts`    | —          | Connection, migration runner, lifecycle |
 

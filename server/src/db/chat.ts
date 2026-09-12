@@ -1,4 +1,5 @@
 import { getDb } from "./index.js";
+import { notDeleted, softDeleteTimestamp } from "./soft-delete.js";
 
 export interface ChatRow {
   id: string;
@@ -51,7 +52,7 @@ export function getChatById(chatId: string): ChatRow | undefined {
         content,
         created_at AS createdAt
       FROM chat
-      WHERE id = ?
+      WHERE id = ? AND ${notDeleted}
     `,
     )
     .get(chatId) as ChatRow | undefined;
@@ -69,14 +70,23 @@ export function listChatsByOriginId(originId: string): ChatRow[] {
         content,
         created_at AS createdAt
       FROM chat
-      WHERE origin_id = ?
+      WHERE origin_id = ? AND ${notDeleted}
       ORDER BY created_at ASC
     `,
     )
     .all(originId) as ChatRow[];
 }
 
-export function deleteChatById(chatId: string): boolean {
-  const result = getDb().prepare(`DELETE FROM chat WHERE id = ?`).run(chatId);
+export function softDeleteChatById(chatId: string): boolean {
+  const result = getDb()
+    .prepare(
+      `
+      UPDATE chat
+      SET deleted_at = ?
+      WHERE id = ? AND ${notDeleted}
+    `,
+    )
+    .run(softDeleteTimestamp(), chatId);
+
   return result.changes > 0;
 }
