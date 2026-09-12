@@ -142,7 +142,7 @@ Structured items extracted from text captures (or future sources).
 | `origin_id`    | TEXT | NOT NULL, FK → `origin(id)`  | Domain scope                               |
 | `user_id`      | TEXT | NOT NULL, FK → `user(id)`    | Owner (denormalized for user-wide queries) |
 | `chat_id`      | TEXT | FK → `chat(id)`, nullable    | User `CAPTURE` message that created this   |
-| `kind`         | TEXT | NOT NULL, CHECK              | `task` \| `reminder` \| `note`             |
+| `kind`         | TEXT | NOT NULL, CHECK              | `reminder` \| `note`                       |
 | `title`        | TEXT | NOT NULL                     | Short label                                |
 | `summary`      | TEXT |                          | One-line description                       |
 | `due_at`       | TEXT |                          | ISO 8601 datetime; used for reminders      |
@@ -208,11 +208,10 @@ Used in `chat.message_type`:
 
 ### Task kinds
 
-| Value      | Meaning                                      |
-| ---------- | -------------------------------------------- |
-| `task`     | Action item, often without a specific time   |
-| `reminder` | Action tied to a date/time (`due_at` set)    |
-| `note`     | Reference info; no action required           |
+| Value      | Meaning                                                         |
+| ---------- | --------------------------------------------------------------- |
+| `reminder` | Something to do or follow up on; `due_at` optional              |
+| `note`     | Reference info; no action required                              |
 
 ### Task status
 
@@ -241,7 +240,7 @@ Typical flow for `POST /captures`:
 | `user.ts`     | `user`     | Get, upsert, and delete client identity |
 | `origin.ts`   | `origin`   | Get or create origin by user + domain   |
 | `chat.ts`     | `chat`     | Insert and list messages                |
-| `task.ts`     | `task`     | Insert extracted items                  |
+| `task.ts`     | `task`     | Insert, list, get, and update tasks     |
 | `workflow.ts` | `workflow` | Insert and query workflows              |
 | `schema.ts`   | —          | DDL migrations                          |
 | `index.ts`    | —          | Connection, migration runner, lifecycle |

@@ -31,7 +31,7 @@ export interface ChatResponseBody {
   ezerMessageId: string;
 }
 
-export type ItemKind = "task" | "reminder" | "note";
+export type ItemKind = "reminder" | "note";
 
 export interface CaptureRequestBody {
   text: string;
@@ -93,7 +93,7 @@ export function isChatResponseBody(value: unknown): value is ChatResponseBody {
   );
 }
 
-const itemKinds = ["task", "reminder", "note"] as const;
+const itemKinds = ["reminder", "note"] as const;
 
 function isItemKind(value: unknown): value is ItemKind {
   return typeof value === "string" && (itemKinds as readonly string[]).includes(value);
@@ -231,6 +231,97 @@ export function isWorkflowResponseBody(value: unknown): value is WorkflowRespons
     Array.isArray(body.actions) &&
     body.actions.every(isRecordedActionBody) &&
     typeof body.createdAt === "string"
+  );
+}
+
+export type TaskKind = "reminder" | "note";
+export type TaskStatus = "active" | "done" | "dismissed";
+
+export interface CreateTaskRequestBody {
+  kind: TaskKind;
+  title: string;
+  tabUrl: string;
+  summary?: string;
+  dueAt?: string | null;
+  sourceUrl?: string;
+  sourceTitle?: string;
+}
+
+export interface UpdateTaskRequestBody {
+  status?: TaskStatus;
+  title?: string;
+  summary?: string | null;
+  dueAt?: string | null;
+  kind?: TaskKind;
+}
+
+export interface TaskResponseBody {
+  id: string;
+  originId: string;
+  origin: string;
+  chatId: string | null;
+  kind: TaskKind;
+  title: string;
+  summary: string | null;
+  dueAt: string | null;
+  status: TaskStatus;
+  sourceUrl: string | null;
+  sourceTitle: string | null;
+  createdAt: string;
+}
+
+export interface TaskListResponseBody {
+  originId: string | null;
+  origin: string | null;
+  tabUrl: string;
+  tasks: TaskResponseBody[];
+}
+
+const taskKinds = ["reminder", "note"] as const;
+const taskStatuses = ["active", "done", "dismissed"] as const;
+
+function isTaskKind(value: unknown): value is TaskKind {
+  return typeof value === "string" && (taskKinds as readonly string[]).includes(value);
+}
+
+function isTaskStatus(value: unknown): value is TaskStatus {
+  return typeof value === "string" && (taskStatuses as readonly string[]).includes(value);
+}
+
+export function isTaskResponseBody(value: unknown): value is TaskResponseBody {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const body = value as TaskResponseBody;
+  return (
+    typeof body.id === "string" &&
+    typeof body.originId === "string" &&
+    typeof body.origin === "string" &&
+    (body.chatId === null || typeof body.chatId === "string") &&
+    isTaskKind(body.kind) &&
+    typeof body.title === "string" &&
+    (body.summary === null || typeof body.summary === "string") &&
+    (body.dueAt === null || typeof body.dueAt === "string") &&
+    isTaskStatus(body.status) &&
+    (body.sourceUrl === null || typeof body.sourceUrl === "string") &&
+    (body.sourceTitle === null || typeof body.sourceTitle === "string") &&
+    typeof body.createdAt === "string"
+  );
+}
+
+export function isTaskListResponseBody(value: unknown): value is TaskListResponseBody {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const body = value as TaskListResponseBody;
+  return (
+    (body.originId === null || typeof body.originId === "string") &&
+    (body.origin === null || typeof body.origin === "string") &&
+    typeof body.tabUrl === "string" &&
+    Array.isArray(body.tasks) &&
+    body.tasks.every(isTaskResponseBody)
   );
 }
 

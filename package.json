@@ -1,7 +1,7 @@
 {
   "name": "ezer",
   "private": true,
-  "description": "Ezer: a Chrome side-panel personal and professional assistant for tasks, reminders, notes, and recorded workflows.",
+  "description": "Ezer: a Chrome side-panel personal and professional assistant for reminders, notes, and recorded workflows.",
   "scripts": {
     "setup": "npm install && npm --prefix server install && npm --prefix client install",
     "dev:server": "npm --prefix server run dev",

@@ -10,6 +10,7 @@ export const routePaths = {
   chat: "/chat",
   captures: "/captures",
   workflow: "/workflow",
+  task: "/task",
 } as const;
 
 export const errorMessages = {
@@ -23,6 +24,11 @@ export const errorMessages = {
   workflowIdRequired: "workflow id is required",
   workflowNotFound: "Workflow not found",
   workflowPersistFailed: "Failed to save workflow",
+  taskRequired: "kind, title, and tabUrl are required",
+  taskIdRequired: "task id is required",
+  taskNotFound: "Task not found",
+  taskPersistFailed: "Failed to save task",
+  taskUpdateRequired: "At least one updatable field is required",
   captureRequired: "text and tabUrl are required",
   tabUrlRequired: "tabUrl query parameter is required",
   invalidTabUrl: "tabUrl must be a valid page URL",

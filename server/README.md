@@ -1,6 +1,6 @@
 # Ezer Server
 
-Express API for the personal-assistant feature: LLM-backed capture extraction (`task` | `reminder` | `note`), per-origin chat persistence, and user identity. Workflow replay remains client-side (IndexedDB) until the `workflow` table is wired up.
+Express API for the personal-assistant feature: LLM-backed capture extraction (`reminder` | `note`), per-origin chat persistence, and user identity. Workflow replay remains client-side (IndexedDB) until the `workflow` table is wired up.
 
 Default base URL: `http://localhost:3000`
 
@@ -35,7 +35,7 @@ X-Ezer-User-Id: <uuid-v4>
 | Route group | Middleware | Behavior |
 | ----------- | ---------- | -------- |
 | `/user` | `requireUserId` | Validates header only |
-| `/chat`, `/captures`, `/workflow` | `requireUser` | Validates header and auto-registers the user if missing |
+| `/chat`, `/captures`, `/workflow`, `/task` | `requireUser` | Validates header and auto-registers the user if missing |
 | `/health` | — | No auth |
 
 Register explicitly with `PUT /user` on first run. Other routes will create the user row on first use.
@@ -55,6 +55,10 @@ Register explicitly with `PUT /user` on first run. Other routes will create the 
 | `GET` | `/workflow?tabUrl=` | `X-Ezer-User-Id` | List workflows for an origin |
 | `GET` | `/workflow/:id` | `X-Ezer-User-Id` | Get one workflow |
 | `POST` | `/workflow` | `X-Ezer-User-Id` | Save a workflow |
+| `GET` | `/task?tabUrl=` | `X-Ezer-User-Id` | List tasks for an origin |
+| `GET` | `/task/:id` | `X-Ezer-User-Id` | Get one task |
+| `POST` | `/task` | `X-Ezer-User-Id` | Create a task |
+| `PATCH` | `/task/:id` | `X-Ezer-User-Id` | Update a task |
 
 All JSON endpoints use `Content-Type: application/json`. CORS is enabled for local extension development.
 
@@ -239,7 +243,7 @@ Delete a chat message owned by the authenticated user.
 
 ## `POST /captures`
 
-Parse a highlighted text selection into a task, reminder, or note. Persists chat messages and a task row, scoped to the **origin** derived from `tabUrl`.
+Parse a highlighted text selection into a reminder or note. Persists chat messages and a task row, scoped to the **origin** derived from `tabUrl`.
 
 **Headers**
 
@@ -367,6 +371,135 @@ Save a recorded workflow, scoped to the **origin** derived from `tabUrl`.
 **Response `201`** — saved workflow object.
 
 **Errors:** `400` invalid body · `401` invalid header · `500` persist failed
+
+---
+
+## `GET /task`
+
+List tasks for the **origin** of the given page URL.
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Query**
+
+| Param | Required | Description |
+| ----- | -------- | ----------- |
+| `tabUrl` | Yes | Any page URL on the target origin |
+| `status` | No | Filter by `active`, `done`, or `dismissed` |
+
+**Response `200`**
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `originId` | `string` \| `null` | Origin row id, or `null` if none yet |
+| `origin` | `string` \| `null` | URL origin, or `null` if none yet |
+| `tabUrl` | `string` | Echo of the query param |
+| `tasks` | `array` | Tasks ordered by `createdAt` descending |
+
+Each task:
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `id` | `string` | Task UUID |
+| `originId` | `string` | Origin row id |
+| `origin` | `string` | URL origin |
+| `chatId` | `string` \| `null` | Linked `CAPTURE` chat id, if any |
+| `kind` | `string` | `reminder` \| `note` |
+| `title` | `string` | Short label |
+| `summary` | `string` \| `null` | One-line description |
+| `dueAt` | `string` \| `null` | ISO 8601 datetime for reminders |
+| `status` | `string` | `active` \| `done` \| `dismissed` |
+| `sourceUrl` | `string` \| `null` | Page URL where captured |
+| `sourceTitle` | `string` \| `null` | Page title at capture time |
+| `createdAt` | `string` | ISO 8601 timestamp |
+
+**Errors:** `400` missing or invalid `tabUrl` · `401` invalid header
+
+---
+
+## `GET /task/:id`
+
+Get a single task by id.
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Path**
+
+| Param | Description |
+| ----- | ----------- |
+| `id` | Task UUID |
+
+**Response `200`** — single task object (same shape as items in `GET /task`).
+
+**Errors:** `401` invalid header · `404` task not found
+
+---
+
+## `POST /task`
+
+Create a task manually (captures via `POST /captures` also create tasks via the LLM).
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Request body**
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `kind` | `string` | Yes | `reminder` \| `note` |
+| `title` | `string` | Yes | Short label |
+| `tabUrl` | `string` | Yes | Active page URL (origin is parsed from this) |
+| `summary` | `string` | No | One-line description |
+| `dueAt` | `string` \| `null` | No | ISO 8601 datetime |
+| `sourceUrl` | `string` | No | Source page URL |
+| `sourceTitle` | `string` | No | Source page title |
+
+**Response `201`** — created task object.
+
+**Errors:** `400` invalid body · `401` invalid header · `500` persist failed
+
+---
+
+## `PATCH /task/:id`
+
+Update a task (e.g. mark done or dismissed).
+
+**Headers**
+
+| Header | Required | Description |
+| ------ | -------- | ----------- |
+| `X-Ezer-User-Id` | Yes | Client UUID |
+
+**Path**
+
+| Param | Description |
+| ----- | ----------- |
+| `id` | Task UUID |
+
+**Request body** — at least one field:
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `status` | `string` | `active` \| `done` \| `dismissed` |
+| `kind` | `string` | `reminder` \| `note` |
+| `title` | `string` | Updated title |
+| `summary` | `string` \| `null` | Updated summary |
+| `dueAt` | `string` \| `null` | Updated due date |
+
+**Response `200`** — updated task object.
+
+**Errors:** `400` invalid body · `401` invalid header · `404` task not found
 
 ---
 

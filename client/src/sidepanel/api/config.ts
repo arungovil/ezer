@@ -4,6 +4,7 @@ export const routePaths = {
   chat: "/chat",
   captures: "/captures",
   workflow: "/workflow",
+  task: "/task",
 } as const;
 
 export const apiErrorMessages = {

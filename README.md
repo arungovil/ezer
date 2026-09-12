@@ -1,7 +1,7 @@
 # Ezer
 
 Ezer is a Chrome side-panel **personal and professional assistant**. Capture what you find while
-browsing and Ezer turns it into tasks, reminders, and notes; it can also learn workflows and replay
+browsing and Ezer turns it into reminders and notes; it can also learn workflows and replay
 them for you. New ways to help are on the way.
 
 ## Features
@@ -11,10 +11,10 @@ them for you. New ways to help are on the way.
 Keep track of things you come across while browsing.
 
 1. Highlight text on any page while the panel is open — e.g. `Submit expense report by Friday 5pm`.
-2. Ezer turns the selection into a **task**, **reminder**, or **note**, with a title, due date, and summary.
+2. Ezer turns the selection into a **reminder** or **note**, with a title, due date when relevant, and summary.
 3. Your captures and Ezer's replies are saved and come back when you return to that tab.
 
-> **Roadmap:** due reminders and tasks will be pushed back to you as notifications, turning captured items into an active to-do flow.
+> **Roadmap:** due reminders will be pushed back to you as notifications, turning captured items into an active to-do flow.
 
 ### Workflows
 
@@ -29,7 +29,7 @@ Record a repetitive on-page task once, replay it when you need it.
 
 1. Start the server (see below) with `LLM_API_KEY` set.
 2. Load the extension and open the side panel on any page.
-3. **Assistant:** highlight text — e.g. `Submit expense report by Friday 5pm`. Ezer shows the capture in chat and replies with what it understood (task, reminder, or note).
+3. **Assistant:** highlight text — e.g. `Submit expense report by Friday 5pm`. Ezer shows the capture in chat and replies with what it understood (reminder or note).
 4. **Workflow:** click Record, do a few actions on the page, stop, name it, then replay it from the saved-workflows list.
 5. Switch tabs and come back — your captures for that page reload from the server, and saved workflows stay with their tab.
 
@@ -118,11 +118,15 @@ The server powers the personal-assistant feature. Workflow automation is entirel
 | `GET`  | `/workflow?tabUrl=`             | List workflows for an origin       |
 | `GET`  | `/workflow/:id`                 | Get one workflow                   |
 | `POST` | `/workflow`                     | Save a workflow                    |
+| `GET`  | `/task?tabUrl=`                 | List tasks for an origin           |
+| `GET`  | `/task/:id`                     | Get one task                       |
+| `POST` | `/task`                         | Create a task                      |
+| `PATCH` | `/task/:id`                    | Update a task                      |
 
 See [server/README.md](server/README.md) for full request/response shapes and error codes.
 
 ## Status
 
-**Shipped:** text selection capture, LLM task/reminder/note extraction, SQLite persistence, per-tab capture history; workflow recording + replay.
+**Shipped:** text selection capture, LLM reminder/note extraction, SQLite persistence, per-tab capture history; workflow recording + replay.
 
-**Roadmap:** notifications for due tasks and reminders.
+**Roadmap:** notifications for due reminders.

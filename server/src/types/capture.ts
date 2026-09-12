@@ -1,4 +1,4 @@
-export const taskKinds = ["task", "reminder", "note"] as const;
+export const taskKinds = ["reminder", "note"] as const;
 
 export type TaskKind = (typeof taskKinds)[number];
 

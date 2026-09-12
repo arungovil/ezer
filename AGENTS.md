@@ -1,7 +1,7 @@
 # Ezer
 
 Ezer is a Chrome side-panel personal and professional assistant. Its core job is capturing what
-you find while browsing and turning it into tasks, reminders, and notes; it can also learn
+you find while browsing and turning it into reminders and notes; it can also learn
 workflows by recording browser interactions and replaying them for you. More use cases are on the
 way.
 
@@ -18,9 +18,9 @@ way.
 ### Personal assistant
 
 - Capture text selections from any page (independent of workflow recording)
-- Classify each capture as a `task` | `reminder` | `note` and extract title, due date, and summary via LLM
+- Classify each capture as a `reminder` | `note` and extract title, due date, and summary via LLM
 - Persist captures, items, and per-tab chat in SQLite
-- Roadmap: notify the user when a due task or reminder comes up
+- Roadmap: notify the user when a due reminder comes up
 
 ### Workflow automation
 
@@ -43,7 +43,7 @@ way.
 
 ### Personal assistant
 
-- **Item kinds:** `task` | `reminder` | `note` — one per capture; `reminder` carries `dueAt` (ISO 8601, resolved in the user's timezone)
+- **Item kinds:** `reminder` | `note` — one per capture; `reminder` may carry `dueAt` (ISO 8601, resolved in the user's timezone)
 - **Capture:** `POST /captures` with `{ text, tabUrl, url?, title?, timezone? }` → `{ captureId, conversationId, item, reply, userMessageId, ezerMessageId }`
 - **Chat:** `POST /chat` with `{ message }` → `{ reply, rejected }` (off-topic guard)
 - **History:** `GET /conversations/messages?tabUrl=` → per-tab messages; `/captures` and `/conversations/messages` require `X-Ezer-User-Id`

@@ -11,7 +11,7 @@ export function captureStartedMessage(): Message {
     role: "ezer",
     type: MESSAGE_TYPE.RECORDING,
     content:
-      "📌 **Highlight capture ready.** Select text on the page — I'll turn it into a task or reminder.",
+      "📌 **Highlight capture ready.** Select text on the page — I'll save it as a reminder or note.",
   };
 }
 
