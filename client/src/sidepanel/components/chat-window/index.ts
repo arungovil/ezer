@@ -1,4 +1,5 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
+import { helpPrompt } from "@src/shared/constants.js";
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
 import { formatReplayFailure } from "@src/shared/replay-failure.js";
 import type {
@@ -16,6 +17,11 @@ import {
   loadCaptureConversationForActiveTab,
   syncCaptureMode,
 } from "@src/sidepanel/capture/index.js";
+import {
+  appendNoteListMessage,
+  appendReminderListMessage,
+} from "@src/sidepanel/capture/task-handlers.js";
+import type { QuickActionId } from "@src/sidepanel/components/chat-input/quick-actions.js";
 import { tabSwitchedMessage } from "@src/sidepanel/workflow/messages-handler.js";
 import {
   clearPendingEmptyPlaceholder,
@@ -29,6 +35,7 @@ import {
   handleReplayFailed,
 } from "@src/sidepanel/workflow/replay-handlers.js";
 import {
+  appendWorkflowListMessage,
   clearPendingWorkflowSave,
   completeWorkflowSave,
   handleDeleteWorkflow,
@@ -134,11 +141,6 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     syncCaptureMode(this);
   }
 
-  private handleNewChat() {
-    this.resetChat();
-    void refreshSavedWorkflows(this);
-  }
-
   private handleTabSwitched() {
     this.workflowStatus = "idle";
     this.replayingMessageId = null;
@@ -171,6 +173,26 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
       }
     } catch {
       // Degrade to the welcome screen when history cannot be loaded.
+    }
+  }
+
+  private handleQuickAction(e: CustomEvent<QuickActionId>) {
+    switch (e.detail) {
+      case "reminders":
+        void appendReminderListMessage(this);
+        return;
+      case "notes":
+        void appendNoteListMessage(this);
+        return;
+      case "workflows":
+        void appendWorkflowListMessage(this);
+        return;
+      case "record":
+        handleStartRecording(this);
+        return;
+      case "help":
+        void this.processChatMessage(helpPrompt, MESSAGE_TYPE.QUICK_ACTION);
+        return;
     }
   }
 
@@ -239,7 +261,6 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
       <chat-header
         .workflowStatus=${this.workflowStatus}
         @ez-stop-recording=${() => handleStopRecording(this)}
-        @ez-new-chat=${this.handleNewChat}
       ></chat-header>
       ${
         this.messages.length
@@ -272,7 +293,10 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
         .placeholder=${
           this.pendingWorkflowSave ? "Give your workflow a name…" : "What can I help you with?"
         }
+        .workflowStatus=${this.workflowStatus}
+        .quickActionsEnabled=${!this.pendingWorkflowSave}
         @ez-send=${this.handleSend}
+        @ez-quick-action=${this.handleQuickAction}
       ></chat-input>
     `;
   }

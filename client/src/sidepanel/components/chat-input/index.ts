@@ -1,17 +1,52 @@
+import type { WorkflowStatus } from "@src/shared/types.js";
+import "@src/sidepanel/components/chat-input/quick-actions-popover/index.js";
 import "@src/sidepanel/components/common/ez-button/index.js";
 import { sendIcon } from "@src/sidepanel/icons/send.js";
 import { html, LitElement } from "lit";
-import { property, query } from "lit/decorators.js";
+import { property, query, state } from "lit/decorators.js";
+import {
+  filterQuickActions,
+  getQuickActions,
+  getSlashContext,
+  type QuickAction,
+  type QuickActionId,
+} from "./quick-actions.js";
 import { styles } from "./styles.js";
 
 export class ChatInput extends LitElement {
   @property({ type: String }) placeholder = "What can I help you with?";
+  @property({ type: String }) workflowStatus: WorkflowStatus = "idle";
+  @property({ type: Boolean }) quickActionsEnabled = true;
+
+  @state() private slashStart = -1;
+  @state() private slashQuery = "";
+  @state() private activeIndex = 0;
 
   static styles = styles;
 
   @query("textarea") private textareaEl?: HTMLTextAreaElement;
 
   private singleLineHeight = 0;
+
+  private get quickActionsOpen() {
+    return this.quickActionsEnabled && this.slashStart >= 0;
+  }
+
+  private get filteredActions(): QuickAction[] {
+    return filterQuickActions(getQuickActions(this.workflowStatus), this.slashQuery);
+  }
+
+  private get selectableActionIndex(): number {
+    const selectable = this.filteredActions.filter((action) => !action.disabled);
+    if (selectable.length === 0) return -1;
+
+    const current = this.filteredActions[this.activeIndex];
+    if (!current || current.disabled) {
+      return this.filteredActions.findIndex((action) => !action.disabled);
+    }
+
+    return this.activeIndex;
+  }
 
   private handleSend() {
     const el = this.textareaEl;
@@ -25,13 +60,122 @@ export class ChatInput extends LitElement {
     );
     el.value = "";
     el.style.height = "";
+    this.closeQuickActions();
   }
 
   private handleKeydown(e: KeyboardEvent) {
+    if (this.quickActionsOpen) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        this.moveActiveIndex(1);
+        return;
+      }
+
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        this.moveActiveIndex(-1);
+        return;
+      }
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        this.closeQuickActions();
+        return;
+      }
+
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        this.selectActiveAction();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        this.closeQuickActions();
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       this.handleSend();
     }
+  }
+
+  private moveActiveIndex(direction: 1 | -1) {
+    const actions = this.filteredActions;
+    if (actions.length === 0) return;
+
+    const enabledIndexes = actions
+      .map((action, index) => (action.disabled ? -1 : index))
+      .filter((index) => index >= 0);
+    if (enabledIndexes.length === 0) return;
+
+    const current = this.selectableActionIndex;
+    const currentPos = enabledIndexes.indexOf(current);
+    const nextPos =
+      currentPos < 0
+        ? direction === 1
+          ? 0
+          : enabledIndexes.length - 1
+        : (currentPos + direction + enabledIndexes.length) % enabledIndexes.length;
+
+    this.activeIndex = enabledIndexes[nextPos];
+  }
+
+  private selectActiveAction() {
+    const index = this.selectableActionIndex;
+    if (index < 0) return;
+
+    const action = this.filteredActions[index];
+    if (!action || action.disabled) return;
+
+    this.applyQuickAction(action.id);
+  }
+
+  private applyQuickAction(actionId: QuickActionId) {
+    this.removeSlashQuery();
+    this.closeQuickActions();
+    this.dispatchEvent(
+      new CustomEvent<QuickActionId>("ez-quick-action", {
+        detail: actionId,
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private removeSlashQuery() {
+    const el = this.textareaEl;
+    if (!el || this.slashStart < 0) return;
+
+    const end = el.selectionStart;
+    el.value = `${el.value.slice(0, this.slashStart)}${el.value.slice(end)}`;
+    el.selectionStart = el.selectionEnd = this.slashStart;
+    this.resizeTextarea(el);
+  }
+
+  private closeQuickActions() {
+    this.slashStart = -1;
+    this.slashQuery = "";
+    this.activeIndex = 0;
+  }
+
+  private syncQuickActions() {
+    const el = this.textareaEl;
+    if (!el || !this.quickActionsEnabled) {
+      this.closeQuickActions();
+      return;
+    }
+
+    const context = getSlashContext(el.value, el.selectionStart);
+    if (!context) {
+      this.closeQuickActions();
+      return;
+    }
+
+    this.slashStart = context.start;
+    this.slashQuery = context.query;
+    this.activeIndex = 0;
   }
 
   protected override firstUpdated() {
@@ -47,6 +191,11 @@ export class ChatInput extends LitElement {
 
   private handleInput(e: InputEvent) {
     const el = e.target as HTMLTextAreaElement;
+    this.resizeTextarea(el);
+    this.syncQuickActions();
+  }
+
+  private resizeTextarea(el: HTMLTextAreaElement) {
     if (!this.singleLineHeight) this.singleLineHeight = el.scrollHeight;
     el.style.height = "0";
     if (el.scrollHeight > this.singleLineHeight) {
@@ -56,16 +205,31 @@ export class ChatInput extends LitElement {
     }
   }
 
+  private handleQuickActionSelect(e: CustomEvent<QuickActionId>) {
+    this.applyQuickAction(e.detail);
+  }
+
   render() {
+    const actions = this.filteredActions;
+
     return html`
-      <textarea
-        aria-label=${this.placeholder}
-        placeholder=${this.placeholder}
-        @focus=${this.handleFocus}
-        @input=${this.handleInput}
-        @keydown=${this.handleKeydown}
-      ></textarea>
-      <ez-button variant="primary" size="icon-md" @click=${this.handleSend}>${sendIcon}</ez-button>
+      <div class="input-shell">
+        <quick-actions-popover
+          .open=${this.quickActionsOpen}
+          .items=${actions}
+          .activeIndex=${this.activeIndex}
+          .anchor=${this.textareaEl}
+          @ez-select=${this.handleQuickActionSelect}
+        ></quick-actions-popover>
+        <textarea
+          aria-label=${this.placeholder}
+          placeholder=${this.placeholder}
+          @focus=${this.handleFocus}
+          @input=${this.handleInput}
+          @keydown=${this.handleKeydown}
+        ></textarea>
+        <ez-button variant="primary" size="icon-md" @click=${this.handleSend}>${sendIcon}</ez-button>
+      </div>
     `;
   }
 }

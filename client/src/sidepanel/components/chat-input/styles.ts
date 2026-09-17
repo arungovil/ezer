@@ -2,13 +2,19 @@ import { css } from "lit";
 
 export const styles = css`
   :host {
-    display: flex;
-    align-items: center;
-    gap: var(--ez-space-sm);
+    display: block;
     flex-shrink: 0;
     padding: var(--ez-space-sm) var(--ez-space-md);
     border-top: 1px solid var(--ez-color-border);
   }
+
+  .input-shell {
+    display: flex;
+    align-items: center;
+    gap: var(--ez-space-sm);
+    position: relative;
+  }
+
   textarea {
     flex: 1;
     resize: none;
