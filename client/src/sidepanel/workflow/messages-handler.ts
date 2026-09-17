@@ -34,13 +34,14 @@ export function recordingStoppedEmptyMessage(): Message {
   );
 }
 
+export function recordingStoppedByTabSwitchMessage(): Message {
+  return ezerStatusMessage(
+    "⏹️ **Recording stopped.** Switching tabs ends an in-progress recording. Start again when you're ready.",
+  );
+}
+
 export function tabSwitchedMessage(): Message {
-  return {
-    id: newId(),
-    role: "ezer",
-    type: MESSAGE_TYPE.TAB_SWITCHED,
-    content: "🔄 **You switched tabs.** Ready to record something on this page?",
-  };
+  return ezerStatusMessage("🔄 **You switched tabs.** This chat is for the current page.");
 }
 
 function formatCapturedActions(actions: RecordedAction[]): string {

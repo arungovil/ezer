@@ -32,7 +32,9 @@ async function appendTaskKindListMessage(
 
   if (!tabUrl) {
     newMessages.push(
-      ezerStatusMessage("I couldn't find the current page. Try switching tabs and asking again."),
+      ezerStatusMessage(
+        "⚠️ **Couldn't find the current page.** Try switching tabs and asking again.",
+      ),
     );
     host.messages = [...host.messages, ...newMessages];
     return;
@@ -41,7 +43,7 @@ async function appendTaskKindListMessage(
   const result = await listTasks(tabUrl, { status: "active" });
   if (!result.ok) {
     newMessages.push(
-      ezerStatusMessage("Couldn't load your tasks right now. Try again in a moment."),
+      ezerStatusMessage("⚠️ **Couldn't load your list right now.** Try again in a moment."),
     );
     host.messages = [...host.messages, ...newMessages];
     return;

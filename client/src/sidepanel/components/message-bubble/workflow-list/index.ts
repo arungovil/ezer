@@ -1,6 +1,5 @@
 import "@src/sidepanel/components/common/ez-button/index.js";
 import "@src/sidepanel/components/common/ez-workflow-label/index.js";
-import "@src/sidepanel/components/record-button/index.js";
 import type { Workflow, WorkflowListContent } from "@src/shared/types.js";
 import { playIcon, trashIcon } from "@src/sidepanel/icons/index.js";
 import { html, LitElement } from "lit";
@@ -67,8 +66,6 @@ export class MessageBubbleWorkflowList extends LitElement {
   }
 
   render() {
-    const { workflows } = this.content;
-
     return html`
       <ul class="workflow-list">
         ${this.visibleWorkflows.map(
@@ -101,34 +98,27 @@ export class MessageBubbleWorkflowList extends LitElement {
       </ul>
 
       ${
-        workflows.length > 0
+        this.hasPagination
           ? html`
             <div class="footer">
-              <record-button></record-button>
-              ${
-                this.hasPagination
-                  ? html`
-                    <div class="pagination">
-                      <ez-button
-                        variant="outline"
-                        size="sm"
-                        ?disabled=${this.currentPage === 0}
-                        @click=${this.handlePrev}
-                      >
-                        Prev
-                      </ez-button>
-                      <ez-button
-                        variant="outline"
-                        size="sm"
-                        ?disabled=${this.currentPage >= this.totalPages - 1}
-                        @click=${this.handleNext}
-                      >
-                        Next
-                      </ez-button>
-                    </div>
-                  `
-                  : null
-              }
+              <div class="pagination">
+                <ez-button
+                  variant="outline"
+                  size="sm"
+                  ?disabled=${this.currentPage === 0}
+                  @click=${this.handlePrev}
+                >
+                  Prev
+                </ez-button>
+                <ez-button
+                  variant="outline"
+                  size="sm"
+                  ?disabled=${this.currentPage >= this.totalPages - 1}
+                  @click=${this.handleNext}
+                >
+                  Next
+                </ez-button>
+              </div>
             </div>
           `
           : null

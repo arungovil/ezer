@@ -7,6 +7,7 @@ import type {
   WorkflowListContent,
 } from "@src/shared/types.js";
 import { MESSAGE_TYPE } from "@src/shared/types.js";
+import { userErrorMessages } from "@src/sidepanel/utils/user-message.js";
 import {
   deleteWorkflow,
   getWorkflowsByTabId,
@@ -117,16 +118,14 @@ export async function completeWorkflowSave(host: ChatWindowHost, name: string): 
 
     host.messages = [...host.messages, ezerStatusMessage(`✅ **Got it! Saved as "${name}".**`)];
     void refreshSavedWorkflows(host);
-  } catch (err) {
+  } catch {
     host.messages = host.messages.map((m) => {
       if (m.id !== pending.messageId || m.type !== MESSAGE_TYPE.WORKFLOW) return m;
       return { ...m, content: { ...m.content, awaitingName: false } };
     });
     host.messages = [
       ...host.messages,
-      ezerStatusMessage(
-        `⚠️ **Couldn't save your workflow.** ${err instanceof Error ? err.message : "Unknown error"}`,
-      ),
+      ezerStatusMessage(`⚠️ **${userErrorMessages.workflowSaveFailed}**`),
     ];
   }
 }
@@ -203,12 +202,10 @@ export async function handleDeleteWorkflow(
       ezerStatusMessage(`✅ **"${workflow.name}" has been removed.**`),
     ];
     void refreshSavedWorkflows(host);
-  } catch (err) {
+  } catch {
     host.messages = [
       ...host.messages,
-      ezerStatusMessage(
-        `⚠️ **Couldn't remove the workflow.** ${err instanceof Error ? err.message : "Unknown error"}`,
-      ),
+      ezerStatusMessage(`⚠️ **${userErrorMessages.workflowDeleteFailed}**`),
     ];
   }
 }

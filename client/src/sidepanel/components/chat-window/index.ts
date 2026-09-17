@@ -22,7 +22,8 @@ import {
   appendReminderListMessage,
 } from "@src/sidepanel/capture/task-handlers.js";
 import type { QuickActionId } from "@src/sidepanel/components/chat-input/quick-actions.js";
-import { tabSwitchedMessage } from "@src/sidepanel/workflow/messages-handler.js";
+import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.js";
+import { recordingStoppedByTabSwitchMessage } from "@src/sidepanel/workflow/messages-handler.js";
 import {
   clearPendingEmptyPlaceholder,
   handleRecordingComplete,
@@ -70,7 +71,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
     if (message?.type === RUNTIME_MESSAGE_TYPE.TAB_SWITCHED) {
-      this.handleTabSwitched();
+      void this.handleTabSwitched();
       return;
     }
     if (message?.type === RUNTIME_MESSAGE_TYPE.SELECTION_CAPTURED && message.text) {
@@ -88,7 +89,8 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     if (message?.type === RUNTIME_MESSAGE_TYPE.REPLAY_FAILED) {
       handleReplayFailed(
         this,
-        message.error ?? (message.failure ? formatReplayFailure(message.failure) : "Run failed."),
+        message.error ??
+          (message.failure ? formatReplayFailure(message.failure) : userErrorMessages.replayFailed),
       );
     }
     if (message?.type === RUNTIME_MESSAGE_TYPE.REPLAY_COMPLETE) {
@@ -141,38 +143,49 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     syncCaptureMode(this);
   }
 
-  private handleTabSwitched() {
+  private async handleTabSwitched() {
+    const wasRecording = this.workflowStatus === "recording";
+
+    this.chatTask.abort();
+    this.captureTask.abort();
     this.workflowStatus = "idle";
     this.replayingMessageId = null;
+    this.pendingReplayError = null;
     clearPendingEmptyPlaceholder(this);
     clearPendingWorkflowSave(this);
+    this.messages = [];
     syncCaptureMode(this);
+    void refreshSavedWorkflows(this);
+    await this.loadConversation({ replace: true });
 
-    if (this.messages.length === 0) {
-      void this.loadConversation();
-      return;
+    if (wasRecording) {
+      this.messages = [...this.messages, recordingStoppedByTabSwitchMessage()];
     }
-
-    const last = this.messages[this.messages.length - 1];
-    if (last?.type === MESSAGE_TYPE.TAB_SWITCHED) return;
-
-    this.messages = [...this.messages, tabSwitchedMessage()];
   }
 
-  private async loadConversation() {
+  private async loadConversation(options: { replace?: boolean } = {}) {
     const generation = ++this.conversationLoadGeneration;
+    const replace = options.replace ?? false;
 
     try {
       const loaded = await loadCaptureConversationForActiveTab();
-      if (generation !== this.conversationLoadGeneration || this.messages.length > 0) {
+      if (generation !== this.conversationLoadGeneration) {
         return;
       }
 
-      if (loaded.length > 0) {
-        this.messages = loaded;
+      if (!replace && this.messages.length > 0) {
+        return;
       }
+
+      this.messages = loaded;
     } catch {
-      // Degrade to the welcome screen when history cannot be loaded.
+      if (generation !== this.conversationLoadGeneration) {
+        return;
+      }
+
+      if (replace || this.messages.length === 0) {
+        this.messages = [];
+      }
     }
   }
 
@@ -247,8 +260,8 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
         return;
       }
 
-      const errorMessage = error instanceof Error ? error.message : "Something went wrong.";
-      this.applyChatReply(ezerMsgId, errorMessage, messageType);
+      const errorMessage = toUserErrorMessage(error, userErrorMessages.chatFailed);
+      this.applyChatReply(ezerMsgId, `⚠️ **${errorMessage}**`, messageType);
     }
   }
 
@@ -268,7 +281,6 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
               class="messages"
               @ez-replay=${(e: CustomEvent) => handleReplay(this, e)}
               @ez-save=${(e: CustomEvent) => handleSave(this, e)}
-              @ez-start-recording=${() => handleStartRecording(this)}
               @ez-play-workflow=${(e: CustomEvent) => handlePlayWorkflow(this, e, () => this.resetChat())}
               @ez-delete-workflow=${(e: CustomEvent) => void handleDeleteWorkflow(this, e)}
             >

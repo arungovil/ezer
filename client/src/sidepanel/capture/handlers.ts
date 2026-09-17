@@ -3,6 +3,7 @@ import { getActiveTabUrl } from "@src/shared/tabs/active-tab.js";
 import type { ChatWindowHost, Message } from "@src/shared/types.js";
 import { MESSAGE_TYPE } from "@src/shared/types.js";
 import type { CaptureResponseBody } from "@src/sidepanel/api/types.js";
+import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.js";
 import type { CaptureTaskArgs } from "./capture-task.js";
 import { userCaptureMessage } from "./messages.js";
 
@@ -56,10 +57,10 @@ export async function handleSelectionCaptured(
       return;
     }
 
-    const errorMessage = error instanceof Error ? error.message : "Something went wrong.";
+    const errorMessage = toUserErrorMessage(error, userErrorMessages.captureFailed);
     host.messages = host.messages.map((message) =>
       message.id === ezerMsgId && message.type === MESSAGE_TYPE.TEXT
-        ? { ...message, content: errorMessage, loading: false }
+        ? { ...message, content: `⚠️ **${errorMessage}**`, loading: false }
         : message,
     );
   }

@@ -50,8 +50,7 @@ export const styles = [
     .footer {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: var(--ez-space-sm);
+      justify-content: flex-end;
       margin-top: var(--ez-space-md);
       width: 100%;
     }
