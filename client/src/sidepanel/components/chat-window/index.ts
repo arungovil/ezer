@@ -1,5 +1,4 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { helpPrompt } from "@src/shared/constants.js";
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
 import { formatReplayFailure } from "@src/shared/replay-failure.js";
 import type {
@@ -14,6 +13,7 @@ import {
   createCaptureTask,
   disarmCaptureMode,
   handleSelectionCaptured,
+  loadCaptureConversationForActiveTab,
   syncCaptureMode,
 } from "@src/sidepanel/capture/index.js";
 import { tabSwitchedMessage } from "@src/sidepanel/workflow/messages-handler.js";
@@ -29,13 +29,11 @@ import {
   handleReplayFailed,
 } from "@src/sidepanel/workflow/replay-handlers.js";
 import {
-  appendWorkflowListMessage,
   clearPendingWorkflowSave,
   completeWorkflowSave,
   handleDeleteWorkflow,
   handlePlayWorkflow,
   handleSave,
-  handleSelectWorkflow,
   refreshSavedWorkflows,
 } from "@src/sidepanel/workflow/workflow-handlers.js";
 import { html, LitElement, type PropertyValues } from "lit";
@@ -43,7 +41,6 @@ import { query, state } from "lit/decorators.js";
 import { createChatTask } from "./chat-task.js";
 import { styles } from "./styles.js";
 import "@src/sidepanel/components/chat-empty/index.js";
-import "@src/sidepanel/components/chat-workflows/index.js";
 import "@src/sidepanel/components/chat-header/index.js";
 import "@src/sidepanel/components/chat-input/index.js";
 import "@src/sidepanel/components/message-bubble/index.js";
@@ -62,6 +59,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
 
   private readonly chatTask = createChatTask(this);
   private readonly captureTask = createCaptureTask(this);
+  private conversationLoadGeneration = 0;
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
     if (message?.type === RUNTIME_MESSAGE_TYPE.TAB_SWITCHED) {
@@ -97,6 +95,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
       chrome.runtime.onMessage.addListener(this.handleRuntimeMessage);
     }
     void refreshSavedWorkflows(this);
+    void this.loadConversation();
     syncCaptureMode(this);
   }
 
@@ -148,7 +147,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     syncCaptureMode(this);
 
     if (this.messages.length === 0) {
-      void refreshSavedWorkflows(this);
+      void this.loadConversation();
       return;
     }
 
@@ -158,8 +157,21 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     this.messages = [...this.messages, tabSwitchedMessage()];
   }
 
-  private handleHelp() {
-    void this.processChatMessage(helpPrompt, MESSAGE_TYPE.QUICK_ACTION);
+  private async loadConversation() {
+    const generation = ++this.conversationLoadGeneration;
+
+    try {
+      const loaded = await loadCaptureConversationForActiveTab();
+      if (generation !== this.conversationLoadGeneration || this.messages.length > 0) {
+        return;
+      }
+
+      if (loaded.length > 0) {
+        this.messages = loaded;
+      }
+    } catch {
+      // Degrade to the welcome screen when history cannot be loaded.
+    }
   }
 
   private handleSend(e: CustomEvent<{ text: string }>) {
@@ -254,17 +266,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
                   </div>`,
               })}
             </div>`
-          : this.savedWorkflows.length > 0
-            ? html`<chat-workflows
-                .workflows=${this.savedWorkflows}
-                @ez-start-recording=${() => handleStartRecording(this)}
-                @ez-select-workflow=${(e: CustomEvent) => handleSelectWorkflow(this, e)}
-                @ez-show-all-workflows=${() => void appendWorkflowListMessage(this)}
-              ></chat-workflows>`
-            : html`<chat-empty
-                @ez-start-recording=${() => handleStartRecording(this)}
-                @ez-help=${this.handleHelp}
-              ></chat-empty>`
+          : html`<chat-empty></chat-empty>`
       }
       <chat-input
         .placeholder=${

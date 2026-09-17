@@ -9,7 +9,7 @@ export const routePaths = {
 } as const;
 
 export const apiErrorMessages = {
-  unreachable: "Can't reach the Ezer server. Run `npm run dev:server` and try again.",
+  unreachable: "Can't reach the Ezer server. Please try again later.",
   requestFailed: "Something went wrong talking to the Ezer server.",
   invalidResponse: "No reply from the server.",
 } as const;
