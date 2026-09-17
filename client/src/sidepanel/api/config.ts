@@ -1,6 +1,7 @@
 export const serverBaseUrl = __EZER_SERVER_URL__;
 
 export const routePaths = {
+  user: "/user",
   chat: "/chat",
   captures: "/captures",
   workflow: "/workflow",

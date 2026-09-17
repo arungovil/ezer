@@ -255,6 +255,6 @@ Typical flow for `POST /captures`:
 
 ## Migrations
 
-Migrations run sequentially on every `getDb()` call. Legacy plural table names and pre-refactor tables are dropped before the current schema is created.
+Migrations run sequentially on every `getDb()` call.
 
 For a clean slate during development, delete the SQLite file and restart the server.

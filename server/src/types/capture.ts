@@ -2,12 +2,6 @@ export const taskKinds = ["reminder", "note"] as const;
 
 export type TaskKind = (typeof taskKinds)[number];
 
-/** @deprecated Use TaskKind */
-export type ItemKind = TaskKind;
-
-/** @deprecated Use taskKinds */
-export const itemKinds = taskKinds;
-
 export interface CaptureRequestBody {
   text: string;
   tabUrl: string;

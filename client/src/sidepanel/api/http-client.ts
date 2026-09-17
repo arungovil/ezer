@@ -1,4 +1,5 @@
-import { getOrCreateUserId } from "@src/shared/identity/user-id.js";
+import { initializeUser } from "@src/shared/identity/initialize-user.js";
+import { getRequestUserId } from "@src/shared/identity/user-store.js";
 import { apiErrorMessages, serverBaseUrl } from "./config.js";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -28,12 +29,25 @@ function buildUrl(path: string, query?: Record<string, string>): string {
   return url.toString();
 }
 
+async function resolveUserId(): Promise<string> {
+  try {
+    return await getRequestUserId();
+  } catch {
+    const result = await initializeUser();
+    if (!result.ok) {
+      throw new Error(result.message);
+    }
+
+    return result.data.id;
+  }
+}
+
 export async function requestJson(
   path: string,
   options: RequestOptions = {},
 ): Promise<{ response: Response; data: unknown }> {
   const { method = "GET", body, signal, query } = options;
-  const userId = await getOrCreateUserId();
+  const userId = await resolveUserId();
 
   try {
     const response = await fetch(buildUrl(path, query), {

@@ -2,6 +2,20 @@ export interface ApiErrorBody {
   error: string;
 }
 
+export interface UserResponseBody {
+  id: string;
+  createdAt: string;
+}
+
+export function isUserResponseBody(value: unknown): value is UserResponseBody {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const body = value as UserResponseBody;
+  return typeof body.id === "string" && typeof body.createdAt === "string";
+}
+
 export interface ChatRequestBody {
   message: string;
   tabUrl: string;
@@ -31,7 +45,19 @@ export interface ChatResponseBody {
   ezerMessageId: string;
 }
 
-export type ItemKind = "reminder" | "note";
+export type TaskKind = "reminder" | "note";
+export type TaskStatus = "active" | "done" | "dismissed";
+
+const taskKinds = ["reminder", "note"] as const;
+const taskStatuses = ["active", "done", "dismissed"] as const;
+
+function isTaskKind(value: unknown): value is TaskKind {
+  return typeof value === "string" && (taskKinds as readonly string[]).includes(value);
+}
+
+function isTaskStatus(value: unknown): value is TaskStatus {
+  return typeof value === "string" && (taskStatuses as readonly string[]).includes(value);
+}
 
 export interface CaptureRequestBody {
   text: string;
@@ -43,7 +69,7 @@ export interface CaptureRequestBody {
 
 export interface CaptureItemBody {
   id: string;
-  kind: ItemKind;
+  kind: TaskKind;
   title: string;
   dueAt: string | null;
   summary: string | null;
@@ -93,12 +119,6 @@ export function isChatResponseBody(value: unknown): value is ChatResponseBody {
   );
 }
 
-const itemKinds = ["reminder", "note"] as const;
-
-function isItemKind(value: unknown): value is ItemKind {
-  return typeof value === "string" && (itemKinds as readonly string[]).includes(value);
-}
-
 function isCaptureItemBody(value: unknown): value is CaptureItemBody {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -107,7 +127,7 @@ function isCaptureItemBody(value: unknown): value is CaptureItemBody {
   const item = value as CaptureItemBody;
   return (
     typeof item.id === "string" &&
-    isItemKind(item.kind) &&
+    isTaskKind(item.kind) &&
     typeof item.title === "string" &&
     (item.dueAt === null || typeof item.dueAt === "string") &&
     (item.summary === null || typeof item.summary === "string")
@@ -234,9 +254,6 @@ export function isWorkflowResponseBody(value: unknown): value is WorkflowRespons
   );
 }
 
-export type TaskKind = "reminder" | "note";
-export type TaskStatus = "active" | "done" | "dismissed";
-
 export interface CreateTaskRequestBody {
   kind: TaskKind;
   title: string;
@@ -275,17 +292,6 @@ export interface TaskListResponseBody {
   origin: string | null;
   tabUrl: string;
   tasks: TaskResponseBody[];
-}
-
-const taskKinds = ["reminder", "note"] as const;
-const taskStatuses = ["active", "done", "dismissed"] as const;
-
-function isTaskKind(value: unknown): value is TaskKind {
-  return typeof value === "string" && (taskKinds as readonly string[]).includes(value);
-}
-
-function isTaskStatus(value: unknown): value is TaskStatus {
-  return typeof value === "string" && (taskStatuses as readonly string[]).includes(value);
 }
 
 export function isTaskResponseBody(value: unknown): value is TaskResponseBody {

@@ -1,6 +1,9 @@
+import { initializeUser } from "@src/shared/identity/initialize-user.js";
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
 import type { RecordedAction } from "@src/shared/types.js";
 import { injectAndRetry } from "./fallbacks.js";
+
+void initializeUser();
 
 let isRecording = false;
 let sidepanelOpen = false;
@@ -25,6 +28,7 @@ chrome.runtime.onConnect.addListener((port) => {
 
 chrome.runtime.onInstalled.addListener(() => {
   void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  void initializeUser();
 });
 
 // Detect tab switches — reset all recording state

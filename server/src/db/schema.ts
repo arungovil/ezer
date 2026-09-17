@@ -1,32 +1,5 @@
 export const migrations = [
   `
-    DROP TABLE IF EXISTS workflows;
-  `,
-  `
-    DROP TABLE IF EXISTS tasks;
-  `,
-  `
-    DROP TABLE IF EXISTS chats;
-  `,
-  `
-    DROP TABLE IF EXISTS origins;
-  `,
-  `
-    DROP TABLE IF EXISTS users;
-  `,
-  `
-    DROP TABLE IF EXISTS items;
-  `,
-  `
-    DROP TABLE IF EXISTS captures;
-  `,
-  `
-    DROP TABLE IF EXISTS messages;
-  `,
-  `
-    DROP TABLE IF EXISTS conversations;
-  `,
-  `
     CREATE TABLE IF NOT EXISTS user (
       id TEXT PRIMARY KEY,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -97,8 +70,5 @@ export const migrations = [
   `
     CREATE INDEX IF NOT EXISTS idx_workflow_origin_created
     ON workflow(origin_id, created_at);
-  `,
-  `
-    UPDATE task SET kind = 'reminder' WHERE kind = 'task';
   `,
 ] as const;
