@@ -45,7 +45,8 @@ import {
   refreshSavedWorkflows,
 } from "@src/sidepanel/workflow/workflow-handlers.js";
 import { html, LitElement, type PropertyValues } from "lit";
-import { query, state } from "lit/decorators.js";
+import { state } from "lit/decorators.js";
+import { ChatScrollController } from "./chat-scroll-controller.js";
 import { createChatTask } from "./chat-task.js";
 import { styles } from "./styles.js";
 import "@src/sidepanel/components/chat-empty/index.js";
@@ -58,8 +59,6 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   @state() savedWorkflows: ChatWindowHost["savedWorkflows"] = [];
   @state() workflowStatus: WorkflowStatus = "idle";
 
-  @query(".messages") private messagesContainer?: HTMLDivElement;
-
   replayingMessageId: string | null = null;
   pendingEmptyMsgId: string | null = null;
   pendingReplayError: string | null = null;
@@ -67,6 +66,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
 
   private readonly chatTask = createChatTask(this);
   private readonly captureTask = createCaptureTask(this);
+  private readonly chatScroll = new ChatScrollController(this, () => this.messages.length);
   private conversationLoadGeneration = 0;
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
@@ -119,15 +119,8 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   static styles = styles;
 
   protected override updated(changedProperties: PropertyValues<this>) {
-    this.scrollToBottom();
     if (changedProperties.has("workflowStatus")) {
       syncCaptureMode(this);
-    }
-  }
-
-  private scrollToBottom() {
-    if (this.messagesContainer) {
-      this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
   }
 
@@ -159,6 +152,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     await this.loadConversation({ replace: true });
 
     if (wasRecording) {
+      this.chatScroll.pinToEnd();
       this.messages = [...this.messages, recordingStoppedByTabSwitchMessage()];
     }
   }
@@ -178,6 +172,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
       }
 
       this.messages = loaded;
+      this.chatScroll.anchorToEnd(loaded.length);
     } catch {
       if (generation !== this.conversationLoadGeneration) {
         return;
@@ -204,6 +199,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
         handleStartRecording(this);
         return;
       case "help":
+        this.chatScroll.pinToEnd();
         void this.processChatMessage(helpPrompt, MESSAGE_TYPE.QUICK_ACTION);
         return;
     }
@@ -212,6 +208,8 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   private handleSend(e: CustomEvent<{ text: string }>) {
     const text = e.detail.text.trim();
     if (!text) return;
+
+    this.chatScroll.pinToEnd();
 
     if (this.pendingWorkflowSave) {
       void completeWorkflowSave(this, text);
@@ -279,6 +277,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
         this.messages.length
           ? html`<div
               class="messages"
+              @unpinned=${() => this.chatScroll.handleUnpinned()}
               @ez-replay=${(e: CustomEvent) => handleReplay(this, e)}
               @ez-save=${(e: CustomEvent) => handleSave(this, e)}
               @ez-play-workflow=${(e: CustomEvent) => handlePlayWorkflow(this, e, () => this.resetChat())}
@@ -286,6 +285,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
             >
               ${virtualize({
                 scroller: true,
+                layout: this.chatScroll.layout,
                 items: this.messages,
                 keyFunction: (m: Message) => m.id,
                 renderItem: (m: Message) =>

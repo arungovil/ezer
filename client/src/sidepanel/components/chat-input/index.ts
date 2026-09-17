@@ -61,6 +61,7 @@ export class ChatInput extends LitElement {
     el.value = "";
     el.style.height = "";
     this.closeQuickActions();
+    el.focus();
   }
 
   private handleKeydown(e: KeyboardEvent) {

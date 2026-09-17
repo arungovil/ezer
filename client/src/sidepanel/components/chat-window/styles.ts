@@ -15,6 +15,8 @@ export const styles = css`
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    overflow-anchor: auto;
+    overscroll-behavior: contain;
     scrollbar-gutter: stable;
     padding: var(--ez-space-md) 0;
     box-sizing: border-box;
