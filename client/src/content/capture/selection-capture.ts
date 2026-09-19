@@ -3,10 +3,16 @@
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
 
 const MAX_CAPTURE_LENGTH = 4000;
+const MIN_SELECTION_LENGTH = 3;
 
 let captureMode = false;
+let listenersAttached = false;
 
 export function startSelectionCapture(): void {
+  if (listenersAttached) {
+    return;
+  }
+  listenersAttached = true;
   window.addEventListener("mouseup", handleMouseUp);
 }
 
@@ -14,18 +20,20 @@ export function setCaptureMode(enabled: boolean): void {
   captureMode = enabled;
 }
 
-export function isCaptureModeActive(): boolean {
-  return captureMode;
-}
-
 function handleMouseUp(): void {
-  if (!captureMode) return;
+  if (!captureMode) {
+    return;
+  }
 
   const selection = window.getSelection();
-  if (!selection || selection.isCollapsed) return;
+  if (!selection || selection.isCollapsed) {
+    return;
+  }
 
   const text = selection.toString().trim();
-  if (!text) return;
+  if (text.length < MIN_SELECTION_LENGTH) {
+    return;
+  }
 
   chrome.runtime
     .sendMessage({

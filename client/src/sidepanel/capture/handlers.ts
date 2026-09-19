@@ -1,4 +1,4 @@
-import type { Task } from "@lit/task";
+import { type Task, TaskStatus } from "@lit/task";
 import { getActiveTabUrl } from "@src/shared/tabs/active-tab.js";
 import type { ChatWindowHost, Message } from "@src/shared/types.js";
 import { MESSAGE_TYPE } from "@src/shared/types.js";
@@ -6,6 +6,10 @@ import type { CaptureResponseBody } from "@src/sidepanel/api/types.js";
 import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.js";
 import type { CaptureTaskArgs } from "./capture-task.js";
 import { userCaptureMessage } from "./messages.js";
+
+const captureDedupeMs = 3000;
+let lastCapturedKey = "";
+let lastCapturedAt = 0;
 
 export async function handleSelectionCaptured(
   host: ChatWindowHost,
@@ -18,6 +22,20 @@ export async function handleSelectionCaptured(
   if (!tabUrl) {
     return;
   }
+
+  const normalizedText = text.trim();
+  const captureKey = normalizedText;
+  const now = Date.now();
+  if (captureKey === lastCapturedKey && now - lastCapturedAt < captureDedupeMs) {
+    return;
+  }
+
+  if (captureTask.status === TaskStatus.PENDING) {
+    return;
+  }
+
+  lastCapturedKey = captureKey;
+  lastCapturedAt = now;
 
   const userMsg = userCaptureMessage({
     text,

@@ -9,6 +9,10 @@ let isRecording = false;
 let sidepanelOpen = false;
 const actionBuffer: RecordedAction[] = [];
 let activeTabId: number | null = null;
+let lastSelectionCaptureKey = "";
+let lastSelectionCaptureAt = 0;
+
+const selectionCaptureDedupeMs = 3000;
 
 // Initialize active tab on startup
 void (async function init() {
@@ -70,6 +74,19 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       sendResponse({ ok: false, reason: "empty-selection" });
       return false;
     }
+
+    const captureKey = `${message.url ?? ""}|${message.text.trim()}`;
+    const now = Date.now();
+    if (
+      captureKey === lastSelectionCaptureKey &&
+      now - lastSelectionCaptureAt < selectionCaptureDedupeMs
+    ) {
+      sendResponse({ ok: false, reason: "duplicate" });
+      return false;
+    }
+
+    lastSelectionCaptureKey = captureKey;
+    lastSelectionCaptureAt = now;
 
     chrome.runtime
       .sendMessage({
