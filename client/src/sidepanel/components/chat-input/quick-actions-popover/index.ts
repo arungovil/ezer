@@ -61,8 +61,6 @@ export class QuickActionsPopover extends LitElement {
   }
 
   private handleSelect(action: QuickAction) {
-    if (action.disabled) return;
-
     this.dispatchEvent(
       new CustomEvent<QuickActionId>("ez-select", {
         detail: action.id,
@@ -86,7 +84,6 @@ export class QuickActionsPopover extends LitElement {
                       class="item ${active ? "active" : ""}"
                       role="option"
                       aria-selected=${active}
-                      ?disabled=${action.disabled ?? false}
                       @mousedown=${(e: Event) => e.preventDefault()}
                       @click=${() => this.handleSelect(action)}
                     >

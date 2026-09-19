@@ -1,13 +1,10 @@
 import { initializeUser } from "@src/shared/identity/initialize-user.js";
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
-import type { RecordedAction } from "@src/shared/types.js";
 import { injectAndRetry } from "./fallbacks.js";
 
 void initializeUser();
 
-let isRecording = false;
 let sidepanelOpen = false;
-const actionBuffer: RecordedAction[] = [];
 let activeTabId: number | null = null;
 let lastSelectionCaptureKey = "";
 let lastSelectionCaptureAt = 0;
@@ -35,35 +32,14 @@ chrome.runtime.onInstalled.addListener(() => {
   void initializeUser();
 });
 
-// Detect tab switches — reset all recording state
 chrome.tabs.onActivated.addListener(({ tabId }) => {
   if (activeTabId === tabId) return;
   activeTabId = tabId;
 
-  if (isRecording) {
-    isRecording = false;
-    actionBuffer.length = 0;
-  }
-
-  // Notify sidepanel so it can reset and show the tab-switched message
   chrome.runtime.sendMessage({ type: RUNTIME_MESSAGE_TYPE.TAB_SWITCHED, tabId }).catch(() => {});
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  // Direct messages from content script
-  if (message?.type === RUNTIME_MESSAGE_TYPE.ACTION_CAPTURED) {
-    if (isRecording && message.action) {
-      actionBuffer.push(message.action);
-    }
-    sendResponse({ ok: true });
-    return false;
-  }
-
-  if (message?.type === RUNTIME_MESSAGE_TYPE.GET_RECORDING_STATE) {
-    sendResponse({ isRecording });
-    return false;
-  }
-
   if (message?.type === RUNTIME_MESSAGE_TYPE.CAPTURE_SELECTION) {
     if (!sidepanelOpen) {
       sendResponse({ ok: false, reason: "panel-closed" });
@@ -100,99 +76,19 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return false;
   }
 
-  if (
-    message?.type === RUNTIME_MESSAGE_TYPE.REPLAY_COMPLETE ||
-    message?.type === RUNTIME_MESSAGE_TYPE.REPLAY_FAILED
-  ) {
-    // Broadcast from content back to sidepanel
-    chrome.runtime.sendMessage(message).catch(() => {});
-    sendResponse({ ok: true });
-    return false;
-  }
-
-  // Messages from sidepanel, routed to content script
   if (message?.target !== "content") return;
 
-  if (message.payload?.type === RUNTIME_MESSAGE_TYPE.START_RECORDING) {
-    handleStartRecording(message.payload, sendResponse);
-    return true;
-  }
-
-  if (message.payload?.type === RUNTIME_MESSAGE_TYPE.STOP_RECORDING) {
-    handleStopRecording(message.payload, sendResponse);
-    return true;
-  }
-
-  if (message.payload?.type === RUNTIME_MESSAGE_TYPE.START_CAPTURE) {
+  if (
+    message.payload?.type === RUNTIME_MESSAGE_TYPE.START_CAPTURE ||
+    message.payload?.type === RUNTIME_MESSAGE_TYPE.STOP_CAPTURE
+  ) {
     void deliverToContent(message.payload, sendResponse);
     return true;
   }
 
-  if (message.payload?.type === RUNTIME_MESSAGE_TYPE.STOP_CAPTURE) {
-    void deliverToContent(message.payload, sendResponse);
-    return true;
-  }
-
-  // Unknown payload type — forward to content as-is
   void deliverToContent(message.payload, sendResponse);
   return true;
 });
-
-async function handleStartRecording(payload: unknown, sendResponse: (response: unknown) => void) {
-  isRecording = true;
-  actionBuffer.length = 0;
-
-  // Update activeTabId in case it wasn't initialized (edge case)
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab?.id != null) activeTabId = tab.id;
-
-  const response = await deliverToContentAsync(payload);
-  if (isErrorResponse(response)) {
-    isRecording = false;
-  }
-  sendResponse(response);
-}
-
-async function handleStopRecording(payload: unknown, sendResponse: (response: unknown) => void) {
-  if (!isRecording) {
-    sendResponse({ ok: true });
-    return;
-  }
-
-  isRecording = false;
-
-  // Snapshot the buffer before forwarding STOP; the content script may
-  // still be capturing on the current page.
-  const captured = [...actionBuffer];
-  actionBuffer.length = 0;
-
-  await deliverToContent(payload, () => {});
-
-  // Broadcast to sidepanel
-  chrome.runtime
-    .sendMessage({
-      type: RUNTIME_MESSAGE_TYPE.RECORDING_COMPLETE,
-      actions: captured,
-    })
-    .catch(() => {});
-
-  sendResponse({ ok: true });
-}
-
-function deliverToContentAsync(payload: unknown): Promise<unknown> {
-  return new Promise((resolve) => {
-    void deliverToContent(payload, resolve);
-  });
-}
-
-function isErrorResponse(response: unknown): response is { error: string } {
-  return (
-    typeof response === "object" &&
-    response !== null &&
-    "error" in response &&
-    typeof (response as { error: unknown }).error === "string"
-  );
-}
 
 async function deliverToContent(payload: unknown, sendResponse: (response: unknown) => void) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });

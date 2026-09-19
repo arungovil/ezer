@@ -5,9 +5,6 @@ export const userErrorMessages = {
   serverUnreachable: "Can't reach Ezer right now. Check your connection and try again.",
   captureFailed: "Couldn't save your highlight. Please try again.",
   chatFailed: "Couldn't send your message. Please try again.",
-  workflowSaveFailed: "Couldn't save your workflow. Please try again.",
-  workflowDeleteFailed: "Couldn't remove the workflow. Please try again.",
-  replayFailed: "The workflow couldn't finish. Check the page and try again.",
 } as const;
 
 export function toUserErrorMessage(

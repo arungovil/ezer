@@ -1,4 +1,3 @@
-import type { WorkflowStatus } from "@src/shared/types.js";
 import "@src/sidepanel/components/chat-input/quick-actions-popover/index.js";
 import "@src/sidepanel/components/common/ez-button/index.js";
 import { sendIcon } from "@src/sidepanel/icons/send.js";
@@ -15,7 +14,6 @@ import { styles } from "./styles.js";
 
 export class ChatInput extends LitElement {
   @property({ type: String }) placeholder = "What can I help you with?";
-  @property({ type: String }) workflowStatus: WorkflowStatus = "idle";
   @property({ type: Boolean }) quickActionsEnabled = true;
 
   @state() private slashStart = -1;
@@ -33,18 +31,11 @@ export class ChatInput extends LitElement {
   }
 
   private get filteredActions(): QuickAction[] {
-    return filterQuickActions(getQuickActions(this.workflowStatus), this.slashQuery);
+    return filterQuickActions(getQuickActions(), this.slashQuery);
   }
 
   private get selectableActionIndex(): number {
-    const selectable = this.filteredActions.filter((action) => !action.disabled);
-    if (selectable.length === 0) return -1;
-
-    const current = this.filteredActions[this.activeIndex];
-    if (!current || current.disabled) {
-      return this.filteredActions.findIndex((action) => !action.disabled);
-    }
-
+    if (this.filteredActions.length === 0) return -1;
     return this.activeIndex;
   }
 
@@ -106,21 +97,15 @@ export class ChatInput extends LitElement {
     const actions = this.filteredActions;
     if (actions.length === 0) return;
 
-    const enabledIndexes = actions
-      .map((action, index) => (action.disabled ? -1 : index))
-      .filter((index) => index >= 0);
-    if (enabledIndexes.length === 0) return;
-
     const current = this.selectableActionIndex;
-    const currentPos = enabledIndexes.indexOf(current);
     const nextPos =
-      currentPos < 0
+      current < 0
         ? direction === 1
           ? 0
-          : enabledIndexes.length - 1
-        : (currentPos + direction + enabledIndexes.length) % enabledIndexes.length;
+          : actions.length - 1
+        : (current + direction + actions.length) % actions.length;
 
-    this.activeIndex = enabledIndexes[nextPos];
+    this.activeIndex = nextPos;
   }
 
   private selectActiveAction() {
@@ -128,7 +113,7 @@ export class ChatInput extends LitElement {
     if (index < 0) return;
 
     const action = this.filteredActions[index];
-    if (!action || action.disabled) return;
+    if (!action) return;
 
     this.applyQuickAction(action.id);
   }

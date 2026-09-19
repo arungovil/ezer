@@ -25,12 +25,8 @@ export function handleStopCaptureMode(): void {
   disarmCaptureMode();
 }
 
-export function syncCaptureMode(host: ChatWindowHost): void {
-  if (host.workflowStatus === "idle") {
-    armCaptureMode();
-  } else {
-    disarmCaptureMode();
-  }
+export function syncCaptureMode(_host: ChatWindowHost): void {
+  armCaptureMode();
 }
 
 export function handleStartCapture(host: ChatWindowHost): void {

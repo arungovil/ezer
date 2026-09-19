@@ -57,18 +57,6 @@ export const migrations = [
     ON task(origin_id, created_at);
   `,
   `
-    CREATE TABLE IF NOT EXISTS workflow (
-      id TEXT PRIMARY KEY,
-      origin_id TEXT NOT NULL REFERENCES origin(id),
-      user_id TEXT NOT NULL REFERENCES user(id),
-      name TEXT NOT NULL,
-      actions TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      deleted_at TEXT
-    );
-  `,
-  `
-    CREATE INDEX IF NOT EXISTS idx_workflow_origin_created
-    ON workflow(origin_id, created_at);
+    DROP TABLE IF EXISTS workflow;
   `,
 ] as const;
