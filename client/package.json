@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Ezer Chrome extension: a personal and professional assistant for reminders, notes, and recorded workflows",
+  "description": "Ezer Chrome extension: a personal and professional assistant for reminders and notes",
   "scripts": {
     "build": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",

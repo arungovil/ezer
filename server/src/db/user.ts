@@ -67,11 +67,6 @@ export function softDeleteUser(userId: string): boolean {
       userId,
     );
 
-    db.prepare(`UPDATE workflow SET deleted_at = ? WHERE user_id = ? AND ${notDeleted}`).run(
-      deletedAt,
-      userId,
-    );
-
     db.prepare(`UPDATE user SET deleted_at = ? WHERE id = ? AND ${notDeleted}`).run(
       deletedAt,
       userId,

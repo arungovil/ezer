@@ -1,9 +1,7 @@
 # Ezer
 
 Ezer is a Chrome side-panel personal and professional assistant. Its core job is capturing what
-you find while browsing and turning it into reminders and notes; it can also learn
-workflows by recording browser interactions and replaying them for you. More use cases are on the
-way.
+you find while browsing and turning it into reminders and notes. More use cases are on the way.
 
 ## Principles
 
@@ -17,25 +15,18 @@ way.
 
 ### Personal assistant
 
-- Capture text selections from any page (independent of workflow recording)
+- Capture text selections from any page
 - Classify each capture as a `reminder` | `note` and extract title, due date, and summary via LLM
 - Persist captures, tasks, and per-origin chat in SQLite
 - Roadmap: notify the user when a due reminder comes up
 
-### Workflow automation
-
-- Record `click` / `change` / `submit` on the capture phase
-- Map each event to a `RecordedAction` with a priority-ordered selector chain
-- Save named workflows locally in IndexedDB, scoped per tab
-- Replay saved workflows with synthetic DOM events
-
 ## Stack & Layout
 
-- `client/src/background/` — MV3 service worker: recording buffer, message routing
-- `client/src/content/` — MV3 content script: `workflow/` (record + replay engine), `capture/` (selection)
-- `client/src/sidepanel/` — MV3 side panel: `components/`, `api/`, `workflow/`, `capture/`
-- `client/src/shared/` — cross-layer types, message constants, replay failure shapes
-- `server/` — Express: `/captures`, `/chat`, `/task`, `/workflow`, `/user`, SQLite persistence (assistant feature)
+- `client/src/background/` — MV3 service worker: message routing, capture dedupe
+- `client/src/content/` — MV3 content script: `capture/` (selection)
+- `client/src/sidepanel/` — MV3 side panel: `components/`, `api/`, `capture/`
+- `client/src/shared/` — cross-layer types, message constants
+- `server/` — Express: `/captures`, `/chat`, `/task`, `/user`, SQLite persistence
 - LLM: DeepSeek (`deepseek-chat`, OpenAI-compatible API) with structured JSON output
 - Dev env: server on `localhost:3000`; extension loaded unpacked in Chrome
 
@@ -48,16 +39,7 @@ way.
 - **Chat:** `POST /chat` with `{ message, tabUrl }` → `{ originId, origin, reply, rejected, userMessageId, ezerMessageId }` (off-topic guard)
 - **History:** `GET /chat?tabUrl=` → per-origin messages; authenticated routes require `X-Ezer-User-Id`
 - **Tasks:** `GET /task?tabUrl=`, `PATCH /task/:id` — reminders and notes for the page origin
-- **Persistence:** SQLite tables `user`, `origin`, `chat`, `task`, `workflow` (soft delete via `deleted_at`)
-
-### Workflow automation
-
-- **Recorded action:** `{ type: CLICK|INPUT|SUBMIT, selectors: string[], value?, checked?, innerText?, tagName }` — `selectors` ordered by priority; `selectors[0]` is primary
-- **Selector chain:** `data-testid` → `id` → `name` → `aria-label` → `placeholder` → `[type]` → tag name
-- **Workflow:** `{ id, tabId, url, name, actions: RecordedAction[], createdAt }` — client stores in IndexedDB today; server `GET/POST /workflow` available for migration
-- **Replay:** resolve via `querySelector(selectors[0])`, falling back down the chain; INPUT → set value via native setter (`Object.getOwnPropertyDescriptor`) + dispatch input/change (React/Vue controlled inputs); CLICK/SUBMIT → scrollIntoView + click(); 800ms between steps
-- **Replay errors:** selector unresolved → retry up to 3× over the selector chain; if still unresolvable, stop the run and surface an error message naming the failed step and suggesting a fix
-- **Messages:** `START_RECORDING`, `STOP_RECORDING`, `REPLAY_ACTIONS`, `ACTION_CAPTURED`, `GET_RECORDING_STATE`, `REPLAY_COMPLETE`, `REPLAY_FAILED`, `RECORDING_COMPLETE` via background broker
+- **Persistence:** SQLite tables `user`, `origin`, `chat`, `task` (soft delete via `deleted_at`)
 
 ## Conventions
 
@@ -82,8 +64,3 @@ Auto-enforced (Biome): formatting, quotes, semicolons, trailing commas, 100-col 
 ### Styling
 
 Design tokens via CSS custom properties in `styles.css`. All Lit components reference `var(--token-name)` only. Tokens cascade through Shadow DOM automatically.
-
-### Extension
-
-- Selector priority (recorded per step): `data-testid` > `id` > `name` > `aria-label` > `placeholder` > `[type]` > tag name
-- Record `click` / `change` / `submit` on the capture phase; truncate innerText to 50 chars

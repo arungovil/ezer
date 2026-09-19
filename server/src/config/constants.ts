@@ -9,7 +9,6 @@ export const routePaths = {
   user: "/user",
   chat: "/chat",
   captures: "/captures",
-  workflow: "/workflow",
   task: "/task",
 } as const;
 
@@ -20,10 +19,6 @@ export const errorMessages = {
   chatNotFound: "Chat message not found",
   chatHasLinkedTask: "Cannot delete a capture message with a linked task",
   requestFailed: "Request failed",
-  workflowRequired: "name, tabUrl, and actions are required",
-  workflowIdRequired: "workflow id is required",
-  workflowNotFound: "Workflow not found",
-  workflowPersistFailed: "Failed to save workflow",
   taskRequired: "kind, title, and tabUrl are required",
   taskIdRequired: "task id is required",
   taskNotFound: "Task not found",

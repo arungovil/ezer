@@ -4,7 +4,6 @@ export const routePaths = {
   user: "/user",
   chat: "/chat",
   captures: "/captures",
-  workflow: "/workflow",
   task: "/task",
 } as const;
 

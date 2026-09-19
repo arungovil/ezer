@@ -9,7 +9,7 @@ import type { ChatWindowHost } from "@src/shared/types.js";
 import { MESSAGE_TYPE } from "@src/shared/types.js";
 import { listTasks } from "@src/sidepanel/api/task.js";
 import type { TaskKind, TaskResponseBody } from "@src/sidepanel/api/types.js";
-import { ezerStatusMessage, userTextMessage } from "@src/sidepanel/workflow/messages-handler.js";
+import { ezerStatusMessage, userTextMessage } from "./messages.js";
 
 function formatReminderLine(task: TaskResponseBody): string {
   const due = task.dueAt ? ` — due ${new Date(task.dueAt).toLocaleDateString()}` : "";

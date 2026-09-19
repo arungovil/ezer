@@ -2,7 +2,7 @@ import { renderMarkdown } from "@src/sidepanel/utils/markdown.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 
-export class MessageBubbleRecording extends LitElement {
+export class MessageBubbleStatus extends LitElement {
   @property({ type: String }) content = "";
 
   render() {
@@ -10,4 +10,4 @@ export class MessageBubbleRecording extends LitElement {
   }
 }
 
-customElements.define("message-bubble-recording", MessageBubbleRecording);
+customElements.define("message-bubble-status", MessageBubbleStatus);

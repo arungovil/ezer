@@ -1,9 +1,4 @@
-import type {
-  CaptureContent,
-  MessageType,
-  WorkflowContent,
-  WorkflowListContent,
-} from "@src/shared/types.js";
+import type { CaptureContent, MessageType } from "@src/shared/types.js";
 import { MESSAGE_TYPE } from "@src/shared/types.js";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
@@ -12,9 +7,7 @@ import "@src/sidepanel/components/chat-loader/index.js";
 import "@src/sidepanel/components/message-bubble/capture/index.js";
 import "@src/sidepanel/components/message-bubble/text/index.js";
 import "@src/sidepanel/components/message-bubble/quick-action/index.js";
-import "@src/sidepanel/components/message-bubble/recording/index.js";
-import "@src/sidepanel/components/message-bubble/workflow/index.js";
-import "@src/sidepanel/components/message-bubble/workflow-list/index.js";
+import "@src/sidepanel/components/message-bubble/status/index.js";
 import "@src/sidepanel/components/message-bubble/tab-switched/index.js";
 
 export class MessageBubble extends LitElement {
@@ -37,18 +30,10 @@ export class MessageBubble extends LitElement {
         return html`<message-bubble-quick-action
           .content=${this.content as string}
         ></message-bubble-quick-action>`;
-      case MESSAGE_TYPE.RECORDING:
-        return html`<message-bubble-recording
+      case MESSAGE_TYPE.STATUS:
+        return html`<message-bubble-status
           .content=${this.content as string}
-        ></message-bubble-recording>`;
-      case MESSAGE_TYPE.WORKFLOW:
-        return html`<message-bubble-workflow
-          .content=${this.content as WorkflowContent}
-        ></message-bubble-workflow>`;
-      case MESSAGE_TYPE.WORKFLOW_LIST:
-        return html`<message-bubble-workflow-list
-          .content=${this.content as WorkflowListContent}
-        ></message-bubble-workflow-list>`;
+        ></message-bubble-status>`;
       case MESSAGE_TYPE.TAB_SWITCHED:
         return html`<message-bubble-tab-switched
           .content=${this.content as string}

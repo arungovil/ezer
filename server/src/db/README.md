@@ -15,16 +15,15 @@ Data is scoped in three layers:
 
 1. **User** — identity from the client (`X-Ezer-User-Id` UUID)
 2. **Origin** — browsing context per user, keyed by URL origin (e.g. `https://github.com`)
-3. **Domain data** — chat messages, tasks, and workflows for that origin
+3. **Domain data** — chat messages and tasks for that origin
 
-All pages on the same origin share one chat thread and one set of tasks/workflows for that user.
+All pages on the same origin share one chat thread and one set of tasks for that user.
 
 ```
 user
   └── origin (user_id + origin)
         ├── chat
-        ├── task
-        └── workflow
+        └── task
 ```
 
 ## Entity-relationship diagram
@@ -34,10 +33,8 @@ erDiagram
   user ||--o{ origin : "has"
   origin ||--o{ chat : "has"
   origin ||--o{ task : "has"
-  origin ||--o{ workflow : "has"
   chat ||--o| task : "optional source"
   user ||--o{ task : "owns"
-  user ||--o{ workflow : "owns"
 
   user {
     text id PK
@@ -74,15 +71,6 @@ erDiagram
     text source_title
     text created_at
   }
-
-  workflow {
-    text id PK
-    text origin_id FK
-    text user_id FK
-    text name
-    text actions
-    text created_at
-  }
 ```
 
 ## Tables
@@ -113,7 +101,7 @@ Per-user browsing context. One row per `(user_id, origin)` pair.
 
 **Unique:** `(user_id, origin)`
 
-**Derivation:** `origin` is parsed from the client’s page URL via `new URL(tabUrl).origin` (see `lib/parse-origin.ts`). Full page paths on the same site map to one origin row.
+**Derivation:** `origin` is parsed from the client's page URL via `new URL(tabUrl).origin` (see `lib/parse-origin.ts`). Full page paths on the same site map to one origin row.
 
 ---
 
@@ -159,37 +147,15 @@ Structured items extracted from text captures (or future sources).
 - `idx_task_user_status_due (user_id, status, due_at)` — user to-do / reminder queries
 - `idx_task_origin_created (origin_id, created_at)` — per-origin task history
 
----
-
-### `workflow`
-
-Recorded browser interaction sequences, scoped to an origin.
-
-| Column       | Type | Constraints                  | Description                          |
-| ------------ | ---- | ---------------------------- | ------------------------------------ |
-| `id`         | TEXT | PRIMARY KEY                  | UUID                                 |
-| `origin_id`  | TEXT | NOT NULL, FK → `origin(id)`  | Domain scope                         |
-| `user_id`    | TEXT | NOT NULL, FK → `user(id)`    | Owner                                |
-| `name`       | TEXT | NOT NULL                     | User-given workflow name             |
-| `actions`    | TEXT | NOT NULL                     | JSON array of recorded DOM actions   |
-| `created_at` | TEXT | NOT NULL                     | Creation timestamp                   |
-| `deleted_at` | TEXT |                              | Set by soft delete; `NULL` = active  |
-
-**Index:** `idx_workflow_origin_created (origin_id, created_at)`
-
-Workflows are exposed via `GET/POST /workflow` (see [../../README.md](../../README.md)). `DELETE /workflow/:id` is not implemented yet; `softDeleteWorkflowForUser` is ready for when it is. The extension client still reads from IndexedDB until wired to the API.
-
 ## Relationships
 
-| Parent   | Child      | Cardinality | FK column   | On delete   |
-| -------- | ---------- | ----------- | ----------- | ----------- |
-| `user`   | `origin`   | 1:N         | `user_id`   | soft delete |
-| `user`   | `task`     | 1:N         | `user_id`   | soft delete |
-| `user`   | `workflow` | 1:N         | `user_id`   | soft delete |
-| `origin` | `chat`     | 1:N         | `origin_id` | soft delete |
-| `origin` | `task`     | 1:N         | `origin_id` | —           |
-| `origin` | `workflow` | 1:N         | `origin_id` | —           |
-| `chat`   | `task`     | 1:0..1      | `chat_id`   | —           |
+| Parent   | Child    | Cardinality | FK column   | On delete   |
+| -------- | -------- | ----------- | ----------- | ----------- |
+| `user`   | `origin` | 1:N         | `user_id`   | soft delete |
+| `user`   | `task`   | 1:N         | `user_id`   | soft delete |
+| `origin` | `chat`   | 1:N         | `origin_id` | soft delete |
+| `origin` | `task`   | 1:N         | `origin_id` | —           |
+| `chat`   | `task`   | 1:0..1      | `chat_id`   | —           |
 
 All `DELETE` API routes set `deleted_at` instead of removing rows. Reads exclude rows where `deleted_at` is set.
 
@@ -200,7 +166,6 @@ All `DELETE` API routes set `deleted_at` instead of removing rows. Reads exclude
 | Resolve origin         | `(user_id, origin)`                              |
 | Load chat for a page   | `origin.id` where `origin = parsePageOrigin(tabUrl)` |
 | List tasks for origin  | `task.origin_id`                                 |
-| List workflows         | `workflow.origin_id`                             |
 
 ## Enums and conventions
 
@@ -249,7 +214,6 @@ Typical flow for `POST /captures`:
 | `origin.ts`   | `origin`   | Get or create origin by user + domain   |
 | `chat.ts`     | `chat`     | Insert, list, and soft-delete messages  |
 | `task.ts`     | `task`     | Insert, list, get, update (`softDeleteTaskForUser` for future routes) |
-| `workflow.ts` | `workflow` | Insert and query (`softDeleteWorkflowForUser` for future routes) |
 | `schema.ts`   | —          | DDL migrations                          |
 | `index.ts`    | —          | Connection, migration runner, lifecycle |
 

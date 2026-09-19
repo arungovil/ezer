@@ -1,26 +1,16 @@
-import type { WorkflowStatus } from "@src/shared/types.js";
-import {
-  clipboardClockIcon,
-  helpCircleIcon,
-  notebookPenIcon,
-  recordIcon,
-  workflowIcon,
-} from "@src/sidepanel/icons/index.js";
+import { clipboardClockIcon, helpCircleIcon, notebookPenIcon } from "@src/sidepanel/icons/index.js";
 import type { TemplateResult } from "lit";
 
-export type QuickActionId = "reminders" | "notes" | "workflows" | "record" | "help";
+export type QuickActionId = "reminders" | "notes" | "help";
 
 export interface QuickAction {
   id: QuickActionId;
   label: string;
   keywords: string[];
   icon: TemplateResult;
-  disabled?: boolean;
 }
 
-export function getQuickActions(workflowStatus: WorkflowStatus): QuickAction[] {
-  const recording = workflowStatus === "recording" || workflowStatus === "replaying";
-
+export function getQuickActions(): QuickAction[] {
   return [
     {
       id: "reminders",
@@ -33,19 +23,6 @@ export function getQuickActions(workflowStatus: WorkflowStatus): QuickAction[] {
       label: "Notes",
       keywords: ["notes", "note", "saved"],
       icon: notebookPenIcon,
-    },
-    {
-      id: "workflows",
-      label: "Workflows",
-      keywords: ["workflows", "workflow", "saved"],
-      icon: workflowIcon,
-    },
-    {
-      id: "record",
-      label: "Record workflow",
-      keywords: ["record", "workflow", "automate", "new"],
-      icon: recordIcon,
-      disabled: recording,
     },
     {
       id: "help",

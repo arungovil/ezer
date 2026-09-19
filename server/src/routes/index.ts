@@ -6,7 +6,6 @@ import { handleDeleteChat, handleListChat, handlePostChat } from "./chat.js";
 import { handleHealth } from "./health.js";
 import { handleGetTask, handleListTasks, handlePatchTask, handlePostTask } from "./task.js";
 import { handleDeleteUser, handleGetUser, handlePutUser } from "./user.js";
-import { handleGetWorkflow, handleListWorkflows, handlePostWorkflow } from "./workflow.js";
 
 export function registerRoutes(app: Express): void {
   app.get(routePaths.health, handleHealth);
@@ -21,9 +20,6 @@ export function registerRoutes(app: Express): void {
   app.post(routePaths.captures, requireUser, (req, res) => {
     void handleCapture(req, res);
   });
-  app.get(routePaths.workflow, requireUser, handleListWorkflows);
-  app.get(`${routePaths.workflow}/:id`, requireUser, handleGetWorkflow);
-  app.post(routePaths.workflow, requireUser, handlePostWorkflow);
   app.get(routePaths.task, requireUser, handleListTasks);
   app.get(`${routePaths.task}/:id`, requireUser, handleGetTask);
   app.post(routePaths.task, requireUser, handlePostTask);

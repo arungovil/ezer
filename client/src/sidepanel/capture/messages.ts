@@ -5,11 +5,29 @@ function newId(): string {
   return crypto.randomUUID();
 }
 
+export function ezerStatusMessage(content: string): Message {
+  return {
+    id: newId(),
+    role: "ezer",
+    type: MESSAGE_TYPE.STATUS,
+    content,
+  };
+}
+
+export function userTextMessage(content: string): Message {
+  return {
+    id: newId(),
+    role: "user",
+    type: MESSAGE_TYPE.TEXT,
+    content,
+  };
+}
+
 export function captureStartedMessage(): Message {
   return {
     id: newId(),
     role: "ezer",
-    type: MESSAGE_TYPE.RECORDING,
+    type: MESSAGE_TYPE.STATUS,
     content:
       "📌 **Highlight capture ready.** Select text on the page — I'll save it as a reminder or note.",
   };
