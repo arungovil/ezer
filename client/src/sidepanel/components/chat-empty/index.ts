@@ -9,7 +9,7 @@ export class ChatEmpty extends LitElement {
       <div class="hero">
         <h2>Say hello to Ezer! 👋</h2>
         <p>
-          Highlight text on any page to save reminders and notes, or ask me anything below.
+          Select text on this page to save a note or reminder. Type / below for more options.
         </p>
       </div>
     `;
