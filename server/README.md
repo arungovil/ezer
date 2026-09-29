@@ -1,6 +1,6 @@
 # Ezer Server
 
-Express API for the personal-assistant feature: LLM-backed capture extraction (`reminder` | `note`), per-origin chat and task persistence, and user identity.
+Express API for notes and reminders: LLM-backed capture extraction (`note` by default, `reminder` when the selection is actionable), per-origin chat and task persistence, and user identity.
 
 Default base URL: `http://localhost:3000`
 
@@ -245,7 +245,7 @@ Soft-delete a chat message owned by the authenticated user.
 
 ## `POST /captures`
 
-Parse a highlighted text selection into a reminder or note. Persists chat messages and a task row, scoped to the **origin** derived from `tabUrl`. If the LLM call fails or returns invalid JSON, the server saves a generic **note** fallback and still returns `200`.
+Parse a highlighted text selection into a note, or a reminder when it is something to do. Persists chat messages and a task row, scoped to the **origin** derived from `tabUrl`. If the LLM call fails or returns invalid JSON, the server saves a generic **note** fallback and still returns `200`.
 
 **Headers**
 

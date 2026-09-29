@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ezer",
   "version": "0.1.0",
-  "description": "Ezer is your personal and professional assistant for reminders and notes",
+  "description": "Ezer is your personal assistant for notes and reminders",
   "permissions": ["activeTab", "scripting", "sidePanel", "storage"],
   "host_permissions": ["<all_urls>"],
   "background": {

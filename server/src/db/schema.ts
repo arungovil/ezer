@@ -56,7 +56,4 @@ export const migrations = [
     CREATE INDEX IF NOT EXISTS idx_task_origin_created
     ON task(origin_id, created_at);
   `,
-  `
-    DROP TABLE IF EXISTS workflow;
-  `,
 ] as const;

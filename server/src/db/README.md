@@ -125,7 +125,7 @@ Chat messages for an origin. Ordered by `created_at`.
 
 ### `task`
 
-Structured items extracted from text captures (or future sources).
+Notes and reminders extracted from text captures.
 
 | Column         | Type | Constraints                  | Description                                |
 | -------------- | ---- | ---------------------------- | ------------------------------------------ |
@@ -176,14 +176,14 @@ Used in `chat.message_type`:
 | Value     | Role  | `content` format                                      |
 | --------- | ----- | ----------------------------------------------------- |
 | `CAPTURE` | user  | JSON: `{ text, url?, title? }` — raw page selection   |
-| `TEXT`    | either| Markdown plain text (Ezer replies, future typed chat) |
+| `TEXT`    | either| Markdown plain text (typed chat and Ezer replies)     |
 
 ### Task kinds
 
 | Value      | Meaning                                                         |
 | ---------- | --------------------------------------------------------------- |
 | `reminder` | Something to do or follow up on; `due_at` optional              |
-| `note`     | Reference info; no action required                              |
+| `note`     | Default. Reference info; no action required                     |
 
 ### Task status
 

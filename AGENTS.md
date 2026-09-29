@@ -1,7 +1,7 @@
 # Ezer
 
-Ezer is a Chrome side-panel personal and professional assistant. Its core job is capturing what
-you find while browsing and turning it into reminders and notes. More use cases are on the way.
+Ezer is a Chrome side-panel personal assistant. Its core job is capturing what you find while
+browsing and saving it as a note, or as a reminder when the selection is something to act on.
 
 ## Principles
 
@@ -13,10 +13,10 @@ you find while browsing and turning it into reminders and notes. More use cases 
 
 ## Features
 
-### Personal assistant
+### Notes and reminders
 
 - Capture text selections from any page
-- Classify each capture as a `reminder` | `note` and extract title, due date, and summary via LLM
+- Save each capture as a `note` by default; use `reminder` when the text is something to do, and set `dueAt` when a date or time is present
 - Persist captures, tasks, and per-origin chat in SQLite
 - Roadmap: notify the user when a due reminder comes up
 
@@ -32,13 +32,13 @@ you find while browsing and turning it into reminders and notes. More use cases 
 
 ## Contracts
 
-### Personal assistant
+### Notes and reminders
 
-- **Item kinds:** `reminder` | `note` — one per capture; `reminder` may carry `dueAt` (ISO 8601, resolved in the user's timezone)
+- **Item kinds:** `note` | `reminder` — one per capture. Notes are the default. A `reminder` is for something to do and may carry `dueAt` (ISO 8601, resolved in the user's timezone)
 - **Capture:** `POST /captures` with `{ text, tabUrl, url?, title?, timezone? }` → `{ taskId, originId, origin, item, reply, userMessageId, ezerMessageId }`. LLM failures degrade to a generic note (always `200` on success path).
 - **Chat:** `POST /chat` with `{ message, tabUrl }` → `{ originId, origin, reply, rejected, userMessageId, ezerMessageId }` (off-topic guard)
 - **History:** `GET /chat?tabUrl=` → per-origin messages; authenticated routes require `X-Ezer-User-Id`
-- **Tasks:** `GET /task?tabUrl=`, `PATCH /task/:id` — reminders and notes for the page origin
+- **Tasks:** `GET /task?tabUrl=`, `PATCH /task/:id` — notes and reminders for the page origin
 - **Persistence:** SQLite tables `user`, `origin`, `chat`, `task` (soft delete via `deleted_at`)
 
 ## Conventions
