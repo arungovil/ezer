@@ -13,16 +13,16 @@ export interface QuickAction {
 export function getQuickActions(): QuickAction[] {
   return [
     {
-      id: "reminders",
-      label: "Reminders",
-      keywords: ["reminders", "reminder", "due"],
-      icon: clipboardClockIcon,
-    },
-    {
       id: "notes",
       label: "Notes",
       keywords: ["notes", "note", "saved"],
       icon: notebookPenIcon,
+    },
+    {
+      id: "reminders",
+      label: "Reminders",
+      keywords: ["reminders", "reminder", "due"],
+      icon: clipboardClockIcon,
     },
     {
       id: "help",

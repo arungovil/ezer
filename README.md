@@ -1,19 +1,23 @@
 # Ezer
 
-Ezer is a Chrome side-panel **personal and professional assistant**. Capture what you find while
-browsing and Ezer turns it into reminders and notes. New ways to help are on the way.
+Ezer is a Chrome side-panel **personal assistant** for taking notes, and for reminders when
+something you find is worth acting on.
 
 ## Features
 
-### Personal assistant
+### Notes
 
-Keep track of things you come across while browsing.
+Highlight text on any page while the panel is open — a quote, a link, a fact, a paragraph you want
+to keep. Ezer saves it as a **note** with a title and a short summary. Captures and Ezer's replies
+come back when you return to that site.
 
-1. Highlight text on any page while the panel is open — e.g. `Submit expense report by Friday 5pm`.
-2. Ezer turns the selection into a **reminder** or **note**, with a title, due date when relevant, and summary.
-3. Your captures and Ezer's replies are saved and come back when you return to that tab.
+### Reminders
 
-> **Roadmap:** due reminders will be pushed back to you as notifications, turning captured items into an active to-do flow.
+When the selection is something to do, Ezer saves a **reminder** instead. A date or time in the text
+(for example, `Submit expense report by Friday 5pm`) becomes a due date in your timezone. If it is
+actionable but has no time, the reminder is saved without one.
+
+> **Roadmap:** notify you when a reminder is due.
 
 ## Getting started
 
@@ -61,7 +65,7 @@ npm run build
 ## Architecture
 
 ```
-Personal assistant (client → server)
+Notes and reminders (client → server)
   page selection (content script)
     → side panel chat UI (Lit)
     → Express API (POST /captures, GET/POST /chat, GET/PATCH /task)
@@ -78,7 +82,7 @@ Personal assistant (client → server)
 
 ## API
 
-The server powers the personal-assistant feature.
+The server powers notes and reminders.
 
 | Method   | Path                | Description                        |
 | -------- | ------------------- | ---------------------------------- |
@@ -99,8 +103,6 @@ See [server/README.md](server/README.md) for full request/response shapes and er
 
 ## Status
 
-**Shipped:** text selection capture, LLM reminder/note extraction, SQLite persistence, per-tab capture history.
+**Shipped:** text selection capture, notes by default, reminders when the selection is actionable, SQLite persistence, per-site history.
 
 **Roadmap:** notifications for due reminders.
-
-**Archived:** workflow recording and replay live on the `archive/workflow-recorder` branch.
