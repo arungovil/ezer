@@ -17,6 +17,13 @@ When the selection is something to do, Ezer saves a **reminder** instead. A date
 (for example, `Submit expense report by Friday 5pm`) becomes a due date in your timezone. If it is
 actionable but has no time, the reminder is saved without one.
 
+### Chat about your notes
+
+Ask Ezer about what you've saved on the current site. It answers **only** from those notes — ask a
+factual question (`what is a dam?`), whether you saved something (`do I have a note about X?`), or
+for a summary (`summarise my notes`). If the notes don't cover it, Ezer says so; it won't fall back
+to general knowledge. Follow-up questions keep the topic from the previous turn.
+
 > **Roadmap:** notify you when a reminder is due.
 
 ## Getting started
@@ -71,6 +78,12 @@ Notes and reminders (client → server)
     → Express API (POST /captures, GET/POST /chat, GET/PATCH /task)
     → LLM structured extraction
     → SQLite (user, origin, chat, task)
+
+Chat (per site, answers only from saved notes)
+  typed message
+    → classify (LLM: specific | summary | out_of_scope)
+    → retrieve notes (SQLite FTS5, scoped to the site)
+    → answer (LLM, grounded in the retrieved notes)
 ```
 
 | Layer    | Tech                                    |
@@ -82,7 +95,7 @@ Notes and reminders (client → server)
 
 ## API
 
-The server powers notes and reminders.
+The server powers notes, reminders, and the notes-grounded chat assistant.
 
 | Method   | Path                | Description                        |
 | -------- | ------------------- | ---------------------------------- |
@@ -92,7 +105,7 @@ The server powers notes and reminders.
 | `DELETE` | `/user`             | Soft-delete user and owned data    |
 | `POST`   | `/captures`         | Extract and store a text selection |
 | `GET`    | `/chat?tabUrl=`     | List chat messages for an origin   |
-| `POST`   | `/chat`             | Send a message and persist reply   |
+| `POST`   | `/chat`             | Ask about saved notes (classify → FTS retrieval → grounded reply) |
 | `DELETE` | `/chat/:id`         | Soft-delete a chat message         |
 | `GET`    | `/task?tabUrl=`     | List tasks for an origin           |
 | `GET`    | `/task/:id`         | Get one task                       |
@@ -103,6 +116,6 @@ See [server/README.md](server/README.md) for full request/response shapes and er
 
 ## Status
 
-**Shipped:** text selection capture, notes by default, reminders when the selection is actionable, SQLite persistence, per-site history.
+**Shipped:** text selection capture, notes by default, reminders when the selection is actionable, grounded chat over saved notes, SQLite persistence, per-site history.
 
 **Roadmap:** notifications for due reminders.
