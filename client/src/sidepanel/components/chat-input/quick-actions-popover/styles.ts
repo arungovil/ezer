@@ -1,6 +1,9 @@
+import { popoverEnterAnimation } from "@src/sidepanel/styles/popover-enter-animation.ts";
 import { css } from "lit";
 
-export const styles = css`
+export const styles = [
+  popoverEnterAnimation,
+  css`
   [popover] {
     position: fixed;
     inset: unset;
@@ -76,4 +79,5 @@ export const styles = css`
     color: var(--ez-color-text-muted);
     text-align: center;
   }
-`;
+`,
+];

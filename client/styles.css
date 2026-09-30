@@ -101,6 +101,11 @@
    * Motion
    */
   --ez-transition-fast: 0.15s ease;
+  --ez-motion-popover-duration: 0.12s;
+  --ez-motion-popover-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ez-popover-enter-shift: 4px;
+  --ez-popover-enter-scale: 0.99;
+  --ez-popover-transform-origin: bottom center;
 
   /* Base document styles */
   font-family: var(--ez-font-sans);
