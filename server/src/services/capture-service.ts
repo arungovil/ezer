@@ -109,6 +109,7 @@ export async function processCapture(
     title: extracted.title.trim(),
     dueAt: extracted.dueAt,
     summary: extracted.summary.trim(),
+    body: input.text,
     sourceUrl: input.url ?? input.tabUrl,
     sourceTitle: input.title,
   });

@@ -1,4 +1,4 @@
-export const migrations = [
+export const schemaStatements = [
   `
     CREATE TABLE IF NOT EXISTS user (
       id TEXT PRIMARY KEY,
@@ -23,6 +23,7 @@ export const migrations = [
       role TEXT NOT NULL CHECK(role IN ('user', 'ezer')),
       message_type TEXT NOT NULL,
       content TEXT NOT NULL,
+      agent_state TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       deleted_at TEXT
     );
@@ -40,6 +41,7 @@ export const migrations = [
       kind TEXT NOT NULL CHECK(kind IN ('reminder', 'note')),
       title TEXT NOT NULL,
       summary TEXT,
+      body TEXT,
       due_at TEXT,
       status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'done', 'dismissed')),
       source_url TEXT,
@@ -56,4 +58,36 @@ export const migrations = [
     CREATE INDEX IF NOT EXISTS idx_task_origin_created
     ON task(origin_id, created_at);
   `,
-] as const;
+  `
+    CREATE VIRTUAL TABLE IF NOT EXISTS task_fts USING fts5(
+      title,
+      summary,
+      body,
+      source_title,
+      content='task',
+      content_rowid='rowid',
+      tokenize='porter unicode61'
+    );
+  `,
+  `
+    CREATE TRIGGER IF NOT EXISTS task_fts_ai AFTER INSERT ON task BEGIN
+      INSERT INTO task_fts(rowid, title, summary, body, source_title)
+      VALUES (new.rowid, new.title, new.summary, new.body, new.source_title);
+    END;
+  `,
+  `
+    CREATE TRIGGER IF NOT EXISTS task_fts_ad AFTER DELETE ON task BEGIN
+      INSERT INTO task_fts(task_fts, rowid, title, summary, body, source_title)
+      VALUES ('delete', old.rowid, old.title, old.summary, old.body, old.source_title);
+    END;
+  `,
+  `
+    CREATE TRIGGER IF NOT EXISTS task_fts_au AFTER UPDATE ON task BEGIN
+      INSERT INTO task_fts(task_fts, rowid, title, summary, body, source_title)
+      VALUES ('delete', old.rowid, old.title, old.summary, old.body, old.source_title);
+      INSERT INTO task_fts(rowid, title, summary, body, source_title)
+      SELECT new.rowid, new.title, new.summary, new.body, new.source_title
+      WHERE new.deleted_at IS NULL;
+    END;
+  `,
+];
