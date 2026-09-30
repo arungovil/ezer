@@ -105,7 +105,7 @@ The server powers notes, reminders, and the notes-grounded chat assistant.
 | `DELETE` | `/user`             | Soft-delete user and owned data    |
 | `POST`   | `/captures`         | Extract and store a text selection |
 | `GET`    | `/chat?tabUrl=`     | List chat messages for an origin   |
-| `POST`   | `/chat`             | Ask about saved notes (classify → FTS retrieval → grounded reply) |
+| `POST`   | `/chat`             | Chat about saved notes, or menu `action` (`notes` / `reminders` / `help`) |
 | `DELETE` | `/chat/:id`         | Soft-delete a chat message         |
 | `GET`    | `/task?tabUrl=`     | List tasks for an origin           |
 | `GET`    | `/task/:id`         | Get one task                       |

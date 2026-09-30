@@ -1,8 +1,10 @@
+import { isQuickActionId, type QuickActionId } from "../config/quick-actions.ts";
 import { parseTabUrlQuery } from "./capture.ts";
 
 export interface ChatRequestBody {
   message: string;
   tabUrl: string;
+  action?: QuickActionId;
 }
 
 export interface ChatMessageBody {
@@ -56,7 +58,15 @@ export function parseChatRequest(body: unknown): ChatRequestBody | null {
     return null;
   }
 
-  return { message, tabUrl };
+  if (record.action !== undefined && !isQuickActionId(record.action)) {
+    return null;
+  }
+
+  return {
+    message,
+    tabUrl,
+    ...(record.action ? { action: record.action } : {}),
+  };
 }
 
 export function parseChatTabUrlQuery(value: unknown): string | null {

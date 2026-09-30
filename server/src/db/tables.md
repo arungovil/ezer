@@ -105,7 +105,8 @@ Used in `chat.message_type`:
 | Value     | Role     | `content` format |
 | --------- | -------- | ---------------- |
 | `CAPTURE` | user     | JSON: `{ text, url?, title? }` — raw page selection |
-| `TEXT`    | either   | Markdown plain text (typed chat and assistant replies) |
+| `TEXT`         | either   | Markdown plain text (typed chat and assistant replies) |
+| `QUICK_ACTION` | either   | Markdown; slash-menu turns (`action` on `POST /chat`) |
 
 ### Task kinds
 

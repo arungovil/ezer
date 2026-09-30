@@ -1,5 +1,5 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { helpPrompt } from "@src/shared/constants.ts";
+import { helpPrompt, noteListUserPrompt, reminderListUserPrompt } from "@src/shared/constants.ts";
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
 import type { ChatWindowHost, Message, RuntimeMessage } from "@src/shared/types.ts";
 import { MESSAGE_TYPE } from "@src/shared/types.ts";
@@ -10,10 +10,6 @@ import {
   loadCaptureConversationForActiveTab,
   syncCaptureMode,
 } from "@src/sidepanel/capture/index.ts";
-import {
-  appendNoteListMessage,
-  appendReminderListMessage,
-} from "@src/sidepanel/capture/task-handlers.ts";
 import type { QuickActionId } from "@src/sidepanel/components/chat-input/quick-actions.ts";
 import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.ts";
 import { html, LitElement } from "lit";
@@ -105,18 +101,15 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   }
 
   private handleQuickAction(e: CustomEvent<QuickActionId>) {
-    switch (e.detail) {
-      case "reminders":
-        void appendReminderListMessage(this);
-        return;
-      case "notes":
-        void appendNoteListMessage(this);
-        return;
-      case "help":
-        this.chatScroll.pinToEnd();
-        void this.processChatMessage(helpPrompt, MESSAGE_TYPE.QUICK_ACTION);
-        return;
-    }
+    this.chatScroll.pinToEnd();
+    const action = e.detail;
+    const prompt =
+      action === "notes"
+        ? noteListUserPrompt
+        : action === "reminders"
+          ? reminderListUserPrompt
+          : helpPrompt;
+    void this.processChatMessage(prompt, MESSAGE_TYPE.QUICK_ACTION, action);
   }
 
   private handleSend(e: CustomEvent<{ text: string }>) {
@@ -140,6 +133,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   private async processChatMessage(
     text: string,
     messageType: typeof MESSAGE_TYPE.TEXT | typeof MESSAGE_TYPE.QUICK_ACTION = MESSAGE_TYPE.TEXT,
+    action?: QuickActionId,
   ) {
     const userMsg: Message = {
       id: crypto.randomUUID(),
@@ -158,7 +152,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     this.messages = [...this.messages, userMsg, pendingEzerMsg];
 
     try {
-      void this.chatTask.run([text, ezerMsgId]);
+      void this.chatTask.run([text, ezerMsgId, action]);
       const result = await this.chatTask.taskComplete;
       this.applyChatReply(result.ezerMsgId, result.reply, messageType);
     } catch (error) {

@@ -45,9 +45,13 @@ export async function getChatMessages(
 export async function postChat(
   message: string,
   tabUrl: string,
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal; action?: ChatRequestBody["action"] } = {},
 ): Promise<ApiResult<ChatResponseBody>> {
-  const body: ChatRequestBody = { message, tabUrl };
+  const body: ChatRequestBody = {
+    message,
+    tabUrl,
+    ...(options.action ? { action: options.action } : {}),
+  };
 
   try {
     const { response, data } = await requestJson(routePaths.chat, {

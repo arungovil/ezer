@@ -31,7 +31,7 @@ Each message:
 | ----- | ---- | ----------- |
 | `id` | `string` | Message UUID |
 | `role` | `string` | `user` \| `ezer` |
-| `messageType` | `string` | `CAPTURE` \| `TEXT` |
+| `messageType` | `string` | `CAPTURE` \| `TEXT` \| `QUICK_ACTION` |
 | `content` | `string` | Plain text or JSON (`CAPTURE`) |
 | `createdAt` | `string` | ISO 8601 timestamp |
 
@@ -39,11 +39,15 @@ Each message:
 
 ## `POST /chat`
 
-Send a typed message to the assistant for the current origin. It classifies the message
-(`specific` | `summary` | `out_of_scope`), retrieves matching notes with SQLite FTS5, then phrases a
-reply from them. Off-topic messages get a canned refusal and a search with no hits gets a canned
-"nothing found" — neither costs an extra LLM call. Persists the user message and the assistant reply
-(with `agent_state`) in the `chat` table.
+Two modes, same response shape:
+
+1. **Typed chat** (no `action`) — classifies the message (`specific` | `summary` | `out_of_scope`),
+   retrieves matching notes with SQLite FTS5, then phrases a reply. Off-topic messages get a canned
+   refusal; a search with no hits gets a canned "nothing found". Persists `TEXT` messages; assistant
+   rows may include `agent_state`.
+2. **Menu actions** (`action` set) — server-built markdown reply (`notes`, `reminders`, or product
+   `help`) from tasks / config; **no LLM**. Persists `QUICK_ACTION` messages; `rejected` is always
+   `false`.
 
 **Request body**
 
@@ -51,6 +55,7 @@ reply from them. Off-topic messages get a canned refusal and a search with no hi
 | ----- | ---- | -------- | ----------- |
 | `message` | `string` | Yes | Non-empty user message (whitespace trimmed) |
 | `tabUrl` | `string` | Yes | Active page URL (origin is parsed from this) |
+| `action` | `string` | No | `notes` \| `reminders` \| `help` — server-built reply from tasks or product help; no LLM |
 
 **Response `200`**
 
@@ -59,11 +64,11 @@ reply from them. Off-topic messages get a canned refusal and a search with no hi
 | `originId` | `string` | Origin row id |
 | `origin` | `string` | URL origin, e.g. `https://github.com` |
 | `reply` | `string` | Assistant reply (markdown allowed) |
-| `rejected` | `boolean` | `true` when the message was classified `out_of_scope` (canned refusal). A no-hits answer is on-topic → `false` |
-| `userMessageId` | `string` | Saved user `TEXT` chat id |
-| `ezerMessageId` | `string` | Saved assistant `TEXT` reply id |
+| `rejected` | `boolean` | Typed chat: `true` when classified `out_of_scope`. Menu `action`: always `false` |
+| `userMessageId` | `string` | Saved user message id (`TEXT` or `QUICK_ACTION`) |
+| `ezerMessageId` | `string` | Saved assistant reply id (`TEXT` or `QUICK_ACTION`) |
 
-**Errors:** `400` invalid body · `401` invalid header · `502` LLM failed · `503` LLM not configured
+**Errors:** `400` invalid body · `401` invalid header · `502` LLM failed · `503` LLM not configured (typed chat only; `action` works without LLM)
 
 ## `DELETE /chat/:id`
 

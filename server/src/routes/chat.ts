@@ -41,7 +41,7 @@ export async function handlePostChat(
     return;
   }
 
-  if (!isLlmConfigured()) {
+  if (!input.action && !isLlmConfigured()) {
     res.status(503).json({ error: errorMessages.llmNotConfigured });
     return;
   }
