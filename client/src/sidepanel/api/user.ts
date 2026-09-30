@@ -1,11 +1,11 @@
-import { apiErrorMessages, routePaths } from "./config.js";
-import { requestJson } from "./http-client.js";
+import { apiErrorMessages, routePaths } from "./config.ts";
+import { requestJson } from "./http-client.ts";
 import {
   type ApiResult,
   isApiErrorBody,
   isUserResponseBody,
   type UserResponseBody,
-} from "./types.js";
+} from "./types.ts";
 
 export async function getUser(
   options: { signal?: AbortSignal } = {},

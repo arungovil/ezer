@@ -1,4 +1,4 @@
-import { parseTabUrlQuery } from "./capture.js";
+import { parseTabUrlQuery } from "./capture.ts";
 
 export interface ChatRequestBody {
   message: string;

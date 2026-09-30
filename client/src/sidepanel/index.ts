@@ -1,4 +1,4 @@
-import "@src/sidepanel/components/chat-window/index.js";
-import { connectSidePanelLiveness } from "./liveness.js";
+import "@src/sidepanel/components/chat-window/index.ts";
+import { connectSidePanelLiveness } from "./liveness.ts";
 
 connectSidePanelLiveness();

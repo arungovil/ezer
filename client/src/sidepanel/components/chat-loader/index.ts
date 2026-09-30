@@ -1,5 +1,5 @@
 import { html, LitElement } from "lit";
-import { styles } from "./styles.js";
+import { styles } from "./styles.ts";
 
 export class ChatLoader extends LitElement {
   static styles = styles;

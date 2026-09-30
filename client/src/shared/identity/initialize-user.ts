@@ -4,9 +4,9 @@ import {
   getStoredUser,
   saveStoredUser,
   setPendingUserId,
-} from "@src/shared/identity/user-store.js";
-import type { ApiResult, UserResponseBody } from "@src/sidepanel/api/types.js";
-import { deleteUser, getUser, putUser } from "@src/sidepanel/api/user.js";
+} from "@src/shared/identity/user-store.ts";
+import type { ApiResult, UserResponseBody } from "@src/sidepanel/api/types.ts";
+import { deleteUser, getUser, putUser } from "@src/sidepanel/api/user.ts";
 
 export async function getCurrentUser(): Promise<UserResponseBody | null> {
   return getStoredUser();

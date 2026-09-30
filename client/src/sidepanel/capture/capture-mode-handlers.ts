@@ -1,6 +1,6 @@
-import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
-import type { ChatWindowHost, Message } from "@src/shared/types.js";
-import { captureStartedMessage } from "./messages.js";
+import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
+import type { ChatWindowHost, Message } from "@src/shared/types.ts";
+import { captureStartedMessage } from "./messages.ts";
 
 function sendCaptureMode(enabled: boolean): void {
   if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) return;

@@ -1,6 +1,6 @@
-import { initializeUser } from "@src/shared/identity/initialize-user.js";
-import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
-import { injectAndRetry } from "./fallbacks.js";
+import { initializeUser } from "@src/shared/identity/initialize-user.ts";
+import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
+import { injectAndRetry } from "./fallbacks.ts";
 
 void initializeUser();
 

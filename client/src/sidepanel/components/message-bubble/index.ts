@@ -1,14 +1,14 @@
-import type { CaptureContent, MessageType } from "@src/shared/types.js";
-import { MESSAGE_TYPE } from "@src/shared/types.js";
+import type { CaptureContent, MessageType } from "@src/shared/types.ts";
+import { MESSAGE_TYPE } from "@src/shared/types.ts";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import { styles } from "./styles.js";
-import "@src/sidepanel/components/chat-loader/index.js";
-import "@src/sidepanel/components/message-bubble/capture/index.js";
-import "@src/sidepanel/components/message-bubble/text/index.js";
-import "@src/sidepanel/components/message-bubble/quick-action/index.js";
-import "@src/sidepanel/components/message-bubble/status/index.js";
-import "@src/sidepanel/components/message-bubble/tab-switched/index.js";
+import { styles } from "./styles.ts";
+import "@src/sidepanel/components/chat-loader/index.ts";
+import "@src/sidepanel/components/message-bubble/capture/index.ts";
+import "@src/sidepanel/components/message-bubble/text/index.ts";
+import "@src/sidepanel/components/message-bubble/quick-action/index.ts";
+import "@src/sidepanel/components/message-bubble/status/index.ts";
+import "@src/sidepanel/components/message-bubble/tab-switched/index.ts";
 
 export class MessageBubble extends LitElement {
   @property({ type: String, reflect: true }) sender: "user" | "ezer" = "ezer";

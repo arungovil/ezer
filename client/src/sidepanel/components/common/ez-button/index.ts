@@ -1,6 +1,6 @@
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import { styles } from "./styles.js";
+import { styles } from "./styles.ts";
 
 export class EzButton extends LitElement {
   @property({ type: String, reflect: true }) variant: "primary" | "outline" | "ghost" = "primary";

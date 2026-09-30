@@ -1,4 +1,4 @@
-import { parseTabUrlQuery, type TaskKind, taskKinds } from "./capture.js";
+import { parseTabUrlQuery, type TaskKind, taskKinds } from "./capture.ts";
 
 export type TaskStatus = "active" | "done" | "dismissed";
 

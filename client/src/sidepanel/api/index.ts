@@ -1,4 +1,4 @@
-export { postCapture } from "./capture.js";
-export { deleteChatMessage, getChatMessages, postChat } from "./chat.js";
-export { getTask, listTasks, patchTask, postTask } from "./task.js";
-export { deleteUser, getUser, putUser } from "./user.js";
+export { postCapture } from "./capture.ts";
+export { deleteChatMessage, getChatMessages, postChat } from "./chat.ts";
+export { getTask, listTasks, patchTask, postTask } from "./task.ts";
+export { deleteUser, getUser, putUser } from "./user.ts";

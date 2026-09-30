@@ -1,30 +1,30 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
-import { helpPrompt } from "@src/shared/constants.js";
-import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
-import type { ChatWindowHost, Message, RuntimeMessage } from "@src/shared/types.js";
-import { MESSAGE_TYPE } from "@src/shared/types.js";
+import { helpPrompt } from "@src/shared/constants.ts";
+import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
+import type { ChatWindowHost, Message, RuntimeMessage } from "@src/shared/types.ts";
+import { MESSAGE_TYPE } from "@src/shared/types.ts";
 import {
   createCaptureTask,
   disarmCaptureMode,
   handleSelectionCaptured,
   loadCaptureConversationForActiveTab,
   syncCaptureMode,
-} from "@src/sidepanel/capture/index.js";
+} from "@src/sidepanel/capture/index.ts";
 import {
   appendNoteListMessage,
   appendReminderListMessage,
-} from "@src/sidepanel/capture/task-handlers.js";
-import type { QuickActionId } from "@src/sidepanel/components/chat-input/quick-actions.js";
-import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.js";
+} from "@src/sidepanel/capture/task-handlers.ts";
+import type { QuickActionId } from "@src/sidepanel/components/chat-input/quick-actions.ts";
+import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.ts";
 import { html, LitElement } from "lit";
 import { state } from "lit/decorators.js";
-import { ChatScrollController } from "./chat-scroll-controller.js";
-import { createChatTask } from "./chat-task.js";
-import { styles } from "./styles.js";
-import "@src/sidepanel/components/chat-empty/index.js";
-import "@src/sidepanel/components/chat-header/index.js";
-import "@src/sidepanel/components/chat-input/index.js";
-import "@src/sidepanel/components/message-bubble/index.js";
+import { ChatScrollController } from "./chat-scroll-controller.ts";
+import { createChatTask } from "./chat-task.ts";
+import { styles } from "./styles.ts";
+import "@src/sidepanel/components/chat-empty/index.ts";
+import "@src/sidepanel/components/chat-header/index.ts";
+import "@src/sidepanel/components/chat-input/index.ts";
+import "@src/sidepanel/components/message-bubble/index.ts";
 
 export class ChatWindow extends LitElement implements ChatWindowHost {
   @state() messages: Message[] = [];

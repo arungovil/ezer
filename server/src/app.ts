@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
-import { getDb } from "./db/index.js";
-import { registerRoutes } from "./routes/index.js";
+import { getDb } from "./db/index.ts";
+import { registerRoutes } from "./routes/index.ts";
 
 export function createApp(): express.Application {
   getDb();

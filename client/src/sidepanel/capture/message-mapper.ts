@@ -1,6 +1,6 @@
-import type { CaptureContent, Message } from "@src/shared/types.js";
-import { MESSAGE_TYPE } from "@src/shared/types.js";
-import type { ChatMessageBody } from "@src/sidepanel/api/types.js";
+import type { CaptureContent, Message } from "@src/shared/types.ts";
+import { MESSAGE_TYPE } from "@src/shared/types.ts";
+import type { ChatMessageBody } from "@src/sidepanel/api/types.ts";
 
 function parseCaptureContent(raw: string): CaptureContent {
   try {

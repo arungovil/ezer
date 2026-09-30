@@ -1,19 +1,19 @@
-import { getOrCreateOrigin, getOriginByIdForUser, getOriginByUserAndOrigin } from "../db/origin.js";
+import { getOrCreateOrigin, getOriginByIdForUser, getOriginByUserAndOrigin } from "../db/origin.ts";
 import {
   getTaskByIdForUser,
   insertTask,
   listTasksByOriginId,
   updateTaskForUser,
-} from "../db/task.js";
-import { parsePageOrigin } from "../lib/parse-origin.js";
+} from "../db/task.ts";
+import { parsePageOrigin } from "../lib/parse-origin.ts";
 import type {
   CreateTaskRequestBody,
   TaskListResponseBody,
   TaskResponseBody,
   TaskStatus,
   UpdateTaskRequestBody,
-} from "../types/task.js";
-import { toTaskResponseBody } from "../types/task.js";
+} from "../types/task.ts";
+import { toTaskResponseBody } from "../types/task.ts";
 
 function toResponse(task: {
   id: string;

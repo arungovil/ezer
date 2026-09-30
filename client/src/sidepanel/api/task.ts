@@ -1,5 +1,5 @@
-import { apiErrorMessages, routePaths } from "./config.js";
-import { requestJson } from "./http-client.js";
+import { apiErrorMessages, routePaths } from "./config.ts";
+import { requestJson } from "./http-client.ts";
 import {
   type ApiResult,
   type CreateTaskRequestBody,
@@ -10,7 +10,7 @@ import {
   type TaskResponseBody,
   type TaskStatus,
   type UpdateTaskRequestBody,
-} from "./types.js";
+} from "./types.ts";
 
 export async function listTasks(
   tabUrl: string,

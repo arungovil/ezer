@@ -1,10 +1,10 @@
 import type {
   QuickAction,
   QuickActionId,
-} from "@src/sidepanel/components/chat-input/quick-actions.js";
+} from "@src/sidepanel/components/chat-input/quick-actions.ts";
 import { html, LitElement, type PropertyValues } from "lit";
 import { property, query } from "lit/decorators.js";
-import { styles } from "./styles.js";
+import { styles } from "./styles.ts";
 
 export class QuickActionsPopover extends LitElement {
   @property({ type: Boolean }) open = false;

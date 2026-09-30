@@ -1,5 +1,5 @@
 import { html, LitElement } from "lit";
-import { styles } from "./styles.js";
+import { styles } from "./styles.ts";
 
 export class ChatEmpty extends LitElement {
   static styles = styles;
@@ -8,9 +8,8 @@ export class ChatEmpty extends LitElement {
     return html`
       <div class="hero">
         <h2>Say hello to Ezer! 👋</h2>
-        <p>
-          Select text on this page to save a note or reminder. Type / below for more options.
-        </p>
+        <p>Select text on this page to save a note or reminder.</p>
+        <p>Type / below for more options.</p>
       </div>
     `;
   }

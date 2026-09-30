@@ -1,7 +1,7 @@
-import type { CaptureContent } from "@src/shared/types.js";
+import type { CaptureContent } from "@src/shared/types.ts";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
-import { styles } from "./styles.js";
+import { styles } from "./styles.ts";
 
 export class MessageBubbleCapture extends LitElement {
   @property({ type: Object }) content: CaptureContent = { text: "" };

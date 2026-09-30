@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { errorMessages } from "../config/constants.js";
-import { isLlmConfigured } from "../config/env.js";
-import { readUserId } from "../middleware/read-user-id.js";
-import { processCapture } from "../services/capture-service.js";
-import type { ApiErrorBody } from "../types/api.js";
-import { type CaptureResponseBody, parseCaptureRequest } from "../types/capture.js";
+import { errorMessages } from "../config/constants.ts";
+import { isLlmConfigured } from "../config/env.ts";
+import { readUserId } from "../middleware/read-user-id.ts";
+import { processCapture } from "../services/capture-service.ts";
+import type { ApiErrorBody } from "../types/api.ts";
+import { type CaptureResponseBody, parseCaptureRequest } from "../types/capture.ts";
 
 export async function handleCapture(
   req: Request,

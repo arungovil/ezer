@@ -1,5 +1,5 @@
-import { apiErrorMessages, routePaths } from "./config.js";
-import { requestJson } from "./http-client.js";
+import { apiErrorMessages, routePaths } from "./config.ts";
+import { requestJson } from "./http-client.ts";
 import {
   type ApiResult,
   type ChatListResponseBody,
@@ -8,7 +8,7 @@ import {
   isApiErrorBody,
   isChatListResponseBody,
   isChatResponseBody,
-} from "./types.js";
+} from "./types.ts";
 
 export async function getChatMessages(
   tabUrl: string,
