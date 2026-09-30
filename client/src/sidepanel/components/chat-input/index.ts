@@ -1,6 +1,6 @@
-import "@src/sidepanel/components/chat-input/quick-actions-popover/index.js";
-import "@src/sidepanel/components/common/ez-button/index.js";
-import { sendIcon } from "@src/sidepanel/icons/send.js";
+import "@src/sidepanel/components/chat-input/quick-actions-popover/index.ts";
+import "@src/sidepanel/components/common/ez-button/index.ts";
+import { sendIcon } from "@src/sidepanel/icons/send.ts";
 import { html, LitElement } from "lit";
 import { property, query, state } from "lit/decorators.js";
 import {
@@ -9,8 +9,8 @@ import {
   getSlashContext,
   type QuickAction,
   type QuickActionId,
-} from "./quick-actions.js";
-import { styles } from "./styles.js";
+} from "./quick-actions.ts";
+import { styles } from "./styles.ts";
 
 export class ChatInput extends LitElement {
   @property({ type: String }) placeholder = "What can I help you with?";

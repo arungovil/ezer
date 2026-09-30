@@ -1,11 +1,11 @@
 import { type Task, TaskStatus } from "@lit/task";
-import { getActiveTabUrl } from "@src/shared/tabs/active-tab.js";
-import type { ChatWindowHost, Message } from "@src/shared/types.js";
-import { MESSAGE_TYPE } from "@src/shared/types.js";
-import type { CaptureResponseBody } from "@src/sidepanel/api/types.js";
-import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.js";
-import type { CaptureTaskArgs } from "./capture-task.js";
-import { userCaptureMessage } from "./messages.js";
+import { getActiveTabUrl } from "@src/shared/tabs/active-tab.ts";
+import type { ChatWindowHost, Message } from "@src/shared/types.ts";
+import { MESSAGE_TYPE } from "@src/shared/types.ts";
+import type { CaptureResponseBody } from "@src/sidepanel/api/types.ts";
+import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.ts";
+import type { CaptureTaskArgs } from "./capture-task.ts";
+import { userCaptureMessage } from "./messages.ts";
 
 const captureDedupeMs = 3000;
 let lastCapturedKey = "";

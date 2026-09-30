@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { getDb } from "./index.js";
-import { notDeleted } from "./soft-delete.js";
+import { getDb } from "./index.ts";
+import { notDeleted } from "./soft-delete.ts";
 
 export interface OriginRow {
   id: string;

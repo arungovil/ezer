@@ -1,17 +1,17 @@
 import { randomUUID } from "node:crypto";
-import { getEnv } from "../config/env.js";
-import { insertChat } from "../db/chat.js";
-import { getOrCreateOrigin } from "../db/origin.js";
-import { insertTask } from "../db/task.js";
-import { parsePageOrigin } from "../lib/parse-origin.js";
-import { captureSystemPrompt } from "../prompts/capture.js";
+import { getEnv } from "../config/env.ts";
+import { insertChat } from "../db/chat.ts";
+import { getOrCreateOrigin } from "../db/origin.ts";
+import { insertTask } from "../db/task.ts";
+import { parsePageOrigin } from "../lib/parse-origin.ts";
+import { captureSystemPrompt } from "../prompts/capture.ts";
 import {
   type CaptureLlmResult,
   type CaptureRequestBody,
   type CaptureResponseBody,
   isCaptureLlmResult,
-} from "../types/capture.js";
-import { getLlmClient } from "./llm-client.js";
+} from "../types/capture.ts";
+import { getLlmClient } from "./llm-client.ts";
 
 function parseCaptureLlmResult(raw: string): CaptureLlmResult {
   const parsed: unknown = JSON.parse(raw);

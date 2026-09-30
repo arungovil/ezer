@@ -1,8 +1,8 @@
-import "@src/sidepanel/components/common/ez-button/index.js";
-import { slidersHorizontalIcon } from "@src/sidepanel/icons/sliders-horizontal.js";
-import { zapIcon } from "@src/sidepanel/icons/zap.js";
+import "@src/sidepanel/components/common/ez-button/index.ts";
+import { slidersHorizontalIcon } from "@src/sidepanel/icons/sliders-horizontal.ts";
+import { zapIcon } from "@src/sidepanel/icons/zap.ts";
 import { html, LitElement } from "lit";
-import { styles } from "./styles.js";
+import { styles } from "./styles.ts";
 
 export class ChatHeader extends LitElement {
   static styles = styles;

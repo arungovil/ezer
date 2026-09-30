@@ -1,15 +1,15 @@
 import type { Request, Response } from "express";
-import { errorMessages } from "../config/constants.js";
-import { isLlmConfigured } from "../config/env.js";
-import { readUserId } from "../middleware/read-user-id.js";
-import { listChatForTabUrl, processChat, removeChatMessage } from "../services/chat-service.js";
-import type { ApiErrorBody } from "../types/api.js";
+import { errorMessages } from "../config/constants.ts";
+import { isLlmConfigured } from "../config/env.ts";
+import { readUserId } from "../middleware/read-user-id.ts";
+import { listChatForTabUrl, processChat, removeChatMessage } from "../services/chat-service.ts";
+import type { ApiErrorBody } from "../types/api.ts";
 import {
   type ChatListResponseBody,
   type ChatResponseBody,
   parseChatRequest,
   parseChatTabUrlQuery,
-} from "../types/chat.js";
+} from "../types/chat.ts";
 
 export function handleListChat(
   req: Request,

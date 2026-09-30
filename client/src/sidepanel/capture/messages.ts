@@ -1,5 +1,5 @@
-import type { CaptureContent, Message } from "@src/shared/types.js";
-import { MESSAGE_TYPE } from "@src/shared/types.js";
+import type { CaptureContent, Message } from "@src/shared/types.ts";
+import { MESSAGE_TYPE } from "@src/shared/types.ts";
 
 function newId(): string {
   return crypto.randomUUID();

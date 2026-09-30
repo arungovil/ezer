@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { createApp } from "./app.js";
-import { getEnv } from "./config/env.js";
+import { createApp } from "./app.ts";
+import { getEnv } from "./config/env.ts";
 
 const { port } = getEnv();
 const app = createApp();

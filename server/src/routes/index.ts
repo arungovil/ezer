@@ -1,11 +1,11 @@
 import type { Express } from "express";
-import { routePaths } from "../config/constants.js";
-import { requireUser, requireUserId } from "../middleware/require-user.js";
-import { handleCapture } from "./capture.js";
-import { handleDeleteChat, handleListChat, handlePostChat } from "./chat.js";
-import { handleHealth } from "./health.js";
-import { handleGetTask, handleListTasks, handlePatchTask, handlePostTask } from "./task.js";
-import { handleDeleteUser, handleGetUser, handlePutUser } from "./user.js";
+import { routePaths } from "../config/constants.ts";
+import { requireUser, requireUserId } from "../middleware/require-user.ts";
+import { handleCapture } from "./capture.ts";
+import { handleDeleteChat, handleListChat, handlePostChat } from "./chat.ts";
+import { handleHealth } from "./health.ts";
+import { handleGetTask, handleListTasks, handlePatchTask, handlePostTask } from "./task.ts";
+import { handleDeleteUser, handleGetUser, handlePutUser } from "./user.ts";
 
 export function registerRoutes(app: Express): void {
   app.get(routePaths.health, handleHealth);

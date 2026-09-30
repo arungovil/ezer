@@ -1,4 +1,4 @@
-import { apiErrorMessages } from "@src/sidepanel/api/config.js";
+import { apiErrorMessages } from "@src/sidepanel/api/config.ts";
 
 export const userErrorMessages = {
   generic: "Something went wrong. Please try again.",

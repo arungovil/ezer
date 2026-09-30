@@ -1,4 +1,4 @@
-import { renderMarkdown } from "@src/sidepanel/utils/markdown.js";
+import { renderMarkdown } from "@src/sidepanel/utils/markdown.ts";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 

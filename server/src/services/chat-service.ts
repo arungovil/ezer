@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { getEnv } from "../config/env.js";
-import { getChatById, insertChat, listChatsByOriginId, softDeleteChatById } from "../db/chat.js";
-import { getOrCreateOrigin, getOriginByIdForUser, getOriginByUserAndOrigin } from "../db/origin.js";
-import { taskExistsForChatId } from "../db/task.js";
-import { parsePageOrigin } from "../lib/parse-origin.js";
-import { chatSystemPrompt } from "../prompts/chat.js";
+import { getEnv } from "../config/env.ts";
+import { getChatById, insertChat, listChatsByOriginId, softDeleteChatById } from "../db/chat.ts";
+import { getOrCreateOrigin, getOriginByIdForUser, getOriginByUserAndOrigin } from "../db/origin.ts";
+import { taskExistsForChatId } from "../db/task.ts";
+import { parsePageOrigin } from "../lib/parse-origin.ts";
+import { chatSystemPrompt } from "../prompts/chat.ts";
 import {
   type ChatListResponseBody,
   type ChatLlmResult,
@@ -12,8 +12,8 @@ import {
   type ChatResponseBody,
   isChatLlmResult,
   toChatMessageBody,
-} from "../types/chat.js";
-import { getLlmClient } from "./llm-client.js";
+} from "../types/chat.ts";
+import { getLlmClient } from "./llm-client.ts";
 
 function parseChatLlmResult(raw: string): ChatLlmResult {
   const parsed: unknown = JSON.parse(raw);

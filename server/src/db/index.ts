@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
-import { getEnv } from "../config/env.js";
-import { migrations } from "./schema.js";
+import { getEnv } from "../config/env.ts";
+import { migrations } from "./schema.ts";
 
 let db: Database.Database | null = null;
 

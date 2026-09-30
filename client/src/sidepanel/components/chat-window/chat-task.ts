@@ -1,6 +1,6 @@
 import { Task } from "@lit/task";
-import { getActiveTabUrl } from "@src/shared/tabs/active-tab.js";
-import { postChat } from "@src/sidepanel/api/index.js";
+import { getActiveTabUrl } from "@src/shared/tabs/active-tab.ts";
+import { postChat } from "@src/sidepanel/api/index.ts";
 import type { ReactiveControllerHost } from "lit";
 
 export type ChatTaskArgs = readonly [text: string, ezerMsgId: string];

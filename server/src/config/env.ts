@@ -1,4 +1,4 @@
-import { defaultDbPath, defaultLlmBaseUrl, defaultLlmModel, defaultPort } from "./constants.js";
+import { defaultDbPath, defaultLlmBaseUrl, defaultLlmModel, defaultPort } from "./constants.ts";
 
 export interface Env {
   port: number;

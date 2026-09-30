@@ -4,14 +4,14 @@ export {
   handleStartCapture,
   handleStopCaptureMode,
   syncCaptureMode,
-} from "./capture-mode-handlers.js";
-export { type CaptureTaskArgs, createCaptureTask } from "./capture-task.js";
-export { loadCaptureConversationForActiveTab } from "./conversation-loader.js";
-export { handleSelectionCaptured } from "./handlers.js";
-export { storedMessageToUiMessage } from "./message-mapper.js";
+} from "./capture-mode-handlers.ts";
+export { type CaptureTaskArgs, createCaptureTask } from "./capture-task.ts";
+export { loadCaptureConversationForActiveTab } from "./conversation-loader.ts";
+export { handleSelectionCaptured } from "./handlers.ts";
+export { storedMessageToUiMessage } from "./message-mapper.ts";
 export {
   captureStartedMessage,
   ezerStatusMessage,
   userCaptureMessage,
   userTextMessage,
-} from "./messages.js";
+} from "./messages.ts";

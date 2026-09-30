@@ -1,6 +1,6 @@
 // Reports the user's text selection when capture mode is armed.
 
-import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
+import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
 
 const MAX_CAPTURE_LENGTH = 4000;
 const MIN_SELECTION_LENGTH = 3;

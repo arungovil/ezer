@@ -1,6 +1,6 @@
-import { initializeUser } from "@src/shared/identity/initialize-user.js";
-import { getRequestUserId } from "@src/shared/identity/user-store.js";
-import { apiErrorMessages, serverBaseUrl } from "./config.js";
+import { initializeUser } from "@src/shared/identity/initialize-user.ts";
+import { getRequestUserId } from "@src/shared/identity/user-store.ts";
+import { apiErrorMessages, serverBaseUrl } from "./config.ts";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

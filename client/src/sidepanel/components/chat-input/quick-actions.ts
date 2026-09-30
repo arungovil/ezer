@@ -1,4 +1,4 @@
-import { clipboardClockIcon, helpCircleIcon, notebookPenIcon } from "@src/sidepanel/icons/index.js";
+import { clipboardClockIcon, helpCircleIcon, notebookPenIcon } from "@src/sidepanel/icons/index.ts";
 import type { TemplateResult } from "lit";
 
 export type QuickActionId = "reminders" | "notes" | "help";

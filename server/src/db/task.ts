@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import type { TaskKind } from "../types/capture.js";
-import type { TaskStatus } from "../types/task.js";
-import { getDb } from "./index.js";
-import { notDeleted, softDeleteTimestamp } from "./soft-delete.js";
+import type { TaskKind } from "../types/capture.ts";
+import type { TaskStatus } from "../types/task.ts";
+import { getDb } from "./index.ts";
+import { notDeleted, softDeleteTimestamp } from "./soft-delete.ts";
 
 export interface TaskRow {
   id: string;

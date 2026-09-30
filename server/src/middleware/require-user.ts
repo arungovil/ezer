@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-import { errorMessages } from "../config/constants.js";
-import { upsertUser } from "../db/user.js";
-import type { ApiErrorBody } from "../types/api.js";
+import { errorMessages } from "../config/constants.ts";
+import { upsertUser } from "../db/user.ts";
+import type { ApiErrorBody } from "../types/api.ts";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

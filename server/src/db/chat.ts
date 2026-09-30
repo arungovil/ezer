@@ -1,5 +1,5 @@
-import { getDb } from "./index.js";
-import { notDeleted, softDeleteTimestamp } from "./soft-delete.js";
+import { getDb } from "./index.ts";
+import { notDeleted, softDeleteTimestamp } from "./soft-delete.ts";
 
 export interface ChatRow {
   id: string;

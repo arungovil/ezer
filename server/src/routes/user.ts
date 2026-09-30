@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
-import { errorMessages } from "../config/constants.js";
-import { readUserId } from "../middleware/read-user-id.js";
-import { getOrCreateUser, getUser, removeUser } from "../services/user-service.js";
-import type { ApiErrorBody } from "../types/api.js";
-import { toUserResponseBody, type UserResponseBody } from "../types/user.js";
+import { errorMessages } from "../config/constants.ts";
+import { readUserId } from "../middleware/read-user-id.ts";
+import { getOrCreateUser, getUser, removeUser } from "../services/user-service.ts";
+import type { ApiErrorBody } from "../types/api.ts";
+import { toUserResponseBody, type UserResponseBody } from "../types/user.ts";
 
 export function handleGetUser(_req: Request, res: Response<UserResponseBody | ApiErrorBody>): void {
   const userId = readUserId(res);

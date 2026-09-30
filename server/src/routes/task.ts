@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { errorMessages } from "../config/constants.js";
-import { readUserId } from "../middleware/read-user-id.js";
-import { createTask, getTask, listTasksForTabUrl, updateTask } from "../services/task-service.js";
-import type { ApiErrorBody } from "../types/api.js";
+import { errorMessages } from "../config/constants.ts";
+import { readUserId } from "../middleware/read-user-id.ts";
+import { createTask, getTask, listTasksForTabUrl, updateTask } from "../services/task-service.ts";
+import type { ApiErrorBody } from "../types/api.ts";
 import {
   parseCreateTaskRequest,
   parseTaskStatusQuery,
@@ -10,7 +10,7 @@ import {
   parseUpdateTaskRequest,
   type TaskListResponseBody,
   type TaskResponseBody,
-} from "../types/task.js";
+} from "../types/task.ts";
 
 export function handleListTasks(
   req: Request,

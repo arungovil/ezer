@@ -1,4 +1,4 @@
-import type { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
+import type { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
 
 export type RuntimeMessageType = (typeof RUNTIME_MESSAGE_TYPE)[keyof typeof RUNTIME_MESSAGE_TYPE];
 

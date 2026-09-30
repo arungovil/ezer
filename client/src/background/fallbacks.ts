@@ -1,6 +1,6 @@
 // Fallbacks for content script delivery failures.
 
-import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.js";
+import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
 
 export async function injectAndRetry(tabId: number, payload: unknown): Promise<unknown> {
   try {

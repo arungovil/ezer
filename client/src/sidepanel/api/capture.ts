@@ -1,12 +1,12 @@
-import { apiErrorMessages, routePaths } from "./config.js";
-import { requestJson } from "./http-client.js";
+import { apiErrorMessages, routePaths } from "./config.ts";
+import { requestJson } from "./http-client.ts";
 import {
   type ApiResult,
   type CaptureRequestBody,
   type CaptureResponseBody,
   isApiErrorBody,
   isCaptureResponseBody,
-} from "./types.js";
+} from "./types.ts";
 
 export async function postCapture(
   body: CaptureRequestBody,

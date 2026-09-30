@@ -3,13 +3,13 @@ import {
   noteListUserPrompt,
   reminderListIntro,
   reminderListUserPrompt,
-} from "@src/shared/constants.js";
-import { getActiveTabUrl } from "@src/shared/tabs/active-tab.js";
-import type { ChatWindowHost } from "@src/shared/types.js";
-import { MESSAGE_TYPE } from "@src/shared/types.js";
-import { listTasks } from "@src/sidepanel/api/task.js";
-import type { TaskKind, TaskResponseBody } from "@src/sidepanel/api/types.js";
-import { ezerStatusMessage, userTextMessage } from "./messages.js";
+} from "@src/shared/constants.ts";
+import { getActiveTabUrl } from "@src/shared/tabs/active-tab.ts";
+import type { ChatWindowHost } from "@src/shared/types.ts";
+import { MESSAGE_TYPE } from "@src/shared/types.ts";
+import { listTasks } from "@src/sidepanel/api/task.ts";
+import type { TaskKind, TaskResponseBody } from "@src/sidepanel/api/types.ts";
+import { ezerStatusMessage, userTextMessage } from "./messages.ts";
 
 function formatReminderLine(task: TaskResponseBody): string {
   const due = task.dueAt ? ` — due ${new Date(task.dueAt).toLocaleDateString()}` : "";
