@@ -29,9 +29,15 @@ export interface ChatResponseBody {
   ezerMessageId: string;
 }
 
-export interface ChatLlmResult {
-  onTopic: boolean;
-  message: string;
+export const chatIntents = ["specific", "summary", "out_of_scope"] as const;
+
+export type ChatIntent = (typeof chatIntents)[number];
+
+export interface Classification {
+  intent: ChatIntent;
+  standaloneQuery: string;
+  topic: string;
+  keywords: string[];
 }
 
 export function parseChatRequest(body: unknown): ChatRequestBody | null {
@@ -57,13 +63,35 @@ export function parseChatTabUrlQuery(value: unknown): string | null {
   return parseTabUrlQuery(value);
 }
 
-export function isChatLlmResult(value: unknown): value is ChatLlmResult {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as ChatLlmResult).onTopic === "boolean" &&
-    typeof (value as ChatLlmResult).message === "string"
-  );
+function isChatIntent(value: unknown): value is ChatIntent {
+  return typeof value === "string" && (chatIntents as readonly string[]).includes(value);
+}
+
+// Accepts both camelCase and snake_case for the query field, since models are inconsistent.
+export function parseClassification(value: unknown): Classification | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const standaloneQuery = record.standaloneQuery ?? record.standalone_query;
+
+  if (
+    !isChatIntent(record.intent) ||
+    typeof standaloneQuery !== "string" ||
+    typeof record.topic !== "string" ||
+    !Array.isArray(record.keywords) ||
+    !record.keywords.every((keyword) => typeof keyword === "string")
+  ) {
+    return null;
+  }
+
+  return {
+    intent: record.intent,
+    standaloneQuery,
+    topic: record.topic,
+    keywords: record.keywords,
+  };
 }
 
 export function toChatMessageBody(message: {

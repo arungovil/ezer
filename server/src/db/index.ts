@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { getEnv } from "../config/env.ts";
-import { migrations } from "./schema.ts";
+import { schemaStatements } from "./schema.ts";
 
 let db: Database.Database | null = null;
 
@@ -19,8 +19,8 @@ export function getDb(): Database.Database {
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
 
-  for (const migration of migrations) {
-    db.exec(migration);
+  for (const statement of schemaStatements) {
+    db.exec(statement);
   }
 
   return db;

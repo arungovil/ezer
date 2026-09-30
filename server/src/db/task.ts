@@ -12,6 +12,7 @@ export interface TaskRow {
   kind: TaskKind;
   title: string;
   summary: string | null;
+  body: string | null;
   dueAt: string | null;
   status: TaskStatus;
   sourceUrl: string | null;
@@ -26,6 +27,7 @@ interface InsertTaskInput {
   kind: TaskKind;
   title: string;
   summary: string | null;
+  body?: string | null;
   dueAt: string | null;
   sourceUrl?: string;
   sourceTitle?: string;
@@ -50,6 +52,7 @@ export function insertTask(input: InsertTaskInput): TaskRow {
     dueAt: input.dueAt,
     status: "active",
     summary: input.summary,
+    body: input.body ?? null,
     sourceUrl: input.sourceUrl ?? null,
     sourceTitle: input.sourceTitle ?? null,
     createdAt: new Date().toISOString(),
@@ -66,6 +69,7 @@ export function insertTask(input: InsertTaskInput): TaskRow {
         kind,
         title,
         summary,
+        body,
         due_at,
         status,
         source_url,
@@ -80,6 +84,7 @@ export function insertTask(input: InsertTaskInput): TaskRow {
         @kind,
         @title,
         @summary,
+        @body,
         @dueAt,
         @status,
         @sourceUrl,
@@ -105,6 +110,7 @@ export function getTaskByIdForUser(taskId: string, userId: string): TaskRow | un
         kind,
         title,
         summary,
+        body,
         due_at AS dueAt,
         status,
         source_url AS sourceUrl,
@@ -132,6 +138,7 @@ export function listTasksByOriginId(
         kind,
         title,
         summary,
+        body,
         due_at AS dueAt,
         status,
         source_url AS sourceUrl,
@@ -150,6 +157,7 @@ export function listTasksByOriginId(
         kind,
         title,
         summary,
+        body,
         due_at AS dueAt,
         status,
         source_url AS sourceUrl,
@@ -223,4 +231,54 @@ export function taskExistsForChatId(chatId: string): boolean {
     .get(chatId);
 
   return row !== undefined;
+}
+
+function buildMatchQuery(keywords: string[]): string | null {
+  const terms = keywords
+    .map((keyword) => keyword.replace(/["']/g, "").trim())
+    .filter((keyword) => keyword.length > 0)
+    .map((keyword) => `"${keyword}"`);
+
+  return terms.length > 0 ? terms.join(" OR ") : null;
+}
+
+export function searchTasksByOrigin(
+  originId: string,
+  userId: string,
+  keywords: string[],
+  limit: number,
+): TaskRow[] {
+  const matchQuery = buildMatchQuery(keywords);
+  if (!matchQuery) {
+    return [];
+  }
+
+  return getDb()
+    .prepare(
+      `
+      SELECT
+        t.id,
+        t.origin_id AS originId,
+        t.user_id AS userId,
+        t.chat_id AS chatId,
+        t.kind,
+        t.title,
+        t.summary,
+        t.body,
+        t.due_at AS dueAt,
+        t.status,
+        t.source_url AS sourceUrl,
+        t.source_title AS sourceTitle,
+        t.created_at AS createdAt
+      FROM task_fts
+      JOIN task t ON t.rowid = task_fts.rowid
+      WHERE task_fts MATCH @matchQuery
+        AND t.origin_id = @originId
+        AND t.user_id = @userId
+        AND t.deleted_at IS NULL
+      ORDER BY bm25(task_fts)
+      LIMIT @limit
+    `,
+    )
+    .all({ matchQuery, originId, userId, limit }) as TaskRow[];
 }

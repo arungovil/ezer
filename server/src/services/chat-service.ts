@@ -1,48 +1,23 @@
 import { randomUUID } from "node:crypto";
-import { getEnv } from "../config/env.ts";
-import { getChatById, insertChat, listChatsByOriginId, softDeleteChatById } from "../db/chat.ts";
+import {
+  getChatById,
+  insertChat,
+  listChatsByOriginId,
+  listRecentChatsByOriginId,
+  softDeleteChatById,
+} from "../db/chat.ts";
 import { getOrCreateOrigin, getOriginByIdForUser, getOriginByUserAndOrigin } from "../db/origin.ts";
 import { taskExistsForChatId } from "../db/task.ts";
 import { parsePageOrigin } from "../lib/parse-origin.ts";
-import { chatSystemPrompt } from "../prompts/chat.ts";
 import {
   type ChatListResponseBody,
-  type ChatLlmResult,
   type ChatRequestBody,
   type ChatResponseBody,
-  isChatLlmResult,
   toChatMessageBody,
 } from "../types/chat.ts";
-import { getLlmClient } from "./llm-client.ts";
+import { handleAssistantMessage } from "./assistant-service.ts";
 
-function parseChatLlmResult(raw: string): ChatLlmResult {
-  const parsed: unknown = JSON.parse(raw);
-
-  if (!isChatLlmResult(parsed)) {
-    throw new Error("Invalid LLM response shape");
-  }
-
-  return parsed;
-}
-
-export async function chatWithLlm(userMessage: string): Promise<ChatLlmResult> {
-  const { llmModel } = getEnv();
-  const completion = await getLlmClient().chat.completions.create({
-    model: llmModel,
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: chatSystemPrompt },
-      { role: "user", content: userMessage },
-    ],
-  });
-
-  const content = completion.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error("Empty LLM response");
-  }
-
-  return parseChatLlmResult(content);
-}
+const chatHistoryLimit = 6;
 
 export function listChatForTabUrl(userId: string, tabUrl: string): ChatListResponseBody {
   const pageOrigin = parsePageOrigin(tabUrl);
@@ -71,10 +46,12 @@ export async function processChat(
   }
 
   const origin = getOrCreateOrigin(userId, pageOrigin);
+  const history = listRecentChatsByOriginId(origin.id, chatHistoryLimit);
+
+  const assistant = await handleAssistantMessage(origin.id, userId, input.message, history);
+
   const userMessageId = randomUUID();
   const ezerMessageId = randomUUID();
-
-  const llmResult = await chatWithLlm(input.message);
 
   insertChat({
     id: userMessageId,
@@ -89,14 +66,15 @@ export async function processChat(
     originId: origin.id,
     role: "ezer",
     messageType: "TEXT",
-    content: llmResult.message.trim(),
+    content: assistant.reply,
+    agentState: assistant.state ? JSON.stringify(assistant.state) : null,
   });
 
   return {
     originId: origin.id,
     origin: origin.origin,
-    reply: llmResult.message.trim(),
-    rejected: !llmResult.onTopic,
+    reply: assistant.reply,
+    rejected: assistant.rejected,
     userMessageId,
     ezerMessageId,
   };
