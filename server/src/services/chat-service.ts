@@ -16,6 +16,7 @@ import {
   toChatMessageBody,
 } from "../types/chat.ts";
 import { handleAssistantMessage } from "./assistant-service.ts";
+import { buildQuickActionReply } from "./quick-action-service.ts";
 
 const chatHistoryLimit = 6;
 
@@ -46,12 +47,42 @@ export async function processChat(
   }
 
   const origin = getOrCreateOrigin(userId, pageOrigin);
-  const history = listRecentChatsByOriginId(origin.id, chatHistoryLimit);
-
-  const assistant = await handleAssistantMessage(origin.id, userId, input.message, history);
-
   const userMessageId = randomUUID();
   const ezerMessageId = randomUUID();
+
+  if (input.action) {
+    const reply = buildQuickActionReply(userId, input.tabUrl, input.action);
+    const messageType = "QUICK_ACTION";
+
+    insertChat({
+      id: userMessageId,
+      originId: origin.id,
+      role: "user",
+      messageType,
+      content: input.message,
+    });
+
+    insertChat({
+      id: ezerMessageId,
+      originId: origin.id,
+      role: "ezer",
+      messageType,
+      content: reply,
+      agentState: null,
+    });
+
+    return {
+      originId: origin.id,
+      origin: origin.origin,
+      reply,
+      rejected: false,
+      userMessageId,
+      ezerMessageId,
+    };
+  }
+
+  const history = listRecentChatsByOriginId(origin.id, chatHistoryLimit);
+  const assistant = await handleAssistantMessage(origin.id, userId, input.message, history);
 
   insertChat({
     id: userMessageId,

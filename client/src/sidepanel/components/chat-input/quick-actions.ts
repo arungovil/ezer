@@ -1,7 +1,8 @@
+import type { QuickActionId } from "@src/shared/constants.ts";
 import { clipboardClockIcon, helpCircleIcon, notebookPenIcon } from "@src/sidepanel/icons/index.ts";
 import type { TemplateResult } from "lit";
 
-export type QuickActionId = "reminders" | "notes" | "help";
+export type { QuickActionId };
 
 export interface QuickAction {
   id: QuickActionId;

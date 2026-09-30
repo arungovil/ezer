@@ -16,7 +16,7 @@ npm run dev            # watch mode
 
 | Variable | Required | Default | Description |
 | -------- | -------- | ------- | ----------- |
-| `LLM_API_KEY` | Yes (for `/chat`, `/captures`) | — | DeepSeek (or other OpenAI-compatible) API key |
+| `LLM_API_KEY` | Yes (for typed `/chat`, `/captures`) | — | DeepSeek (or other OpenAI-compatible) API key. `POST /chat` with `action` works without it |
 | `LLM_BASE_URL` | No | `https://api.deepseek.com` | LLM API base URL |
 | `LLM_MODEL` | No | `deepseek-chat` | Model name |
 | `PORT` | No | `3000` | HTTP port |

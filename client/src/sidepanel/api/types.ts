@@ -16,9 +16,12 @@ export function isUserResponseBody(value: unknown): value is UserResponseBody {
   return typeof body.id === "string" && typeof body.createdAt === "string";
 }
 
+import type { QuickActionId } from "@src/shared/constants.ts";
+
 export interface ChatRequestBody {
   message: string;
   tabUrl: string;
+  action?: QuickActionId;
 }
 
 export interface ChatMessageBody {

@@ -34,11 +34,17 @@ export function storedMessageToUiMessage(message: ChatMessageBody): Message | nu
     };
   }
 
-  if (message.messageType === MESSAGE_TYPE.TEXT) {
+  if (
+    message.messageType === MESSAGE_TYPE.TEXT ||
+    message.messageType === MESSAGE_TYPE.QUICK_ACTION
+  ) {
     return {
       id: message.id,
       role: message.role,
-      type: MESSAGE_TYPE.TEXT,
+      type:
+        message.messageType === MESSAGE_TYPE.QUICK_ACTION
+          ? MESSAGE_TYPE.QUICK_ACTION
+          : MESSAGE_TYPE.TEXT,
       content: message.content,
     };
   }

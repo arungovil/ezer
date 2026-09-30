@@ -1,7 +1,17 @@
 # Ezer assistant (chat)
 
-How `POST /chat` turns a typed message into an answer grounded **only** in the user's saved notes
-for the current page.
+How `POST /chat` works: **typed chat** (grounded assistant) and **menu actions** (deterministic
+replies, no LLM).
+
+### Menu actions (`action` on the request body)
+
+When `action` is `notes`, `reminders`, or `help`, `chat-service.ts` calls `quick-action-service.ts`
+(which reads tasks via `task-service.ts` or static copy in `config/quick-actions.ts`). Messages are
+stored as `QUICK_ACTION`. This path does not run the pipeline below.
+
+### Typed chat (no `action`)
+
+Turns a message into an answer grounded **only** in the user's saved notes for the current page.
 
 The assistant is not a general chatbot. It never answers from the model's own knowledge — the model
 only **routes** and **phrases**, and the server does the retrieval. If the notes don't contain the
@@ -30,7 +40,9 @@ extra LLM calls.
 | File | Responsibility |
 | ---- | -------------- |
 | `assistant-service.ts` | The pipeline: `classify` → retrieve → `answer`, canned replies, `agent_state` |
-| `chat-service.ts` | Orchestration: resolve origin, load history, persist messages, shape the HTTP response |
+| `chat-service.ts` | Orchestration: menu `action` branch or assistant path; persist messages; HTTP response |
+| `quick-action-service.ts` | `notes` / `reminders` / `help` replies |
+| `config/quick-actions.ts` | Help copy and list formatting for menu actions |
 | `prompts/assistant.ts` | Classifier and answer system prompts |
 | `db/task.ts` | `searchTasksByOrigin` — the FTS retrieval query |
 | `db/chat.ts` | `listRecentChatsByOriginId` — follow-up history |

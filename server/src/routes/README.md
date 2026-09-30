@@ -32,7 +32,7 @@ Failed requests return:
 | `409` | Conflict (e.g. deleting a capture linked to a task) |
 | `500` | Persist or internal failure |
 | `502` | LLM request failed (`POST /chat`) |
-| `503` | `LLM_API_KEY` not configured |
+| `503` | `LLM_API_KEY` not configured (typed `POST /chat` only; `action` on `/chat` does not need LLM) |
 
 ## Endpoints
 
@@ -43,7 +43,7 @@ Failed requests return:
 | `PUT` | `/user` | Register or sync current user | [user.md](user.md) |
 | `DELETE` | `/user` | Soft-delete user and all owned data | [user.md](user.md) |
 | `GET` | `/chat?tabUrl=` | List chat messages for an origin | [chat.md](chat.md) |
-| `POST` | `/chat` | Ask about saved notes (grounded reply) | [chat.md](chat.md) |
+| `POST` | `/chat` | Grounded chat or menu `action` (`notes` / `reminders` / `help`) | [chat.md](chat.md) |
 | `DELETE` | `/chat/:id` | Soft-delete a chat message | [chat.md](chat.md) |
 | `POST` | `/captures` | Extract and store a text selection | [capture.md](capture.md) |
 | `GET` | `/task?tabUrl=` | List tasks for an origin | [task.md](task.md) |
