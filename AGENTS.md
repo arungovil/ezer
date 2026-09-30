@@ -20,6 +20,12 @@ browsing and saving it as a note, or as a reminder when the selection is somethi
 - Persist captures, tasks, and per-origin chat in SQLite
 - Roadmap: notify the user when a due reminder comes up
 
+### Chat
+
+- Ask about what's saved on the current page; answers come **only** from that page's notes, never from model knowledge
+- Pipeline: classify (`specific` | `summary` | `out_of_scope`) → FTS5 retrieval (scoped to origin + user) → grounded reply. Off-topic and no-hit cases are canned (no extra LLM call)
+- Follow-ups keep the topic via `chat.agent_state`; see `server/src/services/README.md`
+
 ## Stack & Layout
 
 - `client/src/background/` — MV3 service worker: message routing, capture dedupe
@@ -36,10 +42,10 @@ browsing and saving it as a note, or as a reminder when the selection is somethi
 
 - **Item kinds:** `note` | `reminder` — one per capture. Notes are the default. A `reminder` is for something to do and may carry `dueAt` (ISO 8601, resolved in the user's timezone)
 - **Capture:** `POST /captures` with `{ text, tabUrl, url?, title?, timezone? }` → `{ taskId, originId, origin, item, reply, userMessageId, ezerMessageId }`. LLM failures degrade to a generic note (always `200` on success path).
-- **Chat:** `POST /chat` with `{ message, tabUrl }` → `{ originId, origin, reply, rejected, userMessageId, ezerMessageId }` (off-topic guard)
+- **Chat:** `POST /chat` with `{ message, tabUrl }` → `{ originId, origin, reply, rejected, userMessageId, ezerMessageId }`. Answers only from the page's saved notes: classify (`specific` | `summary` | `out_of_scope`) → FTS5 retrieve → grounded reply. `rejected` is `true` for `out_of_scope` (canned refusal); a no-hits answer is `rejected: false`. See `server/src/services/README.md`.
 - **History:** `GET /chat?tabUrl=` → per-origin messages; authenticated routes require `X-Ezer-User-Id`
 - **Tasks:** `GET /task?tabUrl=`, `PATCH /task/:id` — notes and reminders for the page origin
-- **Persistence:** SQLite tables `user`, `origin`, `chat`, `task` (soft delete via `deleted_at`)
+- **Persistence:** SQLite tables `user`, `origin`, `chat`, `task`, plus the `task_fts` FTS5 search index (soft delete via `deleted_at`)
 
 ## Conventions
 
@@ -52,7 +58,7 @@ browsing and saving it as a note, or as a reminder when the selection is somethi
 | Functions / variables | `camelCase`; handlers → `handle*`                 |
 | Constants             | `camelCase`                                       |
 | Exports               | Named only, no default exports                    |
-| Imports               | Ext libs → internal → siblings (`.js` ext for TS) |
+| Imports               | Ext libs → internal → siblings (`.ts` ext for local TS files) |
 | TS strict             | No `any` except deliberate boundary loose ends    |
 | Functions             | Small, single-purpose; name over block comment    |
 | Comments              | _Why_, not _what_. Code is the _what_.            |
