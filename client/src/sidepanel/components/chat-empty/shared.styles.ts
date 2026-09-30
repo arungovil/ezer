@@ -34,4 +34,17 @@ export const sharedStyles = css`
     margin: 0;
     line-height: var(--ez-line-height);
   }
+
+  .hero kbd {
+    display: inline-block;
+    padding: 0 3px;
+    vertical-align: baseline;
+    border: 1px solid var(--ez-color-border);
+    border-radius: 3px;
+    background: var(--ez-color-surface);
+    color: var(--ez-color-text);
+    font-family: var(--ez-font-mono);
+    font-size: 0.9em;
+    line-height: 1.1;
+  }
 `;
