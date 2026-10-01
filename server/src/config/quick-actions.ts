@@ -43,28 +43,19 @@ function formatNoteLine(title: string): string {
   return `- **${title}**`;
 }
 
-export function formatNoteListReply(
-  tasks: { kind: string; title: string; dueAt: string | null; status: string }[],
-): string {
-  const notes = tasks.filter((task) => task.kind === "note" && task.status === "active");
-  const intro = noteListIntro(notes.length);
-  if (notes.length === 0) {
-    return intro;
+export function taskListPlainText(content: {
+  kind: "note" | "reminder";
+  intro: string;
+  items: { title: string; dueAt: string | null }[];
+}): string {
+  if (content.items.length === 0) {
+    return content.intro;
   }
 
-  const lines = notes.map((task) => formatNoteLine(task.title));
-  return `${intro}\n\n${lines.join("\n")}`;
-}
+  const lines =
+    content.kind === "reminder"
+      ? content.items.map((item) => formatReminderLine(item.title, item.dueAt))
+      : content.items.map((item) => formatNoteLine(item.title));
 
-export function formatReminderListReply(
-  tasks: { kind: string; title: string; dueAt: string | null; status: string }[],
-): string {
-  const reminders = tasks.filter((task) => task.kind === "reminder" && task.status === "active");
-  const intro = reminderListIntro(reminders.length);
-  if (reminders.length === 0) {
-    return intro;
-  }
-
-  const lines = reminders.map((task) => formatReminderLine(task.title, task.dueAt));
-  return `${intro}\n\n${lines.join("\n")}`;
+  return `${content.intro}\n\n${lines.join("\n")}`;
 }

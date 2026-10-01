@@ -1,12 +1,23 @@
+import type { ChatContent } from "@src/shared/chat-content.ts";
+import { isChatTaskListContent, normalizeChatContent } from "@src/shared/chat-content.ts";
 import { renderMarkdown } from "@src/sidepanel/utils/markdown.ts";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
+import "@src/sidepanel/components/message-bubble/quick-action/task-list/index.ts";
 
 export class MessageBubbleQuickAction extends LitElement {
-  @property({ type: String }) content = "";
+  @property() content: string | ChatContent = "";
 
   render() {
-    return html`<div>${renderMarkdown(this.content)}</div>`;
+    const resolved = normalizeChatContent(this.content);
+
+    if (isChatTaskListContent(resolved)) {
+      return html`<message-bubble-quick-action-task-list
+        .content=${resolved}
+      ></message-bubble-quick-action-task-list>`;
+    }
+
+    return html`<div>${renderMarkdown(resolved.text)}</div>`;
   }
 }
 

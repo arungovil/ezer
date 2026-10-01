@@ -1,3 +1,4 @@
+import { parseStoredChatContent } from "@src/shared/chat-content.ts";
 import type { CaptureContent, Message } from "@src/shared/types.ts";
 import { MESSAGE_TYPE } from "@src/shared/types.ts";
 import type { ChatMessageBody } from "@src/sidepanel/api/types.ts";
@@ -34,18 +35,30 @@ export function storedMessageToUiMessage(message: ChatMessageBody): Message | nu
     };
   }
 
-  if (
-    message.messageType === MESSAGE_TYPE.TEXT ||
-    message.messageType === MESSAGE_TYPE.QUICK_ACTION
-  ) {
+  if (message.messageType === MESSAGE_TYPE.TEXT) {
     return {
       id: message.id,
       role: message.role,
-      type:
-        message.messageType === MESSAGE_TYPE.QUICK_ACTION
-          ? MESSAGE_TYPE.QUICK_ACTION
-          : MESSAGE_TYPE.TEXT,
+      type: MESSAGE_TYPE.TEXT,
       content: message.content,
+    };
+  }
+
+  if (message.messageType === MESSAGE_TYPE.QUICK_ACTION) {
+    if (message.role === "user") {
+      return {
+        id: message.id,
+        role: "user",
+        type: MESSAGE_TYPE.QUICK_ACTION,
+        content: message.content,
+      };
+    }
+
+    return {
+      id: message.id,
+      role: "ezer",
+      type: MESSAGE_TYPE.QUICK_ACTION,
+      content: parseStoredChatContent(message.content),
     };
   }
 

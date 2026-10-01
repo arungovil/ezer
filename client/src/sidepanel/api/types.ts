@@ -1,3 +1,6 @@
+import { type ChatContent, isChatContent } from "@src/shared/chat-content.ts";
+import type { QuickActionId } from "@src/shared/constants.ts";
+
 export interface ApiErrorBody {
   error: string;
 }
@@ -15,8 +18,6 @@ export function isUserResponseBody(value: unknown): value is UserResponseBody {
   const body = value as UserResponseBody;
   return typeof body.id === "string" && typeof body.createdAt === "string";
 }
-
-import type { QuickActionId } from "@src/shared/constants.ts";
 
 export interface ChatRequestBody {
   message: string;
@@ -46,6 +47,7 @@ export interface ChatResponseBody {
   rejected: boolean;
   userMessageId: string;
   ezerMessageId: string;
+  content?: ChatContent;
 }
 
 export type TaskKind = "reminder" | "note";
@@ -118,7 +120,8 @@ export function isChatResponseBody(value: unknown): value is ChatResponseBody {
     typeof body.reply === "string" &&
     typeof body.rejected === "boolean" &&
     typeof body.userMessageId === "string" &&
-    typeof body.ezerMessageId === "string"
+    typeof body.ezerMessageId === "string" &&
+    (body.content === undefined || isChatContent(body.content))
   );
 }
 
