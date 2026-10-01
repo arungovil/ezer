@@ -42,7 +42,7 @@ browsing and saving it as a note, or as a reminder when the selection is somethi
 
 - **Item kinds:** `note` | `reminder` — one per capture. Notes are the default. A `reminder` is for something to do and may carry `dueAt` (ISO 8601, resolved in the user's timezone)
 - **Capture:** `POST /captures` with `{ text, tabUrl, url?, title?, timezone? }` → `{ taskId, originId, origin, item, reply, userMessageId, ezerMessageId }`. LLM failures degrade to a generic note (always `200` on success path).
-- **Chat:** `POST /chat` with `{ message, tabUrl, action? }` → `{ originId, origin, reply, rejected, userMessageId, ezerMessageId }`. Without `action`: answers only from the page's saved notes (classify → FTS5 retrieve → grounded reply; `rejected` when `out_of_scope`). With `action` (`notes` \| `reminders` \| `help`): server-built markdown, no LLM. See `server/src/services/README.md` and `server/src/routes/chat.md`.
+- **Chat:** `POST /chat` with `{ message, tabUrl, action? }` → `{ originId, origin, reply, rejected, userMessageId, ezerMessageId }`. Without `action`: answers only from the page's saved notes (classify → FTS5 retrieve → grounded reply; `rejected` when `out_of_scope`). With `action` (`notes` \| `reminders` \| `help`): server-built markdown, no LLM. See `server/src/services/README.md` and `server/src/routes/README.md`.
 - **History:** `GET /chat?tabUrl=` → per-origin messages; authenticated routes require `X-Ezer-User-Id`
 - **Tasks:** `GET /task?tabUrl=`, `PATCH /task/:id` — notes and reminders for the page origin
 - **Persistence:** SQLite tables `user`, `origin`, `chat`, `task`, plus the `task_fts` FTS5 search index (soft delete via `deleted_at`)
