@@ -63,7 +63,8 @@ Two modes, same response shape:
 | ----- | ---- | ----------- |
 | `originId` | `string` | Origin row id |
 | `origin` | `string` | URL origin, e.g. `https://github.com` |
-| `reply` | `string` | Assistant reply (markdown allowed) |
+| `reply` | `string` | Assistant reply (markdown allowed). Fallback when `content` is absent or for plain-text consumers |
+| `content` | `object` | Optional structured payload (`format`: `markdown` \| `taskList`). Menu actions: always set. Typed chat: omitted today; same shape when prompts return structured UI |
 | `rejected` | `boolean` | Typed chat: `true` when classified `out_of_scope`. Menu `action`: always `false` |
 | `userMessageId` | `string` | Saved user message id (`TEXT` or `QUICK_ACTION`) |
 | `ezerMessageId` | `string` | Saved assistant reply id (`TEXT` or `QUICK_ACTION`) |

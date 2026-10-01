@@ -1,4 +1,6 @@
 import { Task } from "@lit/task";
+import type { ChatContent } from "@src/shared/chat-content.ts";
+import { chatContentFromResponse } from "@src/shared/chat-content.ts";
 import type { QuickActionId } from "@src/shared/constants.ts";
 import { getActiveTabUrl } from "@src/shared/tabs/active-tab.ts";
 import { postChat } from "@src/sidepanel/api/index.ts";
@@ -8,7 +10,7 @@ export type ChatTaskArgs = readonly [text: string, ezerMsgId: string, action?: Q
 
 export interface ChatTaskResult {
   ezerMsgId: string;
-  reply: string;
+  content: string | ChatContent;
 }
 
 export function createChatTask(host: ReactiveControllerHost) {
@@ -26,7 +28,9 @@ export function createChatTask(host: ReactiveControllerHost) {
         throw new Error(result.message);
       }
 
-      return { ezerMsgId, reply: result.data.reply };
+      const content = action ? chatContentFromResponse(result.data) : result.data.reply;
+
+      return { ezerMsgId, content };
     },
   });
 }

@@ -15,8 +15,9 @@ import {
   type ChatResponseBody,
   toChatMessageBody,
 } from "../types/chat.ts";
+import { serializeChatContent } from "../types/chat-content.ts";
 import { handleAssistantMessage } from "./assistant-service.ts";
-import { buildQuickActionReply } from "./quick-action-service.ts";
+import { buildQuickActionReply, quickActionReplyText } from "./quick-action-service.ts";
 
 const chatHistoryLimit = 6;
 
@@ -51,7 +52,8 @@ export async function processChat(
   const ezerMessageId = randomUUID();
 
   if (input.action) {
-    const reply = buildQuickActionReply(userId, input.tabUrl, input.action);
+    const content = buildQuickActionReply(userId, input.tabUrl, input.action);
+    const reply = quickActionReplyText(content);
     const messageType = "QUICK_ACTION";
 
     insertChat({
@@ -67,7 +69,7 @@ export async function processChat(
       originId: origin.id,
       role: "ezer",
       messageType,
-      content: reply,
+      content: serializeChatContent(content),
       agentState: null,
     });
 
@@ -78,6 +80,7 @@ export async function processChat(
       rejected: false,
       userMessageId,
       ezerMessageId,
+      content,
     };
   }
 

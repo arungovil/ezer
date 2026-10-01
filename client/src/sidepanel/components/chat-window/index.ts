@@ -1,4 +1,6 @@
 import { virtualize } from "@lit-labs/virtualizer/virtualize.js";
+import type { ChatContent } from "@src/shared/chat-content.ts";
+import { markdownChatContent, normalizeChatContent } from "@src/shared/chat-content.ts";
 import { helpPrompt, noteListUserPrompt, reminderListUserPrompt } from "@src/shared/constants.ts";
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
 import type { ChatWindowHost, Message, RuntimeMessage } from "@src/shared/types.ts";
@@ -122,12 +124,24 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
 
   private applyChatReply(
     ezerMsgId: string,
-    content: string,
+    content: string | ChatContent,
     messageType: typeof MESSAGE_TYPE.TEXT | typeof MESSAGE_TYPE.QUICK_ACTION,
   ) {
-    this.messages = this.messages.map((m) =>
-      m.id === ezerMsgId && m.type === messageType ? { ...m, content, loading: false } : m,
-    );
+    this.messages = this.messages.map((m) => {
+      if (m.id !== ezerMsgId || m.type !== messageType || m.role !== "ezer") {
+        return m;
+      }
+
+      if (messageType === MESSAGE_TYPE.QUICK_ACTION && m.type === MESSAGE_TYPE.QUICK_ACTION) {
+        return { ...m, content: normalizeChatContent(content), loading: false };
+      }
+
+      if (messageType === MESSAGE_TYPE.TEXT && m.type === MESSAGE_TYPE.TEXT) {
+        return { ...m, content: typeof content === "string" ? content : "", loading: false };
+      }
+
+      return m;
+    });
   }
 
   private async processChatMessage(
@@ -142,19 +156,28 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
       content: text,
     };
     const ezerMsgId = crypto.randomUUID();
-    const pendingEzerMsg: Message = {
-      id: ezerMsgId,
-      role: "ezer",
-      type: messageType,
-      content: "",
-      loading: true,
-    };
+    const pendingEzerMsg: Message =
+      messageType === MESSAGE_TYPE.QUICK_ACTION
+        ? {
+            id: ezerMsgId,
+            role: "ezer",
+            type: MESSAGE_TYPE.QUICK_ACTION,
+            content: markdownChatContent(""),
+            loading: true,
+          }
+        : {
+            id: ezerMsgId,
+            role: "ezer",
+            type: MESSAGE_TYPE.TEXT,
+            content: "",
+            loading: true,
+          };
     this.messages = [...this.messages, userMsg, pendingEzerMsg];
 
     try {
       void this.chatTask.run([text, ezerMsgId, action]);
       const result = await this.chatTask.taskComplete;
-      this.applyChatReply(result.ezerMsgId, result.reply, messageType);
+      this.applyChatReply(result.ezerMsgId, result.content, messageType);
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         return;

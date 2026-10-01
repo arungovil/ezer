@@ -1,3 +1,4 @@
+import type { ChatContent } from "@src/shared/chat-content.ts";
 import type { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
 
 export type RuntimeMessageType = (typeof RUNTIME_MESSAGE_TYPE)[keyof typeof RUNTIME_MESSAGE_TYPE];
@@ -24,10 +25,23 @@ export type Message =
       role: "user" | "ezer";
       type:
         | typeof MESSAGE_TYPE.TEXT
-        | typeof MESSAGE_TYPE.QUICK_ACTION
         | typeof MESSAGE_TYPE.STATUS
         | typeof MESSAGE_TYPE.TAB_SWITCHED;
       content: string;
+      loading?: boolean;
+    }
+  | {
+      id: string;
+      role: "user";
+      type: typeof MESSAGE_TYPE.QUICK_ACTION;
+      content: string;
+      loading?: boolean;
+    }
+  | {
+      id: string;
+      role: "ezer";
+      type: typeof MESSAGE_TYPE.QUICK_ACTION;
+      content: ChatContent;
       loading?: boolean;
     }
   | {

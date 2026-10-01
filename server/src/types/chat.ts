@@ -1,5 +1,6 @@
 import { isQuickActionId, type QuickActionId } from "../config/quick-actions.ts";
 import { parseTabUrlQuery } from "./capture.ts";
+import type { ChatContent } from "./chat-content.ts";
 
 export interface ChatRequestBody {
   message: string;
@@ -29,6 +30,7 @@ export interface ChatResponseBody {
   rejected: boolean;
   userMessageId: string;
   ezerMessageId: string;
+  content?: ChatContent;
 }
 
 export const chatIntents = ["specific", "summary", "out_of_scope"] as const;
