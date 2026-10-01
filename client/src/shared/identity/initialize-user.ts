@@ -1,16 +1,11 @@
 import {
-  clearStoredUser,
   createUserId,
   getStoredUser,
   saveStoredUser,
   setPendingUserId,
 } from "@src/shared/identity/user-store.ts";
 import type { ApiResult, UserResponseBody } from "@src/sidepanel/api/types.ts";
-import { deleteUser, getUser, putUser } from "@src/sidepanel/api/user.ts";
-
-export async function getCurrentUser(): Promise<UserResponseBody | null> {
-  return getStoredUser();
-}
+import { getUser, putUser } from "@src/sidepanel/api/user.ts";
 
 export async function initializeUser(
   options: { signal?: AbortSignal } = {},
@@ -65,15 +60,4 @@ async function registerUser(
   } finally {
     setPendingUserId(null);
   }
-}
-
-export async function removeCurrentUser(
-  options: { signal?: AbortSignal } = {},
-): Promise<ApiResult<void>> {
-  const result = await deleteUser(options);
-  if (result.ok) {
-    await clearStoredUser();
-  }
-
-  return result;
 }
