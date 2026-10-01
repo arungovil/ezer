@@ -32,7 +32,7 @@ to general knowledge. Follow-up questions keep the topic from the previous turn.
 
 - Node.js ≥ 20
 - Chrome (Manifest V3 side panel)
-- DeepSeek or other OpenAI-compatible API key (for the assistant feature)
+- DeepSeek or other OpenAI-compatible API key (for capture extraction and typed chat)
 
 ### Setup
 
@@ -67,55 +67,42 @@ Load the extension:
 
 ```bash
 npm run build
+npm run typecheck   # optional
 ```
 
 ## Architecture
 
 ```
-Notes and reminders (client → server)
-  page selection (content script)
-    → side panel chat UI (Lit)
-    → Express API (POST /captures, GET/POST /chat, GET/PATCH /task)
-    → LLM structured extraction
-    → SQLite (user, origin, chat, task)
-
-Chat (per site, answers only from saved notes)
-  typed message
-    → classify (LLM: specific | summary | out_of_scope)
-    → retrieve notes (SQLite FTS5, scoped to the site)
-    → answer (LLM, grounded in the retrieved notes)
+page selection (content script)
+  → background worker (routing, panel-open gate)
+  → side panel (Lit UI, API client)
+  → Express (captures, chat, task, user)
+  → SQLite (per-user, per-origin notes + chat)
 ```
 
-| Layer    | Tech                                    |
-| -------- | --------------------------------------- |
+| Layer     | Tech                                    |
+| --------- | --------------------------------------- |
 | Extension | Manifest V3, Lit 3, TypeScript, esbuild |
-| Server   | Express 4, better-sqlite3, TypeScript   |
-| LLM      | DeepSeek (`deepseek-chat`), JSON mode   |
-| Tooling  | Biome, Husky, strict TypeScript         |
+| Server    | Express 4, better-sqlite3, TypeScript   |
+| LLM       | DeepSeek (`deepseek-chat`), JSON mode   |
+| Tooling   | Biome, Husky, strict TypeScript         |
 
-## API
+Grounded chat on the server: classify → FTS5 retrieval → answer (see
+[server/src/services/README.md](server/src/services/README.md)).
 
-The server powers notes, reminders, and the notes-grounded chat assistant.
+## Documentation
 
-| Method   | Path                | Description                        |
-| -------- | ------------------- | ---------------------------------- |
-| `GET`    | `/health`           | Liveness                           |
-| `GET`    | `/user`             | Get current user                   |
-| `PUT`    | `/user`             | Register or sync user              |
-| `DELETE` | `/user`             | Soft-delete user and owned data    |
-| `POST`   | `/captures`         | Extract and store a text selection |
-| `GET`    | `/chat?tabUrl=`     | List chat messages for an origin   |
-| `POST`   | `/chat`             | Chat about saved notes, or menu `action` (`notes` / `reminders` / `help`) |
-| `DELETE` | `/chat/:id`         | Soft-delete a chat message         |
-| `GET`    | `/task?tabUrl=`     | List tasks for an origin           |
-| `GET`    | `/task/:id`         | Get one task                       |
-| `POST`   | `/task`             | Create a task                      |
-| `PATCH`  | `/task/:id`         | Update a task                      |
-
-See [server/README.md](server/README.md) for full request/response shapes and error codes.
+| Doc | Audience |
+| --- | -------- |
+| [AGENTS.md](AGENTS.md) | Repo layout, API contracts, coding conventions |
+| [server/README.md](server/README.md) | Server setup, env, auth |
+| [server/src/routes/README.md](server/src/routes/README.md) | HTTP API (request/response, errors) |
+| [server/src/services/README.md](server/src/services/README.md) | Chat assistant pipeline |
+| [server/src/db/README.md](server/src/db/README.md) | SQLite model, modules, FTS |
 
 ## Status
 
-**Shipped:** text selection capture, notes by default, reminders when the selection is actionable, grounded chat over saved notes, SQLite persistence, per-site history.
+**Shipped:** text selection capture, notes by default, reminders when actionable, grounded chat over
+saved notes, SQLite persistence, per-site history.
 
 **Roadmap:** notifications for due reminders.

@@ -1,72 +1,68 @@
 # Ezer
 
-Ezer is a Chrome side-panel personal assistant. Its core job is capturing what you find while
-browsing and saving it as a note, or as a reminder when the selection is something to act on.
+Chrome side-panel assistant: capture selections as notes or reminders; chat grounded in notes saved
+for the current site.
 
 ## Principles
 
 - **Depth over breadth** — own one genuinely hard problem instead of skimming ten
 - **Real world first** — malformed input, timeouts, concurrency: degrade gracefully, don't fall over
-- **Deliberate calls** — every product, UX, and infra decision is reasoned and documented in code or PRs where it matters
-- **Trustworthy by default** — observability, clear errors, one-shot setup, tests that catch real failures
+- **Deliberate calls** — product, UX, and infra decisions reasoned in code or PRs where it matters
+- **Trustworthy by default** — clear errors, one-shot setup, tests that catch real failures
 - **The whole journey** — first-run, empty states, error moments, small touches
 
-## Features
+## Stack & layout
 
-### Notes and reminders
+| Path | Role |
+| ---- | ---- |
+| `client/src/background/` | MV3 service worker: messages, capture dedupe, side-panel-open check |
+| `client/src/content/` | MV3 content script; `capture-engine/` handles selection |
+| `client/src/sidepanel/` | Side panel UI (`components/`, `api/`, `capture/`) |
+| `client/src/shared/` | Cross-context only: `message-constants.ts`, `identity/user-store.ts` |
+| `server/` | Express routes, services, `db/`, `types.ts`, `parsers.ts` |
 
-- Capture text selections from any page
-- Save each capture as a `note` by default; use `reminder` when the text is something to do, and set `dueAt` when a date or time is present
-- Persist captures, tasks, and per-origin chat in SQLite
-- Roadmap: notify the user when a due reminder comes up
-
-### Chat
-
-- Ask about what's saved on the current page; answers come **only** from that page's notes, never from model knowledge
-- Pipeline: classify (`specific` | `summary` | `out_of_scope`) → FTS5 retrieval (scoped to origin + user) → grounded reply. Off-topic and no-hit cases are canned (no extra LLM call)
-- Follow-ups keep the topic via `chat.agent_state`; see `server/src/services/README.md`
-
-## Stack & Layout
-
-- `client/src/background/` — MV3 service worker: message routing, capture dedupe
-- `client/src/content/` — MV3 content script: `capture/` (selection)
-- `client/src/sidepanel/` — MV3 side panel: `components/`, `api/`, `capture/`
-- `client/src/shared/` — cross-layer types, message constants
-- `server/` — Express: `/captures`, `/chat`, `/task`, `/user`, SQLite persistence
-- LLM: DeepSeek (`deepseek-chat`, OpenAI-compatible API) with structured JSON output
-- Dev env: server on `localhost:3000`; extension loaded unpacked in Chrome
+Dev: server `localhost:3000`; extension loaded unpacked from `client/`. Human docs:
+[README.md](README.md), [server/README.md](server/README.md).
 
 ## Contracts
 
-### Notes and reminders
+**Auth:** `X-Ezer-User-Id` (client UUID) on user-scoped routes.
 
-- **Item kinds:** `note` | `reminder` — one per capture. Notes are the default. A `reminder` is for something to do and may carry `dueAt` (ISO 8601, resolved in the user's timezone)
-- **Capture:** `POST /captures` with `{ text, tabUrl, url?, title?, timezone? }` → `{ taskId, originId, origin, item, reply, userMessageId, ezerMessageId }`. LLM failures degrade to a generic note (always `200` on success path).
-- **Chat:** `POST /chat` with `{ message, tabUrl, action? }` → `{ originId, origin, reply, rejected, userMessageId, ezerMessageId }`. Without `action`: answers only from the page's saved notes (classify → FTS5 retrieve → grounded reply; `rejected` when `out_of_scope`). With `action` (`notes` \| `reminders` \| `help`): server-built markdown, no LLM. See `server/src/services/README.md` and `server/src/routes/README.md`.
-- **History:** `GET /chat?tabUrl=` → per-origin messages; authenticated routes require `X-Ezer-User-Id`
-- **Tasks:** `GET /task?tabUrl=`, `PATCH /task/:id` — notes and reminders for the page origin
-- **Persistence:** SQLite tables `user`, `origin`, `chat`, `task`, plus the `task_fts` FTS5 search index (soft delete via `deleted_at`)
+**Kinds:** `note` \| `reminder` per capture; reminders may include `dueAt` (ISO 8601, user timezone).
+
+**`POST /captures`** — `{ text, tabUrl, url?, title?, timezone? }` → task + chat rows. LLM failure →
+generic note, still `200`.
+
+**`POST /chat`** — `{ message, tabUrl, action? }`. Without `action`: classify → FTS5 → grounded reply
+(`rejected` when `out_of_scope`). With `action` (`notes` \| `reminders` \| `help`): server markdown, no
+LLM. Details: [server/src/routes/README.md](server/src/routes/README.md),
+[server/src/services/README.md](server/src/services/README.md).
+
+**History / tasks:** `GET /chat?tabUrl=`, `GET /task?tabUrl=`, `PATCH /task/:id`.
+
+**Persistence:** `user`, `origin`, `chat`, `task`, `task_fts`; soft delete via `deleted_at` —
+[server/src/db/README.md](server/src/db/README.md).
 
 ## Conventions
 
 ### Code style
 
-| Rule                  | Convention                                        |
-| --------------------- | ------------------------------------------------- |
-| Files                 | `kebab-case.ts`                                   |
-| Classes / components  | `PascalCase` (`EzerChat`)                         |
-| Functions / variables | `camelCase`; handlers → `handle*`                 |
-| Constants             | `camelCase`                                       |
-| Exports               | Named only, no default exports                    |
-| Imports               | Ext libs → internal → siblings (`.ts` ext for local TS files) |
-| TS strict             | No `any` except deliberate boundary loose ends    |
-| Functions             | Small, single-purpose; name over block comment    |
-| Comments              | _Why_, not _what_. Code is the _what_.            |
-| Logs                  | No `console` in committed code                    |
-| Errors                | Degrade gracefully — catch, surface to UI         |
+| Rule | Convention |
+| ---- | ---------- |
+| Files | `kebab-case.ts` |
+| Classes / components | `PascalCase` (`EzerChat`) |
+| Functions / variables | `camelCase`; handlers → `handle*` |
+| Constants | `camelCase` |
+| Exports | Named only, no default exports |
+| Imports | Ext libs → internal → siblings (`.ts` for local TS) |
+| TS strict | No `any` except deliberate boundary loose ends |
+| Comments | _Why_, not _what_ |
+| Logs | No `console` in committed code |
+| Errors | Degrade gracefully — catch, surface to UI |
 
-Auto-enforced (Biome): formatting, quotes, semicolons, trailing commas, 100-col width.
+Biome: formatting, quotes, semicolons, trailing commas, 100-col width.
 
 ### Styling
 
-Design tokens via CSS custom properties in `styles.css`. All Lit components reference `var(--token-name)` only. Tokens cascade through Shadow DOM automatically.
+Design tokens in `client/styles.css` as CSS custom properties; Lit components use `var(--token-name)`
+only.

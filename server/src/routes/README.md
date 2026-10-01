@@ -1,13 +1,9 @@
-# Ezer HTTP API
+# HTTP API
 
-Express routes for users, captures, chat, and tasks. All routes are registered in `index.ts`; each
-route file exports its handlers.
+Handlers live in this folder; wiring in `index.ts`. Add new routes here (shapes + errors).
 
-> **API docs:** Document every new route in this file — headers, request/response shapes, and error
-> codes.
-
-Base URL: `http://localhost:3000`. See [../../README.md](../../README.md) for setup and env. Grounded
-chat pipeline: [../services/README.md](../services/README.md).
+Setup and env: [../../README.md](../../README.md). Typed chat behavior:
+[../services/README.md](../services/README.md).
 
 ## Conventions
 
@@ -139,15 +135,9 @@ Each message:
 
 ### `POST /chat`
 
-Two modes, same response shape:
-
-1. **Typed chat** (no `action`) — classifies the message (`specific` | `summary` | `out_of_scope`),
-   retrieves matching notes with SQLite FTS5, then phrases a reply. Off-topic messages get a canned
-   refusal; a search with no hits gets a canned "nothing found". Persists `TEXT` messages; assistant
-   rows may include `agent_state`.
-2. **Menu actions** (`action` set) — server-built markdown reply (`notes`, `reminders`, or product
-   `help`) from tasks / config; **no LLM**. Persists `QUICK_ACTION` messages; `rejected` is always
-   `false`.
+Without `action`: grounded assistant (`TEXT` messages, optional `agent_state`) — see
+[../services/README.md](../services/README.md). With `action` (`notes` \| `reminders` \| `help`):
+server-built markdown, `QUICK_ACTION` messages, no LLM, `rejected` always `false`.
 
 **Request body**
 
