@@ -1,5 +1,5 @@
-import type { CaptureContent, MessageType } from "@src/shared/types.ts";
-import { MESSAGE_TYPE } from "@src/shared/types.ts";
+import type { CaptureContent, MessageType } from "@src/sidepanel/types.ts";
+import { MESSAGE_TYPE } from "@src/sidepanel/types.ts";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import { styles } from "./styles.ts";

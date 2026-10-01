@@ -1,4 +1,4 @@
-import type { QuickActionId } from "@src/shared/constants.ts";
+import type { QuickActionId } from "@src/sidepanel/constants.ts";
 import { clipboardClockIcon, helpCircleIcon, notebookPenIcon } from "@src/sidepanel/icons/index.ts";
 import type { TemplateResult } from "lit";
 

@@ -1,6 +1,6 @@
-import { getActiveTabUrl } from "@src/shared/tabs/active-tab.ts";
-import type { Message } from "@src/shared/types.ts";
 import { getChatMessages } from "@src/sidepanel/api/chat.ts";
+import type { Message } from "@src/sidepanel/types.ts";
+import { getActiveTabUrl } from "@src/sidepanel/utils/active-tab.ts";
 import { storedMessageToUiMessage } from "./message-mapper.ts";
 
 export async function loadCaptureConversationForActiveTab(): Promise<Message[]> {

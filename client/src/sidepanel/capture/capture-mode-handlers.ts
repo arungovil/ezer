@@ -1,5 +1,5 @@
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
-import type { ChatWindowHost, Message } from "@src/shared/types.ts";
+import type { ChatWindowHost, Message } from "@src/sidepanel/types.ts";
 import { captureStartedMessage } from "./messages.ts";
 
 function sendCaptureMode(enabled: boolean): void {

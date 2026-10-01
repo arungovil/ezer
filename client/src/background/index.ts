@@ -1,4 +1,4 @@
-import { initializeUser } from "@src/shared/identity/initialize-user.ts";
+import { initializeUser } from "@src/sidepanel/api/initialize-user.ts";
 import { handleRuntimeMessage, handleTabActivated, seedActiveTab } from "./handlers.ts";
 
 void initializeUser();

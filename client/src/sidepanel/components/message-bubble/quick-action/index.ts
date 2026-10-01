@@ -1,5 +1,5 @@
-import type { ChatContent } from "@src/shared/chat-content.ts";
-import { isChatTaskListContent, normalizeChatContent } from "@src/shared/chat-content.ts";
+import type { ChatContent } from "@src/sidepanel/chat-content.ts";
+import { isChatTaskListContent, normalizeChatContent } from "@src/sidepanel/chat-content.ts";
 import { renderMarkdown } from "@src/sidepanel/utils/markdown.ts";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";

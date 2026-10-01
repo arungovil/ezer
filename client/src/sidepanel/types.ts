@@ -1,5 +1,5 @@
-import type { ChatContent } from "@src/shared/chat-content.ts";
 import type { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
+import type { ChatContent } from "@src/sidepanel/chat-content.ts";
 
 export type RuntimeMessageType = (typeof RUNTIME_MESSAGE_TYPE)[keyof typeof RUNTIME_MESSAGE_TYPE];
 

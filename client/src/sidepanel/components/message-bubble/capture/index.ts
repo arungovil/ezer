@@ -1,4 +1,4 @@
-import type { CaptureContent } from "@src/shared/types.ts";
+import type { CaptureContent } from "@src/sidepanel/types.ts";
 import { html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import { styles } from "./styles.ts";

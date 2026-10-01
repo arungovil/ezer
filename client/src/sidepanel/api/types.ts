@@ -1,5 +1,5 @@
-import { type ChatContent, isChatContent } from "@src/shared/chat-content.ts";
-import type { QuickActionId } from "@src/shared/constants.ts";
+import { type ChatContent, isChatContent } from "@src/sidepanel/chat-content.ts";
+import type { QuickActionId } from "@src/sidepanel/constants.ts";
 
 export interface ApiErrorBody {
   error: string;

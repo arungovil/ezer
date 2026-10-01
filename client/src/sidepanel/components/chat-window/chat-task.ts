@@ -1,9 +1,9 @@
 import { Task } from "@lit/task";
-import type { ChatContent } from "@src/shared/chat-content.ts";
-import { chatContentFromResponse } from "@src/shared/chat-content.ts";
-import type { QuickActionId } from "@src/shared/constants.ts";
-import { getActiveTabUrl } from "@src/shared/tabs/active-tab.ts";
 import { postChat } from "@src/sidepanel/api/index.ts";
+import type { ChatContent } from "@src/sidepanel/chat-content.ts";
+import { chatContentFromResponse } from "@src/sidepanel/chat-content.ts";
+import type { QuickActionId } from "@src/sidepanel/constants.ts";
+import { getActiveTabUrl } from "@src/sidepanel/utils/active-tab.ts";
 import type { ReactiveControllerHost } from "lit";
 
 export type ChatTaskArgs = readonly [text: string, ezerMsgId: string, action?: QuickActionId];
