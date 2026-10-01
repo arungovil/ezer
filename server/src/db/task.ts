@@ -1,45 +1,7 @@
 import { randomUUID } from "node:crypto";
-import type { TaskKind } from "../types/capture.ts";
-import type { TaskStatus } from "../types/task.ts";
+import type { InsertTaskInput, TaskRow, TaskStatus, UpdateTaskInput } from "../types.ts";
 import { getDb } from "./index.ts";
 import { notDeleted, softDeleteTimestamp } from "./soft-delete.ts";
-
-export interface TaskRow {
-  id: string;
-  originId: string;
-  userId: string;
-  chatId: string | null;
-  kind: TaskKind;
-  title: string;
-  summary: string | null;
-  body: string | null;
-  dueAt: string | null;
-  status: TaskStatus;
-  sourceUrl: string | null;
-  sourceTitle: string | null;
-  createdAt: string;
-}
-
-interface InsertTaskInput {
-  originId: string;
-  userId: string;
-  chatId?: string;
-  kind: TaskKind;
-  title: string;
-  summary: string | null;
-  body?: string | null;
-  dueAt: string | null;
-  sourceUrl?: string;
-  sourceTitle?: string;
-}
-
-interface UpdateTaskInput {
-  status?: TaskStatus;
-  kind?: TaskKind;
-  title?: string;
-  summary?: string | null;
-  dueAt?: string | null;
-}
 
 export function insertTask(input: InsertTaskInput): TaskRow {
   const task: TaskRow = {

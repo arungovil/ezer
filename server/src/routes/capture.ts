@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import { errorMessages } from "../config/constants.ts";
 import { isLlmConfigured } from "../config/env.ts";
 import { readUserId } from "../middleware/read-user-id.ts";
+import { parseCaptureRequest } from "../parsers.ts";
 import { processCapture } from "../services/capture-service.ts";
-import type { ApiErrorBody } from "../types/api.ts";
-import { type CaptureResponseBody, parseCaptureRequest } from "../types/capture.ts";
+import type { ApiErrorBody, CaptureResponseBody } from "../types.ts";
 
 export async function handleCapture(
   req: Request,

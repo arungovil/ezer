@@ -67,7 +67,7 @@ Failure handling:
 - JSON parse or shape failure → treated as `out_of_scope` (canned refusal), never a `500`.
 - LLM/network failure → propagates → `502` on the route.
 
-`parseClassification` (`types/chat.ts`) accepts both `standaloneQuery` and `standalone_query`.
+`parseClassification` (`parsers.ts`) accepts both `standaloneQuery` and `standalone_query`.
 
 ## 2. Retrieve
 

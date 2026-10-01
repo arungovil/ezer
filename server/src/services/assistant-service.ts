@@ -1,25 +1,20 @@
 import { getEnv } from "../config/env.ts";
-import type { ChatRow } from "../db/chat.ts";
-import { listTasksByOriginId, searchTasksByOrigin, type TaskRow } from "../db/task.ts";
+import { listTasksByOriginId, searchTasksByOrigin } from "../db/task.ts";
+import { parseClassification } from "../parsers.ts";
 import { answerSystemPrompt, classifierSystemPrompt } from "../prompts/assistant.ts";
-import { type ChatIntent, type Classification, parseClassification } from "../types/chat.ts";
+import type {
+  AssistantReply,
+  AssistantState,
+  ChatIntent,
+  ChatRow,
+  Classification,
+  TaskRow,
+} from "../types.ts";
 import { getLlmClient } from "./llm-client.ts";
 
 const retrievalLimit = 40;
 const historyCharLimit = 500;
 const notesContextCharLimit = 8000;
-
-export interface AssistantState {
-  intent: ChatIntent;
-  topic: string;
-  keywords: string[];
-}
-
-export interface AssistantReply {
-  reply: string;
-  rejected: boolean;
-  state: AssistantState | null;
-}
 
 const refusalReply =
   "I can only answer from the notes you've saved on this page. Ask me whether you saved " +

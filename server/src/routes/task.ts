@@ -1,16 +1,14 @@
 import type { Request, Response } from "express";
 import { errorMessages } from "../config/constants.ts";
 import { readUserId } from "../middleware/read-user-id.ts";
-import { createTask, getTask, listTasksForTabUrl, updateTask } from "../services/task-service.ts";
-import type { ApiErrorBody } from "../types/api.ts";
 import {
   parseCreateTaskRequest,
   parseTaskStatusQuery,
   parseTaskTabUrlQuery,
   parseUpdateTaskRequest,
-  type TaskListResponseBody,
-  type TaskResponseBody,
-} from "../types/task.ts";
+} from "../parsers.ts";
+import { createTask, getTask, listTasksForTabUrl, updateTask } from "../services/task-service.ts";
+import type { ApiErrorBody, TaskListResponseBody, TaskResponseBody } from "../types.ts";
 
 export function handleListTasks(
   req: Request,

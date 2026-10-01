@@ -2,14 +2,9 @@ import type { Request, Response } from "express";
 import { errorMessages } from "../config/constants.ts";
 import { isLlmConfigured } from "../config/env.ts";
 import { readUserId } from "../middleware/read-user-id.ts";
+import { parseChatRequest, parseChatTabUrlQuery } from "../parsers.ts";
 import { listChatForTabUrl, processChat, removeChatMessage } from "../services/chat-service.ts";
-import type { ApiErrorBody } from "../types/api.ts";
-import {
-  type ChatListResponseBody,
-  type ChatResponseBody,
-  parseChatRequest,
-  parseChatTabUrlQuery,
-} from "../types/chat.ts";
+import type { ApiErrorBody, ChatListResponseBody, ChatResponseBody } from "../types.ts";
 
 export function handleListChat(
   req: Request,

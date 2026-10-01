@@ -1,12 +1,5 @@
+import type { Env } from "../types.ts";
 import { defaultDbPath, defaultLlmBaseUrl, defaultLlmModel, defaultPort } from "./constants.ts";
-
-export interface Env {
-  port: number;
-  dbPath: string;
-  llmApiKey: string;
-  llmBaseUrl: string;
-  llmModel: string;
-}
 
 export function getEnv(): Env {
   return {

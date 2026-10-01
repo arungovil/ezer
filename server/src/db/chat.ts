@@ -1,24 +1,6 @@
+import type { ChatRow, InsertChatInput } from "../types.ts";
 import { getDb } from "./index.ts";
 import { notDeleted, softDeleteTimestamp } from "./soft-delete.ts";
-
-export interface ChatRow {
-  id: string;
-  originId: string;
-  role: "user" | "ezer";
-  messageType: string;
-  content: string;
-  agentState: string | null;
-  createdAt: string;
-}
-
-interface InsertChatInput {
-  id: string;
-  originId: string;
-  role: "user" | "ezer";
-  messageType: string;
-  content: string;
-  agentState?: string | null;
-}
 
 export function insertChat(input: InsertChatInput): ChatRow {
   const createdAt = new Date().toISOString();

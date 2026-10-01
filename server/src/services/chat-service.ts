@@ -9,13 +9,8 @@ import {
 import { getOrCreateOrigin, getOriginByIdForUser, getOriginByUserAndOrigin } from "../db/origin.ts";
 import { taskExistsForChatId } from "../db/task.ts";
 import { parsePageOrigin } from "../lib/parse-origin.ts";
-import {
-  type ChatListResponseBody,
-  type ChatRequestBody,
-  type ChatResponseBody,
-  toChatMessageBody,
-} from "../types/chat.ts";
-import { serializeChatContent } from "../types/chat-content.ts";
+import { serializeChatContent, toChatMessageBody } from "../parsers.ts";
+import type { ChatListResponseBody, ChatRequestBody, ChatResponseBody } from "../types.ts";
 import { handleAssistantMessage } from "./assistant-service.ts";
 import { buildQuickActionReply, quickActionReplyText } from "./quick-action-service.ts";
 

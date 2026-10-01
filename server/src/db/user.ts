@@ -1,10 +1,6 @@
+import type { UserRow } from "../types.ts";
 import { getDb } from "./index.ts";
 import { notDeleted, softDeleteTimestamp } from "./soft-delete.ts";
-
-export interface UserRow {
-  id: string;
-  createdAt: string;
-}
 
 export function getUserById(userId: string): UserRow | undefined {
   return getDb()

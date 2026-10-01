@@ -1,11 +1,3 @@
-export const quickActionIds = ["notes", "reminders", "help"] as const;
-
-export type QuickActionId = (typeof quickActionIds)[number];
-
-export function isQuickActionId(value: unknown): value is QuickActionId {
-  return typeof value === "string" && (quickActionIds as readonly string[]).includes(value);
-}
-
 export const helpReply = [
   "I'm Ezer — your side-panel assistant for this **site**.",
   "",

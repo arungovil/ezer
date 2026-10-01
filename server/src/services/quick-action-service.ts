@@ -1,12 +1,16 @@
 import {
   helpReply,
   noteListIntro,
-  type QuickActionId,
   reminderListIntro,
   taskListPlainText,
 } from "../config/quick-actions.ts";
-import type { TaskKind } from "../types/capture.ts";
-import type { ChatContent, ChatTaskListContent, ChatTaskListItem } from "../types/chat-content.ts";
+import type {
+  ChatContent,
+  ChatTaskListContent,
+  ChatTaskListItem,
+  QuickActionId,
+  TaskKind,
+} from "../types.ts";
 import { listTasksForTabUrl } from "./task-service.ts";
 
 function toListItem(task: {

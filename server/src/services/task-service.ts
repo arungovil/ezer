@@ -6,14 +6,14 @@ import {
   updateTaskForUser,
 } from "../db/task.ts";
 import { parsePageOrigin } from "../lib/parse-origin.ts";
+import { toTaskResponseBody } from "../parsers.ts";
 import type {
   CreateTaskRequestBody,
   TaskListResponseBody,
   TaskResponseBody,
   TaskStatus,
   UpdateTaskRequestBody,
-} from "../types/task.ts";
-import { toTaskResponseBody } from "../types/task.ts";
+} from "../types.ts";
 
 function toResponse(task: {
   id: string;

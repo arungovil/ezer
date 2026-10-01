@@ -4,13 +4,9 @@ import { insertChat } from "../db/chat.ts";
 import { getOrCreateOrigin } from "../db/origin.ts";
 import { insertTask } from "../db/task.ts";
 import { parsePageOrigin } from "../lib/parse-origin.ts";
+import { isCaptureLlmResult } from "../parsers.ts";
 import { captureSystemPrompt } from "../prompts/capture.ts";
-import {
-  type CaptureLlmResult,
-  type CaptureRequestBody,
-  type CaptureResponseBody,
-  isCaptureLlmResult,
-} from "../types/capture.ts";
+import type { CaptureLlmResult, CaptureRequestBody, CaptureResponseBody } from "../types.ts";
 import { getLlmClient } from "./llm-client.ts";
 
 function parseCaptureLlmResult(raw: string): CaptureLlmResult {
