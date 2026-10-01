@@ -1,26 +1,9 @@
-/** Structured assistant payload (`POST /chat` `content`, persisted on Ezer chat rows). */
-export type ChatTaskKind = "note" | "reminder";
-
-export interface ChatTaskListItem {
-  id: string;
-  title: string;
-  summary: string | null;
-  dueAt: string | null;
-}
-
-export interface ChatTaskListContent {
-  format: "taskList";
-  kind: ChatTaskKind;
-  intro: string;
-  items: ChatTaskListItem[];
-}
-
-export interface ChatMarkdownContent {
-  format: "markdown";
-  text: string;
-}
-
-export type ChatContent = ChatMarkdownContent | ChatTaskListContent;
+import type {
+  ChatContent,
+  ChatMarkdownContent,
+  ChatTaskListContent,
+  ChatTaskListItem,
+} from "@src/sidepanel/types.ts";
 
 function isTaskListItem(value: unknown): value is ChatTaskListItem {
   if (typeof value !== "object" || value === null) {

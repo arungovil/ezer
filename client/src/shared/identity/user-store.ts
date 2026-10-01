@@ -1,9 +1,6 @@
-const userStorageKey = "ezerUser";
+import type { StoredUser } from "@src/shared/identity/types.ts";
 
-export interface StoredUser {
-  id: string;
-  createdAt: string;
-}
+const userStorageKey = "ezerUser";
 
 let pendingUserId: string | null = null;
 

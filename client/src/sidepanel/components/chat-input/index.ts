@@ -1,15 +1,10 @@
 import "@src/sidepanel/components/chat-input/quick-actions-popover/index.ts";
 import "@src/sidepanel/components/common/ez-button/index.ts";
 import { sendIcon } from "@src/sidepanel/icons/send.ts";
+import type { QuickAction, QuickActionId } from "@src/sidepanel/types.ts";
 import { html, LitElement } from "lit";
 import { property, query, state } from "lit/decorators.js";
-import {
-  filterQuickActions,
-  getQuickActions,
-  getSlashContext,
-  type QuickAction,
-  type QuickActionId,
-} from "./quick-actions.ts";
+import { filterQuickActions, getQuickActions, getSlashContext } from "./quick-actions.ts";
 import { styles } from "./styles.ts";
 
 export class ChatInput extends LitElement {

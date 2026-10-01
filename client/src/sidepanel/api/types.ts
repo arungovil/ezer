@@ -1,5 +1,14 @@
-import { type ChatContent, isChatContent } from "@src/sidepanel/chat-content.ts";
-import type { QuickActionId } from "@src/sidepanel/constants.ts";
+import { isChatContent } from "@src/sidepanel/chat-content.ts";
+import type { ChatContent, QuickActionId } from "@src/sidepanel/types.ts";
+
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export interface HttpRequestOptions {
+  method?: HttpMethod;
+  body?: unknown;
+  signal?: AbortSignal;
+  query?: Record<string, string>;
+}
 
 export interface ApiErrorBody {
   error: string;

@@ -1,14 +1,6 @@
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
 import { injectAndRetry } from "./fallbacks.ts";
-
-type WorkerInboundMessage = {
-  type?: string;
-  target?: string;
-  payload?: unknown;
-  text?: unknown;
-  url?: unknown;
-  title?: unknown;
-};
+import type { WorkerInboundMessage } from "./types.ts";
 
 let activeTabId: number | null = null;
 let lastSelectionCaptureKey = "";

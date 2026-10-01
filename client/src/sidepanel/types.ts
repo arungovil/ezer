@@ -1,5 +1,47 @@
 import type { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
-import type { ChatContent } from "@src/sidepanel/chat-content.ts";
+import type { TemplateResult } from "lit";
+
+/** Structured assistant payload (`POST /chat` `content`, persisted on Ezer chat rows). */
+export type ChatTaskKind = "note" | "reminder";
+
+export interface ChatTaskListItem {
+  id: string;
+  title: string;
+  summary: string | null;
+  dueAt: string | null;
+}
+
+export interface ChatTaskListContent {
+  format: "taskList";
+  kind: ChatTaskKind;
+  intro: string;
+  items: ChatTaskListItem[];
+}
+
+export interface ChatMarkdownContent {
+  format: "markdown";
+  text: string;
+}
+
+export type ChatContent = ChatMarkdownContent | ChatTaskListContent;
+
+export type QuickActionId = "notes" | "reminders" | "help";
+
+export interface QuickAction {
+  id: QuickActionId;
+  label: string;
+  keywords: string[];
+  icon: TemplateResult;
+}
+
+export type ChatTaskArgs = readonly [text: string, ezerMsgId: string, action?: QuickActionId];
+
+export interface ChatTaskResult {
+  ezerMsgId: string;
+  content: string | ChatContent;
+}
+
+export type CaptureTaskArgs = readonly [text: string, tabUrl: string, url?: string, title?: string];
 
 export type RuntimeMessageType = (typeof RUNTIME_MESSAGE_TYPE)[keyof typeof RUNTIME_MESSAGE_TYPE];
 

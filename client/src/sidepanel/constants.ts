@@ -1,5 +1,3 @@
-export type QuickActionId = "notes" | "reminders" | "help";
-
 export const helpPrompt = "What can Ezer help me with?";
 
 export const reminderListUserPrompt = "Show me my reminders";

@@ -1,17 +1,9 @@
 import { Task } from "@lit/task";
 import { postChat } from "@src/sidepanel/api/index.ts";
-import type { ChatContent } from "@src/sidepanel/chat-content.ts";
 import { chatContentFromResponse } from "@src/sidepanel/chat-content.ts";
-import type { QuickActionId } from "@src/sidepanel/constants.ts";
+import type { ChatTaskArgs, ChatTaskResult } from "@src/sidepanel/types.ts";
 import { getActiveTabUrl } from "@src/sidepanel/utils/active-tab.ts";
 import type { ReactiveControllerHost } from "lit";
-
-export type ChatTaskArgs = readonly [text: string, ezerMsgId: string, action?: QuickActionId];
-
-export interface ChatTaskResult {
-  ezerMsgId: string;
-  content: string | ChatContent;
-}
 
 export function createChatTask(host: ReactiveControllerHost) {
   return new Task<ChatTaskArgs, ChatTaskResult>(host, {

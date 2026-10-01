@@ -1,7 +1,4 @@
-import type {
-  QuickAction,
-  QuickActionId,
-} from "@src/sidepanel/components/chat-input/quick-actions.ts";
+import type { QuickAction, QuickActionId } from "@src/sidepanel/types.ts";
 import { html, LitElement, type PropertyValues } from "lit";
 import { property, query } from "lit/decorators.js";
 import { styles } from "./styles.ts";

@@ -1,9 +1,8 @@
 import { Task } from "@lit/task";
 import { postCapture } from "@src/sidepanel/api/capture.ts";
 import type { CaptureResponseBody } from "@src/sidepanel/api/types.ts";
+import type { CaptureTaskArgs } from "@src/sidepanel/types.ts";
 import type { ReactiveControllerHost } from "lit";
-
-export type CaptureTaskArgs = readonly [text: string, tabUrl: string, url?: string, title?: string];
 
 export function createCaptureTask(host: ReactiveControllerHost) {
   return new Task<CaptureTaskArgs, CaptureResponseBody>(host, {

@@ -1,15 +1,7 @@
 import { getRequestUserId } from "@src/shared/identity/user-store.ts";
 import { initializeUser } from "@src/sidepanel/api/initialize-user.ts";
 import { apiErrorMessages, serverBaseUrl } from "./config.ts";
-
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
-interface RequestOptions {
-  method?: HttpMethod;
-  body?: unknown;
-  signal?: AbortSignal;
-  query?: Record<string, string>;
-}
+import type { HttpRequestOptions } from "./types.ts";
 
 async function parseJsonBody(response: Response): Promise<unknown> {
   try {
@@ -44,7 +36,7 @@ async function resolveUserId(): Promise<string> {
 
 export async function requestJson(
   path: string,
-  options: RequestOptions = {},
+  options: HttpRequestOptions = {},
 ): Promise<{ response: Response; data: unknown }> {
   const { method = "GET", body, signal, query } = options;
   const userId = await resolveUserId();

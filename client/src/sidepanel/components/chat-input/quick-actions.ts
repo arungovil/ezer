@@ -1,15 +1,5 @@
-import type { QuickActionId } from "@src/sidepanel/constants.ts";
 import { clipboardClockIcon, helpCircleIcon, notebookPenIcon } from "@src/sidepanel/icons/index.ts";
-import type { TemplateResult } from "lit";
-
-export type { QuickActionId };
-
-export interface QuickAction {
-  id: QuickActionId;
-  label: string;
-  keywords: string[];
-  icon: TemplateResult;
-}
+import type { QuickAction, QuickActionId } from "@src/sidepanel/types.ts";
 
 export function getQuickActions(): QuickAction[] {
   return [

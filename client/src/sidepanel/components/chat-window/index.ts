@@ -7,15 +7,19 @@ import {
   loadCaptureConversationForActiveTab,
   syncCaptureMode,
 } from "@src/sidepanel/capture/index.ts";
-import type { ChatContent } from "@src/sidepanel/chat-content.ts";
 import { markdownChatContent, normalizeChatContent } from "@src/sidepanel/chat-content.ts";
-import type { QuickActionId } from "@src/sidepanel/components/chat-input/quick-actions.ts";
 import {
   helpPrompt,
   noteListUserPrompt,
   reminderListUserPrompt,
 } from "@src/sidepanel/constants.ts";
-import type { ChatWindowHost, Message, RuntimeMessage } from "@src/sidepanel/types.ts";
+import type {
+  ChatContent,
+  ChatWindowHost,
+  Message,
+  QuickActionId,
+  RuntimeMessage,
+} from "@src/sidepanel/types.ts";
 import { MESSAGE_TYPE } from "@src/sidepanel/types.ts";
 import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.ts";
 import { html, LitElement } from "lit";

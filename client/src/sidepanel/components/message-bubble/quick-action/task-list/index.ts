@@ -1,5 +1,5 @@
 import "@src/sidepanel/components/common/ez-button/index.ts";
-import type { ChatTaskListContent } from "@src/sidepanel/chat-content.ts";
+import type { ChatTaskListContent } from "@src/sidepanel/types.ts";
 import { formatTaskDueAt } from "@src/sidepanel/utils/format.ts";
 import { renderMarkdown } from "@src/sidepanel/utils/markdown.ts";
 import { html, LitElement } from "lit";
