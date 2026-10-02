@@ -1,15 +1,10 @@
 import { initializeUser } from "@src/sidepanel/api/initialize-user.ts";
-import { handleRuntimeMessage, handleTabActivated, seedActiveTab } from "./handlers.ts";
+import { handleRuntimeMessage } from "./handlers.ts";
 
 void initializeUser();
-seedActiveTab();
 
 chrome.runtime.onInstalled.addListener(() => {
   void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
-});
-
-chrome.tabs.onActivated.addListener(({ tabId }) => {
-  handleTabActivated(tabId);
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {

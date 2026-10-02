@@ -2,25 +2,10 @@ import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
 import { injectAndRetry } from "./fallbacks.ts";
 import type { WorkerInboundMessage } from "./types.ts";
 
-let activeTabId: number | null = null;
 let lastSelectionCaptureKey = "";
 let lastSelectionCaptureAt = 0;
 
 const selectionCaptureDedupeMs = 3000;
-
-export function seedActiveTab(): void {
-  void (async () => {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab?.id != null) activeTabId = tab.id;
-  })();
-}
-
-export function handleTabActivated(tabId: number): void {
-  if (activeTabId === tabId) return;
-  activeTabId = tabId;
-
-  chrome.runtime.sendMessage({ type: RUNTIME_MESSAGE_TYPE.TAB_SWITCHED, tabId }).catch(() => {});
-}
 
 export function handleRuntimeMessage(
   message: WorkerInboundMessage,

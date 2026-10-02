@@ -2,7 +2,7 @@ import { type Task, TaskStatus } from "@lit/task";
 import type { CaptureResponseBody } from "@src/sidepanel/api/types.ts";
 import type { CaptureTaskArgs, ChatWindowHost, Message } from "@src/sidepanel/types.ts";
 import { MESSAGE_TYPE } from "@src/sidepanel/types.ts";
-import { getActiveTabUrl } from "@src/sidepanel/utils/active-tab.ts";
+import { getActiveTabUrl } from "@src/sidepanel/utils/index.ts";
 import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.ts";
 import { userCaptureMessage } from "./messages.ts";
 

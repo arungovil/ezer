@@ -2,7 +2,7 @@ import { Task } from "@lit/task";
 import { postChat } from "@src/sidepanel/api/index.ts";
 import { chatContentFromResponse } from "@src/sidepanel/chat-content.ts";
 import type { ChatTaskArgs, ChatTaskResult } from "@src/sidepanel/types.ts";
-import { getActiveTabUrl } from "@src/sidepanel/utils/active-tab.ts";
+import { getActiveTabUrl } from "@src/sidepanel/utils/index.ts";
 import type { ReactiveControllerHost } from "lit";
 
 export function createChatTask(host: ReactiveControllerHost) {

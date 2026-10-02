@@ -96,7 +96,6 @@ export type Message =
 
 export interface RuntimeMessage {
   type: RuntimeMessageType;
-  tabId?: number;
   text?: string;
   url?: string;
   title?: string;

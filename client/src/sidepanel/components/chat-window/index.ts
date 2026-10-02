@@ -21,6 +21,7 @@ import type {
   RuntimeMessage,
 } from "@src/sidepanel/types.ts";
 import { MESSAGE_TYPE } from "@src/sidepanel/types.ts";
+import { watchActiveSiteScope } from "@src/sidepanel/utils/site-scope.ts";
 import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.ts";
 import { html, LitElement } from "lit";
 import { state } from "lit/decorators.js";
@@ -39,12 +40,9 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   private readonly captureTask = createCaptureTask(this);
   private readonly chatScroll = new ChatScrollController(this, () => this.messages.length);
   private conversationLoadGeneration = 0;
+  private stopWatchingSiteScope: (() => void) | undefined;
 
   private handleRuntimeMessage = (message: RuntimeMessage) => {
-    if (message?.type === RUNTIME_MESSAGE_TYPE.TAB_SWITCHED) {
-      void this.handleTabSwitched();
-      return;
-    }
     if (message?.type === RUNTIME_MESSAGE_TYPE.SELECTION_CAPTURED && message.text) {
       void handleSelectionCaptured(
         this,
@@ -61,7 +59,9 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
       chrome.runtime.onMessage.addListener(this.handleRuntimeMessage);
     }
-    void this.loadConversation();
+    this.stopWatchingSiteScope = watchActiveSiteScope(() => {
+      void this.reloadConversationForSiteScope();
+    });
     syncCaptureMode(this);
   }
 
@@ -70,6 +70,8 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
       chrome.runtime.onMessage.removeListener(this.handleRuntimeMessage);
     }
+    this.stopWatchingSiteScope?.();
+    this.stopWatchingSiteScope = undefined;
     disarmCaptureMode();
   }
 
@@ -83,7 +85,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     this.messages = [...this.messages, ...newMessages];
   }
 
-  private async handleTabSwitched() {
+  private async reloadConversationForSiteScope() {
     this.chatTask.abort();
     this.captureTask.abort();
     this.messages = [];
