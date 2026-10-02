@@ -50,7 +50,7 @@ export async function handleSelectionCaptured(
     loading: true,
   };
 
-  host.messages = [...host.messages, userMsg, pendingEzerMsg];
+  host.appendChatMessages(userMsg, pendingEzerMsg);
 
   try {
     void captureTask.run([text, tabUrl, url, title]);

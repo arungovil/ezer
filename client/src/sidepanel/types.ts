@@ -104,4 +104,5 @@ export interface RuntimeMessage {
 
 export interface ChatWindowHost {
   messages: Message[];
+  appendChatMessages(...newMessages: Message[]): void;
 }

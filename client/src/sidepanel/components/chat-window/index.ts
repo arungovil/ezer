@@ -75,6 +75,14 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
 
   static styles = styles;
 
+  appendChatMessages(...newMessages: Message[]): void {
+    if (newMessages.length === 0) {
+      return;
+    }
+    this.chatScroll.pinToEnd();
+    this.messages = [...this.messages, ...newMessages];
+  }
+
   private async handleTabSwitched() {
     this.chatTask.abort();
     this.captureTask.abort();
@@ -111,7 +119,6 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
   }
 
   private handleQuickAction(e: CustomEvent<QuickActionId>) {
-    this.chatScroll.pinToEnd();
     const action = e.detail;
     const prompt =
       action === "notes"
@@ -126,7 +133,6 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
     const text = e.detail.text.trim();
     if (!text) return;
 
-    this.chatScroll.pinToEnd();
     void this.processMessage(text);
   }
 
@@ -180,7 +186,7 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
             content: "",
             loading: true,
           };
-    this.messages = [...this.messages, userMsg, pendingEzerMsg];
+    this.appendChatMessages(userMsg, pendingEzerMsg);
 
     try {
       void this.chatTask.run([text, ezerMsgId, action]);

@@ -31,7 +31,7 @@ export function syncCaptureMode(_host: ChatWindowHost): void {
 
 export function handleStartCapture(host: ChatWindowHost): void {
   const msg = captureStartedMessage();
-  host.messages = [...host.messages, msg];
+  host.appendChatMessages(msg);
 
   if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) return;
 
