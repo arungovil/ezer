@@ -1,5 +1,6 @@
 import "@src/sidepanel/components/chat-input/quick-actions-popover/index.ts";
 import "@src/sidepanel/components/common/ez-button/index.ts";
+import { chatInputPlaceholder } from "@src/sidepanel/constants.ts";
 import { sendIcon } from "@src/sidepanel/icons/send.ts";
 import type { QuickAction, QuickActionId } from "@src/sidepanel/types.ts";
 import { html, LitElement } from "lit";
@@ -8,7 +9,7 @@ import { filterQuickActions, getQuickActions, getSlashContext } from "./quick-ac
 import { styles } from "./styles.ts";
 
 export class ChatInput extends LitElement {
-  @property({ type: String }) placeholder = "What can I help you with?";
+  @property({ type: String }) placeholder = chatInputPlaceholder;
   @property({ type: Boolean }) quickActionsEnabled = true;
 
   @state() private slashStart = -1;

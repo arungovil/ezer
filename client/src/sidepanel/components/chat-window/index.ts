@@ -234,7 +234,6 @@ export class ChatWindow extends LitElement implements ChatWindowHost {
           : html`<chat-empty></chat-empty>`
       }
       <chat-input
-        placeholder="What can I help you with?"
         @ez-send=${this.handleSend}
         @ez-quick-action=${this.handleQuickAction}
       ></chat-input>
