@@ -1,5 +1,6 @@
 import { getRequestUserId } from "@src/shared/identity/user-store.ts";
 import { initializeUser } from "@src/sidepanel/api/initialize-user.ts";
+
 import { apiErrorMessages, serverBaseUrl } from "./config.ts";
 import type { HttpRequestOptions } from "./types.ts";
 

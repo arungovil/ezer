@@ -1,0 +1,9 @@
+export { ClipboardClockIcon } from "./clipboard-clock.tsx";
+export { HelpCircleIcon } from "./help-circle.tsx";
+export { HouseIcon } from "./house.tsx";
+export { NotebookPenIcon } from "./notebook-pen.tsx";
+export { SendIcon } from "./send.tsx";
+export { SlidersHorizontalIcon } from "./sliders-horizontal.tsx";
+export { TextAlignStartIcon } from "./text-align-start.tsx";
+export { TrashIcon } from "./trash.tsx";
+export { ZapIcon } from "./zap.tsx";

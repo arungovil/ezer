@@ -1,6 +1,7 @@
 // Ezer content script engine
 
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
+
 import { setCaptureMode, startSelectionCapture } from "./capture-engine/index.ts";
 
 const contentScriptKey = "__ezerContentScript";

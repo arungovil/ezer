@@ -1,7 +1,8 @@
+import esbuild from "esbuild";
+
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import esbuild from "esbuild";
 
 const clientDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 const watch = process.argv.includes("--watch");
@@ -40,7 +41,7 @@ const options = {
   entryPoints: {
     content: join(clientDir, "src/content/index.ts"),
     background: join(clientDir, "src/background/index.ts"),
-    sidepanel: join(clientDir, "src/sidepanel/index.ts"),
+    sidepanel: join(clientDir, "src/ui/main.tsx"),
   },
   bundle: true,
   outdir: join(clientDir, "dist"),
@@ -51,8 +52,12 @@ const options = {
     __EZER_SERVER_URL__: JSON.stringify(serverUrl),
   },
   format: "iife",
+  jsx: "automatic",
   target: "chrome120",
   sourcemap: true,
+  loader: {
+    ".module.css": "local-css",
+  },
 };
 
 if (watch) {

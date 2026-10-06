@@ -14,7 +14,7 @@ function parsePageOrigin(url: string): SiteKey {
  * Domain-based chat: reload when the active tab’s site changes, keep the same chat for
  * every tab on that site (e.g. many github.com tabs). Uses URL origin (scheme + host).
  */
-export function watchActiveSiteScope(onChange: () => void): () => void {
+export function watchActiveSiteScope(onChange: (site: SiteKey) => void): () => void {
   if (typeof chrome === "undefined" || !chrome.tabs?.onActivated) {
     return () => {};
   }
@@ -48,7 +48,7 @@ export function watchActiveSiteScope(onChange: () => void): () => void {
       return;
     }
     lastSite = site;
-    onChange();
+    onChange(site);
   };
 
   const syncActiveTab = async (): Promise<void> => {
@@ -59,7 +59,7 @@ export function watchActiveSiteScope(onChange: () => void): () => void {
     }
     if (lastSite !== null) {
       lastSite = null;
-      onChange();
+      onChange(null);
     }
   };
 

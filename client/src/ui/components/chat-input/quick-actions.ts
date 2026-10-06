@@ -1,0 +1,59 @@
+import type { ComponentType } from "react";
+
+import type { QuickActionId } from "@src/sidepanel/types.ts";
+import { ClipboardClockIcon, HelpCircleIcon, NotebookPenIcon } from "@src/ui/icons/index.ts";
+
+export interface QuickAction {
+  id: QuickActionId;
+  label: string;
+  keywords: string[];
+  icon: ComponentType;
+}
+
+export function getQuickActions(): QuickAction[] {
+  return [
+    {
+      id: "notes",
+      label: "Notes",
+      keywords: ["notes", "note", "saved"],
+      icon: NotebookPenIcon,
+    },
+    {
+      id: "reminders",
+      label: "Reminders",
+      keywords: ["reminders", "reminder", "due"],
+      icon: ClipboardClockIcon,
+    },
+    {
+      id: "help",
+      label: "Help",
+      keywords: ["help", "guide", "what"],
+      icon: HelpCircleIcon,
+    },
+  ];
+}
+
+export function filterQuickActions(actions: QuickAction[], query: string): QuickAction[] {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return actions;
+
+  return actions.filter(
+    (action) =>
+      action.label.toLowerCase().includes(normalized) ||
+      action.keywords.some((keyword) => keyword.includes(normalized)),
+  );
+}
+
+export function getSlashContext(
+  value: string,
+  cursor: number,
+): { query: string; start: number } | null {
+  const beforeCursor = value.slice(0, cursor);
+  const match = beforeCursor.match(/(?:^|\s)\/([^\s/]*)$/);
+  if (!match) return null;
+
+  return {
+    query: match[1],
+    start: beforeCursor.lastIndexOf("/"),
+  };
+}

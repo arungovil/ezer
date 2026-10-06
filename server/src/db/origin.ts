@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
 import type { OriginRow } from "../types.ts";
 import { getDb } from "./index.ts";
 import { notDeleted } from "./soft-delete.ts";
+import { randomUUID } from "node:crypto";
 
 export function getOrCreateOrigin(userId: string, origin: string): OriginRow {
   const db = getDb();

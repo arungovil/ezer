@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+
 import { getEnv } from "../config/env.ts";
 
 let client: OpenAI | null = null;

@@ -23,5 +23,24 @@
       "semicolons": "always",
       "trailingCommas": "all"
     }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              [":PACKAGE:", "!@src/**"],
+              ":BLANK_LINE:",
+              "@src/**",
+              ":BLANK_LINE:",
+              ":PATH:"
+            ]
+          }
+        }
+      }
+    }
   }
 }

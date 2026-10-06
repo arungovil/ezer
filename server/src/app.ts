@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+
 import { getDb } from "./db/index.ts";
 import { registerRoutes } from "./routes/index.ts";
 
