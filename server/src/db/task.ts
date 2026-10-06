@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
 import type { InsertTaskInput, TaskRow, TaskStatus, UpdateTaskInput } from "../types.ts";
 import { getDb } from "./index.ts";
 import { notDeleted, softDeleteTimestamp } from "./soft-delete.ts";
+import { randomUUID } from "node:crypto";
 
 export function insertTask(input: InsertTaskInput): TaskRow {
   const task: TaskRow = {

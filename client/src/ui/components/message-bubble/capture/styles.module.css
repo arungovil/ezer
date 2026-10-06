@@ -1,0 +1,15 @@
+.text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.source {
+  display: block;
+  margin-top: var(--ez-space-xs);
+  font-size: var(--ez-font-size-sm);
+  opacity: 0.85;
+  color: inherit;
+  text-decoration: underline;
+  word-break: break-all;
+}

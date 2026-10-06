@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import {
   getChatById,
   insertChat,
@@ -13,6 +12,7 @@ import { serializeChatContent, toChatMessageBody } from "../parsers.ts";
 import type { ChatListResponseBody, ChatRequestBody, ChatResponseBody } from "../types.ts";
 import { handleAssistantMessage } from "./assistant-service.ts";
 import { buildQuickActionReply, quickActionReplyText } from "./quick-action-service.ts";
+import { randomUUID } from "node:crypto";
 
 const chatHistoryLimit = 6;
 

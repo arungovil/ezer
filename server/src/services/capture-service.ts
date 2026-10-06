@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { getEnv } from "../config/env.ts";
 import { insertChat } from "../db/chat.ts";
 import { getOrCreateOrigin } from "../db/origin.ts";
@@ -8,6 +7,7 @@ import { isCaptureLlmResult } from "../parsers.ts";
 import { captureSystemPrompt } from "../prompts/capture.ts";
 import type { CaptureLlmResult, CaptureRequestBody, CaptureResponseBody } from "../types.ts";
 import { getLlmClient } from "./llm-client.ts";
+import { randomUUID } from "node:crypto";
 
 function parseCaptureLlmResult(raw: string): CaptureLlmResult {
   const parsed: unknown = JSON.parse(raw);

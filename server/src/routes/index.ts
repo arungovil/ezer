@@ -1,4 +1,5 @@
 import type { Express } from "express";
+
 import { routePaths } from "../config/constants.ts";
 import { requireUser, requireUserId } from "../middleware/require-user.ts";
 import { handleCapture } from "./capture.ts";

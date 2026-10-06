@@ -11,13 +11,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@lit-labs/virtualizer": "^2.1.1",
-    "@lit/task": "^1.0.3",
-    "lit": "^3.2.1",
+    "@tanstack/react-query": "^5.104.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "snarkdown": "^2.0.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "esbuild": "^0.24.2",
     "typescript": "^5.7.2"
   }

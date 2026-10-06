@@ -1,4 +1,5 @@
 import { RUNTIME_MESSAGE_TYPE } from "@src/shared/message-constants.ts";
+
 import { injectAndRetry } from "./fallbacks.ts";
 import type { WorkerInboundMessage } from "./types.ts";
 

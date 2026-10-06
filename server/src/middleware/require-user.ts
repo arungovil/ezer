@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+
 import { errorMessages } from "../config/constants.ts";
 import { upsertUser } from "../db/user.ts";
 import type { ApiErrorBody } from "../types.ts";

@@ -1,108 +1,54 @@
-# Ezer
+<p align="center">
+<h2 align="center">Ezer</h2>
+</p>
+<p align="center">
+Chrome side-panel assistant for notes and reminders. Chat is grounded in what you saved on the current site.
+</p>
 
-Ezer is a Chrome side-panel **personal assistant** for taking notes, and for reminders when
-something you find is worth acting on.
+---
 
-## Features
+## What it does
 
-### Notes
+- **Notes** — highlight text with the panel open; Ezer saves a title and short summary.
+- **Reminders** — actionable highlights become reminders; dates/times in the text become due dates in your timezone.
+- **Chat** — ask about notes on this site. If they don’t cover it, Ezer says so.
 
-Highlight text on any page while the panel is open — a quote, a link, a fact, a paragraph you want
-to keep. Ezer saves it as a **note** with a title and a short summary. Captures and Ezer's replies
-come back when you return to that site.
+> Notifications when a reminder is due are on the roadmap.
 
-### Reminders
+## Setup
 
-When the selection is something to do, Ezer saves a **reminder** instead. A date or time in the text
-(for example, `Submit expense report by Friday 5pm`) becomes a due date in your timezone. If it is
-actionable but has no time, the reminder is saved without one.
+Node.js ≥ 20, Chrome (MV3 side panel), and an OpenAI-compatible API key (DeepSeek by default).
 
-### Chat about your notes
-
-Ask Ezer about what you've saved on the current site. It answers **only** from those notes — ask a
-factual question (`what is a dam?`), whether you saved something (`do I have a note about X?`), or
-for a summary (`summarise my notes`). If the notes don't cover it, Ezer says so; it won't fall back
-to general knowledge. Follow-up questions keep the topic from the previous turn.
-
-> **Roadmap:** notify you when a reminder is due.
-
-## Getting started
-
-### Prerequisites
-
-- Node.js ≥ 20
-- Chrome (Manifest V3 side panel)
-- DeepSeek or other OpenAI-compatible API key (for capture extraction and typed chat)
-
-### Setup
-
-```bash
+```sh
 npm run setup
 
-cp server/.env.example server/.env   # add LLM_API_KEY
+cp server/.env.example server/.env   # LLM_API_KEY
 cp client/.env.example client/.env   # server URL, default http://localhost:3000
 ```
 
-### Development
+## Running locally
 
-Terminal 1 — API + SQLite:
-
-```bash
+```sh
 npm run dev:server
 ```
 
-Terminal 2 — extension watch build:
-
-```bash
+```sh
 npm run dev:client
 ```
 
-Load the extension:
+Then load the extension:
 
 1. `chrome://extensions` → Developer mode → Load unpacked → `client/`
-2. Pin Ezer, open the side panel on a tab
-3. Highlight text while the panel is open
+2. Pin Ezer and open the side panel
+3. Highlight text on a page
 
-### Build
-
-```bash
+```sh
 npm run build
-npm run typecheck   # optional
+npm run typecheck
 ```
 
-## Architecture
+Type `/` in the panel for notes, reminders, and help.
 
-```
-page selection (content script)
-  → background worker (routing, panel-open gate)
-  → side panel (Lit UI, API client)
-  → Express (captures, chat, task, user)
-  → SQLite (per-user, per-origin notes + chat)
-```
+## Docs
 
-| Layer     | Tech                                    |
-| --------- | --------------------------------------- |
-| Extension | Manifest V3, Lit 3, TypeScript, esbuild |
-| Server    | Express 4, better-sqlite3, TypeScript   |
-| LLM       | DeepSeek (`deepseek-chat`), JSON mode   |
-| Tooling   | Biome, Husky, strict TypeScript         |
-
-Grounded chat on the server: classify → FTS5 retrieval → answer (see
-[server/src/services/README.md](server/src/services/README.md)).
-
-## Documentation
-
-| Doc | Audience |
-| --- | -------- |
-| [AGENTS.md](AGENTS.md) | Repo layout, API contracts, coding conventions |
-| [server/README.md](server/README.md) | Server setup, env, auth |
-| [server/src/routes/README.md](server/src/routes/README.md) | HTTP API (request/response, errors) |
-| [server/src/services/README.md](server/src/services/README.md) | Chat assistant pipeline |
-| [server/src/db/README.md](server/src/db/README.md) | SQLite model, modules, FTS |
-
-## Status
-
-**Shipped:** text selection capture, notes by default, reminders when actionable, grounded chat over
-saved notes, SQLite persistence, per-site history.
-
-**Roadmap:** notifications for due reminders.
+[AGENTS.md](AGENTS.md) · [server](server/README.md) · [API](server/src/routes/README.md) · [chat pipeline](server/src/services/README.md) · [database](server/src/db/README.md)

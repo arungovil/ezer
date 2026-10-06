@@ -17,7 +17,8 @@ for the current site.
 | ---- | ---- |
 | `client/src/background/` | MV3 service worker: messages, capture dedupe, side-panel-open check |
 | `client/src/content/` | MV3 content script; `capture-engine/` handles selection |
-| `client/src/sidepanel/` | Side panel UI (`components/`, `api/`, `capture/`) |
+| `client/src/sidepanel/` | Panel API, capture helpers, domain types (no UI) |
+| `client/src/ui/` | Side panel React UI (`components/`, `hooks/`) |
 | `client/src/shared/` | Cross-context only: `message-constants.ts`, `identity/user-store.ts` |
 | `server/` | Express routes, services, `db/`, `types.ts`, `parsers.ts` |
 
@@ -49,8 +50,8 @@ LLM. Details: [server/src/routes/README.md](server/src/routes/README.md),
 
 | Rule | Convention |
 | ---- | ---------- |
-| Files | `kebab-case.ts` |
-| Classes / components | `PascalCase` (`EzerChat`) |
+| Files | `kebab-case.ts` / `kebab-case.tsx`; UI components live in a folder with `index.tsx` and `styles.module.css` |
+| Classes / components | `PascalCase` (`ChatHeader`) |
 | Functions / variables | `camelCase`; handlers → `handle*` |
 | Constants | `camelCase` |
 | Exports | Named only, no default exports |
@@ -64,5 +65,5 @@ Biome: formatting, quotes, semicolons, trailing commas, 100-col width.
 
 ### Styling
 
-Design tokens in `client/styles.css` as CSS custom properties; Lit components use `var(--token-name)`
-only.
+Design tokens in `client/styles.css` as CSS custom properties; React UI uses CSS modules
+(`styles.module.css`) and `var(--token-name)` only.

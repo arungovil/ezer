@@ -1,8 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
 import Database from "better-sqlite3";
+
 import { getEnv } from "../config/env.ts";
 import { schemaStatements } from "./schema.ts";
+import fs from "node:fs";
+import path from "node:path";
 
 let db: Database.Database | null = null;
 
