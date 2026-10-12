@@ -47,6 +47,8 @@ export interface ChatListResponseBody {
   origin: string | null;
   tabUrl: string;
   messages: ChatMessageBody[];
+  /** True when older messages exist; page back with `before` = the first message's id. */
+  hasMore: boolean;
 }
 
 export interface ChatResponseBody {
@@ -192,7 +194,8 @@ export function isChatListResponseBody(value: unknown): value is ChatListRespons
     (body.origin === null || typeof body.origin === "string") &&
     typeof body.tabUrl === "string" &&
     Array.isArray(body.messages) &&
-    body.messages.every(isChatMessageBody)
+    body.messages.every(isChatMessageBody) &&
+    typeof body.hasMore === "boolean"
   );
 }
 

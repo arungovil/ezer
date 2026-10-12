@@ -77,6 +77,13 @@ export type Message =
       loading?: boolean;
     };
 
+/** A loaded slice of a site's thread (newest messages), oldest first. */
+export interface Conversation {
+  messages: Message[];
+  /** Whether older messages can still be fetched from the server. */
+  hasMore: boolean;
+}
+
 export interface RuntimeMessage {
   type: RuntimeMessageType;
   text?: string;

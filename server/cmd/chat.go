@@ -2,24 +2,47 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"ezer/models"
 )
 
-// GetChats retrieves the conversation for the site of the tabUrl query param.
+// GetChats retrieves one page of the conversation for the site of the tabUrl query param. The
+// newest `limit` messages are returned by default; `before` (a message ID) pages backwards.
 func (a *App) GetChats(w http.ResponseWriter, r *http.Request) {
-	tabURL := strings.TrimSpace(r.URL.Query().Get("tabUrl"))
+	q := r.URL.Query()
+
+	tabURL := strings.TrimSpace(q.Get("tabUrl"))
 	if tabURL == "" {
 		writeError(w, http.StatusBadRequest, msgTabURLRequired)
 		return
 	}
 
-	// TEMP(skeleton-demo): remove this sleep (and the "time" import) once the loader is checked.
-	time.Sleep(3 * time.Second)
+	// Validate. An oversized limit is clamped, a malformed one is an error.
+	limit := defaultChatPageSize
+	if raw := strings.TrimSpace(q.Get("limit")); raw != "" {
+		n, err := strconv.Atoi(raw)
+		if err != nil || n < 1 {
+			writeError(w, http.StatusBadRequest, msgInvalidLimit)
+			return
+		}
+		limit = min(n, maxChatPageSize)
+	}
 
-	out, err := a.core.GetChats(getUserID(r), tabURL)
+	before := strings.TrimSpace(q.Get("before"))
+	if !strHasLen(before, 0, stdInputMaxLen) {
+		writeError(w, http.StatusBadRequest, msgInputTooLong)
+		return
+	}
+
+	// TEMP(skeleton-demo): remove this sleep (and the "time" import) once the loader is checked.
+	if before != "" {
+		time.Sleep(2 * time.Second)
+	}
+
+	out, err := a.core.GetChats(getUserID(r), tabURL, before, limit)
 	if err != nil {
 		a.respondErr(w, err)
 		return

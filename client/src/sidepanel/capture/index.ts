@@ -1,5 +1,5 @@
 export { armCaptureMode, disarmCaptureMode } from "./capture-mode-handlers.ts";
-export { loadCaptureConversationForActiveTab } from "./conversation-loader.ts";
+export { loadCaptureConversationForActiveTab, loadOlderMessages } from "./conversation-loader.ts";
 export { storedMessageToUiMessage } from "./message-mapper.ts";
 export {
   applyCaptureSuccess,

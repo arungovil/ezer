@@ -19,12 +19,14 @@ type ChatRequest struct {
 	Action  string `json:"action"`
 }
 
-// ChatListResponse is the body of GET /chat.
+// ChatListResponse is the body of GET /chat: one page, oldest first. HasMore says whether older
+// messages exist; pass the first message's ID as `before` to get them.
 type ChatListResponse struct {
 	OriginID *string `json:"originId"`
 	Origin   *string `json:"origin"`
 	TabURL   string  `json:"tabUrl"`
 	Messages []Chat  `json:"messages"`
+	HasMore  bool    `json:"hasMore"`
 }
 
 // ChatResponse is the body of POST /chat. Content is set only for quick actions.
