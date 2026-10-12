@@ -11,6 +11,7 @@
 
 .user {
   align-items: flex-end;
+  --markdown-code-bg: var(--ez-color-overlay-on-primary);
 }
 
 .ezer {
@@ -44,52 +45,4 @@
 .ezer .body {
   background: var(--ez-color-surface);
   color: var(--ez-color-text);
-}
-
-.body p {
-  margin: 0 0 var(--ez-space-xs) 0;
-}
-
-.body p:last-child {
-  margin-bottom: 0;
-}
-
-.body code {
-  font-family: var(--ez-font-mono);
-  background: var(--ez-color-overlay);
-  padding: 2px 5px;
-  border-radius: var(--ez-radius-sm);
-  font-size: 0.9em;
-}
-
-.user .body code {
-  background: var(--ez-color-overlay-on-primary);
-}
-
-.body pre {
-  margin: var(--ez-space-xs) 0;
-  padding: var(--ez-space-xs) var(--ez-space-sm);
-  background: var(--ez-color-overlay);
-  border-radius: var(--ez-radius-sm);
-  overflow-x: auto;
-}
-
-.user .body pre {
-  background: var(--ez-color-overlay-on-primary);
-}
-
-.body pre code {
-  background: transparent;
-  padding: 0;
-}
-
-.body ul,
-.body ol {
-  margin: var(--ez-space-xs) 0;
-  padding-left: var(--ez-space-md);
-}
-
-.body a {
-  color: inherit;
-  text-decoration: underline;
 }

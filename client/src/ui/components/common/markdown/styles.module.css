@@ -1,0 +1,41 @@
+/* Element rules live here, not on the bubble: the bubble also holds non-markdown content (the
+   task list's <ul>) that these must not reach. */
+.root p {
+  margin: 0 0 var(--ez-space-xs) 0;
+}
+
+.root p:last-child {
+  margin-bottom: 0;
+}
+
+.root code {
+  font-family: var(--ez-font-mono);
+  background: var(--markdown-code-bg, var(--ez-color-overlay));
+  padding: 2px 5px;
+  border-radius: var(--ez-radius-sm);
+  font-size: 0.9em;
+}
+
+.root pre {
+  margin: var(--ez-space-xs) 0;
+  padding: var(--ez-space-xs) var(--ez-space-sm);
+  background: var(--markdown-code-bg, var(--ez-color-overlay));
+  border-radius: var(--ez-radius-sm);
+  overflow-x: auto;
+}
+
+.root pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.root ul,
+.root ol {
+  margin: var(--ez-space-xs) 0;
+  padding-left: var(--ez-space-md);
+}
+
+.root a {
+  color: inherit;
+  text-decoration: underline;
+}
