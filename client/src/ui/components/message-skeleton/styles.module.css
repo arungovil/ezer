@@ -1,0 +1,107 @@
+/* Mirrors message-list + message-bubble geometry so content doesn't jump when it arrives. */
+.root {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  padding: var(--ez-space-md) 0;
+  box-sizing: border-box;
+  opacity: 0;
+  animation: reveal 0.2s ease-out 150ms forwards;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0 var(--ez-space-md);
+  margin-bottom: var(--ez-space-md);
+  box-sizing: border-box;
+}
+
+.user {
+  align-items: flex-end;
+}
+
+.ezer {
+  align-items: flex-start;
+}
+
+.sender {
+  width: 36px;
+  height: 10px;
+  margin: 0 var(--ez-space-xs) var(--ez-space-xs);
+  border-radius: var(--ez-radius-sm);
+}
+
+.bubble {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ez-space-sm);
+  width: 75%;
+  padding: var(--ez-space-sm) var(--ez-space-md);
+  border-radius: var(--ez-radius-md);
+  background: var(--ez-color-surface);
+  box-sizing: border-box;
+}
+
+.user .bubble {
+  width: 50%;
+}
+
+.line {
+  height: 10px;
+  border-radius: var(--ez-radius-sm);
+}
+
+/* Ragged line lengths read as text; the last line is the shortest. */
+.line:nth-child(1) {
+  width: 90%;
+}
+
+.line:nth-child(2) {
+  width: 65%;
+}
+
+.line:nth-child(3) {
+  width: 40%;
+}
+
+.user .line {
+  width: 100%;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--ez-color-border) 25%,
+    var(--ez-color-surface) 50%,
+    var(--ez-color-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+  }
+}
