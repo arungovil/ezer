@@ -17,7 +17,8 @@ Chrome side-panel assistant for notes and reminders. Chat is grounded in what yo
 
 ## Setup
 
-Node.js ≥ 20, Chrome (MV3 side panel), and an OpenAI-compatible API key (DeepSeek by default).
+Go ≥ 1.26, Node.js ≥ 20 (extension build), Chrome (MV3 side panel), and an OpenAI-compatible API key
+(DeepSeek by default).
 
 ```sh
 npm run setup
@@ -51,4 +52,4 @@ Type `/` in the panel for notes, reminders, and help.
 
 ## Docs
 
-[AGENTS.md](AGENTS.md) · [server](server/README.md) · [API](server/src/routes/README.md) · [chat pipeline](server/src/services/README.md) · [database](server/src/db/README.md)
+[AGENTS.md](AGENTS.md) · [server](server/README.md) · [API](server/docs/api.md) · [chat pipeline](server/docs/chat-pipeline.md) · [database](server/docs/database.md)
