@@ -2,6 +2,7 @@ import { ChatEmpty } from "@src/ui/components/chat-empty/index.tsx";
 import { ChatHeader } from "@src/ui/components/chat-header/index.tsx";
 import { ChatInput } from "@src/ui/components/chat-input/index.tsx";
 import { MessageList } from "@src/ui/components/message-list/index.tsx";
+import { MessageSkeleton } from "@src/ui/components/message-skeleton/index.tsx";
 import { useCaptureMode } from "@src/ui/hooks/use-capture-mode.ts";
 import { useCaptureSelection } from "@src/ui/hooks/use-capture-selection.ts";
 import { useConversation } from "@src/ui/hooks/use-conversation.ts";
@@ -26,7 +27,9 @@ export function ChatWindow() {
   return (
     <div className={styles.root}>
       <ChatHeader />
-      {messages.length > 0 ? (
+      {conversation.isPending ? (
+        <MessageSkeleton />
+      ) : messages.length > 0 ? (
         <MessageList messages={messages} scrollerRef={scrollerRef} onScroll={handleScroll} />
       ) : (
         <ChatEmpty />

@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"ezer/models"
 )
@@ -14,6 +15,9 @@ func (a *App) GetChats(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, msgTabURLRequired)
 		return
 	}
+
+	// TEMP(skeleton-demo): remove this sleep (and the "time" import) once the loader is checked.
+	time.Sleep(3 * time.Second)
 
 	out, err := a.core.GetChats(getUserID(r), tabURL)
 	if err != nil {
