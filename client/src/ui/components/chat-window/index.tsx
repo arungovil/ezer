@@ -5,7 +5,7 @@ import { MessageList } from "@src/ui/components/message-list/index.tsx";
 import { MessageSkeleton } from "@src/ui/components/message-skeleton/index.tsx";
 import { useCaptureMode } from "@src/ui/hooks/use-capture-mode.ts";
 import { useCaptureSelection } from "@src/ui/hooks/use-capture-selection.ts";
-import { useConversation } from "@src/ui/hooks/use-conversation.ts";
+import { useConversation, useLoadOlderMessages } from "@src/ui/hooks/use-conversation.ts";
 import { useSelectionCaptured } from "@src/ui/hooks/use-selection-captured.ts";
 import { promptForQuickAction, useSendChat } from "@src/ui/hooks/use-send-chat.ts";
 import { useSiteScope } from "@src/ui/hooks/use-site-scope.ts";
@@ -18,8 +18,9 @@ export function ChatWindow() {
   const conversation = useConversation(siteScope);
   const sendChat = useSendChat(siteScope);
   const captureSelection = useCaptureSelection(siteScope);
-  const messages = conversation.data ?? [];
+  const messages = conversation.data?.messages ?? [];
   const { scrollerRef, handleScroll, pinToEnd } = useStickToBottom(messages.length);
+  const older = useLoadOlderMessages(siteScope, scrollerRef);
 
   useCaptureMode();
   useSelectionCaptured(captureSelection);
@@ -30,7 +31,14 @@ export function ChatWindow() {
       {conversation.isPending ? (
         <MessageSkeleton />
       ) : messages.length > 0 ? (
-        <MessageList messages={messages} scrollerRef={scrollerRef} onScroll={handleScroll} />
+        <MessageList
+          messages={messages}
+          scrollerRef={scrollerRef}
+          onScroll={handleScroll}
+          hasMore={conversation.data?.hasMore ?? false}
+          olderStatus={older.status}
+          onLoadOlder={older.loadOlder}
+        />
       ) : (
         <ChatEmpty />
       )}

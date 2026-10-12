@@ -105,13 +105,16 @@ origin.
 
 ### `GET /chat`
 
-List persisted chat messages for the **origin** of the given page URL.
+List persisted chat messages for the **origin** of the given page URL, one page at a time. The
+default page is the **newest** messages; page backwards with `before`.
 
 **Query**
 
 | Param | Required | Description |
 | ----- | -------- | ----------- |
 | `tabUrl` | Yes | Any page URL on the target origin |
+| `limit` | No | Page size, default `30`, max `100` (larger values are clamped). Must be a positive integer |
+| `before` | No | A message `id`: return the messages strictly older than it. Use the first `id` of the page you hold. An unknown id, or one from another thread, returns an empty page |
 
 **Response `200`**
 
@@ -120,7 +123,8 @@ List persisted chat messages for the **origin** of the given page URL.
 | `originId` | `string` \| `null` | Origin row id, or `null` if none yet |
 | `origin` | `string` \| `null` | URL origin, or `null` if none yet |
 | `tabUrl` | `string` | Echo of the query param |
-| `messages` | `array` | Chat messages ordered by `createdAt` |
+| `messages` | `array` | One page of messages, oldest first (`createdAt`, then insertion order) |
+| `hasMore` | `boolean` | `true` when older messages exist beyond this page |
 
 Each message:
 
@@ -132,7 +136,10 @@ Each message:
 | `content` | `string` | Plain text or JSON (`CAPTURE`) |
 | `createdAt` | `string` | ISO 8601 timestamp |
 
-**Errors:** `400` missing or invalid `tabUrl` · `401` invalid header
+Paging is by cursor, not offset, so messages arriving while a client scrolls back never shift or
+duplicate older pages.
+
+**Errors:** `400` missing or invalid `tabUrl`, or malformed `limit` · `401` invalid header
 
 ### `POST /chat`
 

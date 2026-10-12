@@ -12,11 +12,11 @@ import {
 
 export async function getChatMessages(
   tabUrl: string,
-  options: { signal?: AbortSignal } = {},
+  options: { before?: string; signal?: AbortSignal } = {},
 ): Promise<ApiResult<ChatListResponseBody>> {
   try {
     const { response, data } = await requestJson(routePaths.chat, {
-      query: { tabUrl },
+      query: { tabUrl, ...(options.before ? { before: options.before } : {}) },
       signal: options.signal,
     });
 

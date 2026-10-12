@@ -10,7 +10,7 @@ import type { Message } from "@src/sidepanel/types.ts";
 import { MESSAGE_TYPE } from "@src/sidepanel/types.ts";
 import { getActiveTabUrl } from "@src/sidepanel/utils/index.ts";
 import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.ts";
-import { conversationQueryKey } from "@src/ui/hooks/use-conversation.ts";
+import { updateConversationMessages } from "@src/ui/hooks/use-conversation.ts";
 
 const captureDedupeMs = 3000;
 let lastCapturedKey = "";
@@ -54,8 +54,7 @@ export function useCaptureSelection(siteScope: string | null | undefined) {
       loading: true,
     };
 
-    const queryKey = conversationQueryKey(siteScope);
-    queryClient.setQueryData<Message[]>(queryKey, (current = []) => [
+    updateConversationMessages(queryClient, siteScope, (current) => [
       ...current,
       userMsg,
       pendingEzerMsg,
@@ -75,7 +74,7 @@ export function useCaptureSelection(siteScope: string | null | undefined) {
         throw new Error(result.message);
       }
 
-      queryClient.setQueryData<Message[]>(queryKey, (current = []) =>
+      updateConversationMessages(queryClient, siteScope, (current) =>
         applyCaptureSuccess(current, userMsg.id, ezerMsgId, result.data),
       );
     } catch (error) {
@@ -84,7 +83,7 @@ export function useCaptureSelection(siteScope: string | null | undefined) {
       }
 
       const errorMessage = toUserErrorMessage(error, userErrorMessages.captureFailed);
-      queryClient.setQueryData<Message[]>(queryKey, (current = []) =>
+      updateConversationMessages(queryClient, siteScope, (current) =>
         applyEzerText(current, ezerMsgId, `⚠️ **${errorMessage}**`),
       );
     } finally {

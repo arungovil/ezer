@@ -22,6 +22,11 @@ const (
 
 	// maxBodyBytes caps a request body.
 	maxBodyBytes = 1 << 20
+
+	// defaultChatPageSize and maxChatPageSize bound one GET /chat page.
+	// TEMP(skeleton-demo): 4 so a short thread already has older pages; restore to 30.
+	defaultChatPageSize = 4
+	maxChatPageSize     = 100
 )
 
 // Client-facing messages for request validation.
@@ -34,6 +39,7 @@ const (
 	msgTaskIDRequired  = "task id is required"
 	msgChatIDRequired  = "chat id is required"
 	msgInputTooLong    = "Input is too long"
+	msgInvalidLimit    = "limit must be a positive integer"
 )
 
 // initHTTPHandlers registers HTTP handlers. Routes are mounted at the root, matching the paths

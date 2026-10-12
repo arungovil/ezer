@@ -12,7 +12,7 @@ import type { Message, QuickActionId } from "@src/sidepanel/types.ts";
 import { MESSAGE_TYPE } from "@src/sidepanel/types.ts";
 import { getActiveTabUrl } from "@src/sidepanel/utils/index.ts";
 import { toUserErrorMessage, userErrorMessages } from "@src/sidepanel/utils/user-message.ts";
-import { conversationQueryKey } from "@src/ui/hooks/use-conversation.ts";
+import { updateConversationMessages } from "@src/ui/hooks/use-conversation.ts";
 
 export function promptForQuickAction(action: QuickActionId): string {
   if (action === "notes") {
@@ -57,8 +57,7 @@ export function useSendChat(siteScope: string | null | undefined) {
             loading: true,
           };
 
-    const queryKey = conversationQueryKey(siteScope);
-    queryClient.setQueryData<Message[]>(queryKey, (current = []) => [
+    updateConversationMessages(queryClient, siteScope, (current) => [
       ...current,
       userMsg,
       pendingEzerMsg,
@@ -77,7 +76,7 @@ export function useSendChat(siteScope: string | null | undefined) {
       }
 
       const content = action ? chatContentFromResponse(result.data) : result.data.reply;
-      queryClient.setQueryData<Message[]>(queryKey, (current = []) =>
+      updateConversationMessages(queryClient, siteScope, (current) =>
         applyChatReply(current, ezerMsgId, content, messageType),
       );
     } catch (error) {
@@ -86,7 +85,7 @@ export function useSendChat(siteScope: string | null | undefined) {
       }
 
       const errorMessage = toUserErrorMessage(error, userErrorMessages.chatFailed);
-      queryClient.setQueryData<Message[]>(queryKey, (current = []) =>
+      updateConversationMessages(queryClient, siteScope, (current) =>
         applyChatReply(current, ezerMsgId, `⚠️ **${errorMessage}**`, messageType),
       );
     }

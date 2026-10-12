@@ -13,6 +13,13 @@
   animation: reveal 0.2s ease-out 150ms forwards;
 }
 
+.older {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: var(--ez-space-md);
+}
+
 .row {
   display: flex;
   flex-direction: column;

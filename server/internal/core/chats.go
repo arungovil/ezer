@@ -13,8 +13,9 @@ import (
 // chatHistoryLimit is how many recent text turns are fed back to the model.
 const chatHistoryLimit = 6
 
-// GetChats gets the full visible conversation for the site of tabURL, oldest first.
-func (c *Core) GetChats(userID, tabURL string) (models.ChatListResponse, error) {
+// GetChats gets one page of the conversation for the site of tabURL, oldest first. It returns
+// the newest limit messages, or the limit messages just older than the message `before`.
+func (c *Core) GetChats(userID, tabURL, before string, limit int) (models.ChatListResponse, error) {
 	pageOrigin, err := parsePageOrigin(tabURL)
 	if err != nil {
 		return models.ChatListResponse{}, newHTTPError(http.StatusBadRequest, errInvalidTabURL)
@@ -31,12 +32,23 @@ func (c *Core) GetChats(userID, tabURL string) (models.ChatListResponse, error) 
 			errRequestFailed, "fetching origin", err)
 	}
 
-	if err := c.q.QueryChats.Select(&out.Messages, origin.ID); err != nil {
+	// Ask for one extra row: its presence is the only thing needed to know another page exists.
+	// Non-nil so an empty page serializes as [] rather than null.
+	page := []models.Chat{}
+	if err := c.q.QueryChats.Select(&page, origin.ID, before, limit+1); err != nil {
 		return models.ChatListResponse{}, c.serverError(http.StatusInternalServerError,
 			errRequestFailed, "fetching chats", err)
 	}
 
-	out.OriginID, out.Origin = &origin.ID, &origin.Origin
+	if len(page) > limit {
+		out.HasMore = true
+		page = page[:limit]
+	}
+
+	// The query pages newest first; clients render oldest first.
+	slices.Reverse(page)
+
+	out.OriginID, out.Origin, out.Messages = &origin.ID, &origin.Origin, page
 	return out, nil
 }
 

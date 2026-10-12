@@ -527,3 +527,91 @@ func TestPreflight(t *testing.T) {
 		t.Fatalf("headers = %v", resp.Header)
 	}
 }
+
+func TestChatPagination(t *testing.T) {
+	e := newEnv(t, false)
+
+	// 4 quick actions = 8 messages (a user/ezer pair each), inserted back to back.
+	for i := 0; i < 4; i++ {
+		status, body := e.do("POST", "/chat", userID,
+			map[string]any{"message": "/help", "tabUrl": tabURL, "action": "help"})
+		expectStatus(t, status, 200, body)
+	}
+
+	ids := func(body map[string]any) []string {
+		var out []string
+		for _, m := range body["messages"].([]any) {
+			out = append(out, m.(map[string]any)["id"].(string))
+		}
+		return out
+	}
+
+	status, all := e.do("GET", "/chat?limit=100&tabUrl="+tabURL, userID, nil)
+	expectStatus(t, status, 200, all)
+	want := ids(all)
+	if len(want) != 8 || all["hasMore"] != false {
+		t.Fatalf("full list = %d messages, hasMore = %v", len(want), all["hasMore"])
+	}
+
+	// Walk backwards three at a time. Pages are oldest-first, newest page first.
+	var got []string
+	before := ""
+	for page := 0; page < 10; page++ {
+		path := "/chat?limit=3&tabUrl=" + tabURL
+		if before != "" {
+			path += "&before=" + before
+		}
+		status, body := e.do("GET", path, userID, nil)
+		expectStatus(t, status, 200, body)
+
+		pageIDs := ids(body)
+		got = append(pageIDs, got...)
+
+		if page == 0 {
+			// A new message arriving mid-scroll must not shift the older pages.
+			e.do("POST", "/chat", userID,
+				map[string]any{"message": "/help", "tabUrl": tabURL, "action": "help"})
+		}
+
+		if body["hasMore"] != true {
+			break
+		}
+		before = pageIDs[0]
+	}
+
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("paged = %v\n want  = %v", got, want)
+	}
+}
+
+func TestChatPaginationEdges(t *testing.T) {
+	e := newEnv(t, false)
+	e.do("POST", "/chat", userID,
+		map[string]any{"message": "/help", "tabUrl": tabURL, "action": "help"})
+
+	for _, q := range []string{"limit=0", "limit=-2", "limit=abc"} {
+		status, body := e.do("GET", "/chat?tabUrl="+tabURL+"&"+q, userID, nil)
+		expectStatus(t, status, 400, body)
+	}
+
+	// Oversized limits are clamped, not rejected.
+	status, body := e.do("GET", "/chat?tabUrl="+tabURL+"&limit=100000", userID, nil)
+	expectStatus(t, status, 200, body)
+
+	// An unknown cursor, or one from another user's thread, yields an empty page (no probing).
+	status, body = e.do("GET", "/chat?tabUrl="+tabURL+"&before=nope", userID, nil)
+	expectStatus(t, status, 200, body)
+	if n := len(body["messages"].([]any)); n != 0 || body["hasMore"] != false {
+		t.Fatalf("unknown cursor: %d messages, hasMore %v", n, body["hasMore"])
+	}
+
+	_, mine := e.do("GET", "/chat?tabUrl="+tabURL, userID, nil)
+	foreign := mine["messages"].([]any)[1].(map[string]any)["id"].(string)
+	e.do("POST", "/chat", otherID,
+		map[string]any{"message": "/help", "tabUrl": tabURL, "action": "help"})
+	status, body = e.do("GET", "/chat?tabUrl="+tabURL+"&before="+foreign, otherID, nil)
+	expectStatus(t, status, 200, body)
+	if n := len(body["messages"].([]any)); n != 0 {
+		t.Fatalf("foreign cursor returned %d messages", n)
+	}
+}

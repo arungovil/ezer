@@ -19,3 +19,13 @@
   display: flex;
   flex-direction: column;
 }
+
+.retry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ez-space-sm);
+  padding: var(--ez-space-sm) var(--ez-space-md);
+  font-size: var(--ez-font-size-sm);
+  color: var(--ez-color-text-muted);
+}

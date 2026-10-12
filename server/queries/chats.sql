@@ -10,10 +10,18 @@ FROM chat c JOIN origin o ON o.id = c.origin_id
 WHERE c.id = ?1 AND o.user_id = ?2 AND c.deleted_at IS NULL AND o.deleted_at IS NULL;
 
 -- name: query-chats
--- rowid breaks created_at ties: a user/ezer pair is inserted within the same millisecond.
+-- One page of a thread, newest first. ?2 is an optional cursor message ID ('' = start at the
+-- newest): only rows strictly older than it are returned. The cursor is compared as
+-- (created_at, rowid) because created_at only has millisecond resolution and a user/ezer pair is
+-- inserted within the same one. A cursor that isn't in this origin matches nothing, so it can't be
+-- used to probe other threads. The caller passes limit+1 to learn whether another page exists.
 SELECT id, origin_id, role, message_type, content, agent_state, created_at
-FROM chat WHERE origin_id = ?1 AND deleted_at IS NULL
-ORDER BY created_at ASC, rowid ASC;
+FROM chat
+WHERE origin_id = ?1 AND deleted_at IS NULL
+    AND (?2 = '' OR (created_at, rowid) < (
+        SELECT created_at, rowid FROM chat WHERE id = ?2 AND origin_id = ?1))
+ORDER BY created_at DESC, rowid DESC
+LIMIT ?3;
 
 -- name: query-recent-text-chats
 -- Newest first; the caller reverses for prompt order.
